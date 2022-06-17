@@ -30,9 +30,9 @@ plt.rcParams.update(parameters)
 plt.style.use(['classic', 'seaborn-talk'])
 
 class KPIndex:
-  def __init__(self, cache_dir):
+  def __init__(self, cache_file):
     self.log = logging.getLogger('KPIndex')
-    self.cachefile = os.path.join(cache_dir, self.__class__.__name__ + '.pkl')
+    self.cachefile = cache_file
     self.data = None
 
     now = time.time()
@@ -105,7 +105,8 @@ def main():
   except IndexError:
     name = '/tmp/kpindex.png'
 
-  kpindex = KPIndex('/tmp')
+  cache_file = config.get('kpindexgraph.cache_file', '/tmp/kpindex.pkl')
+  kpindex = KPIndex(cache_file)
   kpindex.graph(name)
 
 if __name__ == "__main__":

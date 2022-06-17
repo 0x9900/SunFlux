@@ -27,7 +27,6 @@ from telegram.ext import (
 )
 
 import showdxcc
-import kpindex
 
 from config import Config
 
@@ -296,7 +295,7 @@ def send_kpindex(update: Update, context: CallbackContext):
     if now - img_st.st_atime > 3600:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
-    cmd = os.path.join(os.getcwd(), "kpindex.py")
+    cmd = os.path.join(os.getcwd(), "kpindexgraph.py")
     value = subprocess.call([cmd], shell=True)
     logging.info(f'Call {cmd} returned {value}')
     if value:

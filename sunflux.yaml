@@ -19,6 +19,9 @@ sunfluxbot:
 fluxgraph:
   cache_file: /tmp/flux.pkl
 
+pkindexgraph:
+  cache_file: /tmp/kpindex.pkl
+
 showdxcc:
   db_name: /tmp/cluster/cluster.db
   color_map: PRGn
