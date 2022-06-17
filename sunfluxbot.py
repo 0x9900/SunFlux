@@ -45,7 +45,6 @@ ALERTS_URL = NOAA_URL + "/text/wwv.txt"
 NOAA_URL = "https://services.swpc.noaa.gov/"
 IMG_SOURCE = {
   'ai':    'images/station-a-index.png',
-  'gef':   'images/animations/geoelectric/US-Canada/EmapGraphics_1m/latest.png',
   'geost': 'images/geospace/geospace_7_day.png',
   'ki':    'images/station-k-index.png',
   'swx':   'images/swx-overview-large.gif',
@@ -196,7 +195,6 @@ def help_command(update: Update, context: CallbackContext):
     "> /alerts: NOAA Alerts",
     "> /dxcc: Show dxcc contacts",
     "> /flux: 10cm Flux",
-    "> /gef: GeoElectric Field",
     "> /geost: GeoSpace Timeline",
     "> /kindex: K Index",
     "> /swx: Solar indices overvew",
@@ -275,20 +273,7 @@ def send_geost(update: Update, context: CallbackContext):
                          caption='Geospace timeline',
                          filename=os.path.basename(filename), timeout=100)
 
-def send_gef(update: Update, context: CallbackContext):
-  try:
-    filename = noaa_download('gef')
-  except Exception as exp:
-    logger.error(exp)
-    update.message.reply_text(f'Error: {exp}')
-    return
-
-  chat_id = update.message.chat_id
-  context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
-                         caption='Geoelectric field',
-                         filename=os.path.basename(filename), timeout=100)
-
-def send_ai(update: Update, context: CallbackContext):
+def send_aindex(update: Update, context: CallbackContext):
   try:
     filename = noaa_download('ai')
   except Exception as exp:
@@ -419,14 +404,13 @@ def main():
   config = Config()
   updater = Updater(config['sunfluxbot.token'])
   updater.bot.logger.level = logging.INFO
-  updater.dispatcher.add_handler(CommandHandler('ai', send_ai))
-  updater.dispatcher.add_handler(CommandHandler('aindex', send_ai))
+  updater.dispatcher.add_handler(CommandHandler('ai', send_aindex))
+  updater.dispatcher.add_handler(CommandHandler('aindex', send_aindex))
   updater.dispatcher.add_handler(CommandHandler('alert', send_alerts))
   updater.dispatcher.add_handler(CommandHandler('alerts', send_alerts))
   updater.dispatcher.add_handler(CommandHandler('credits', send_credits))
   updater.dispatcher.add_handler(CommandHandler('dxcc', dxcc_handler))
   updater.dispatcher.add_handler(CommandHandler('flux', send_flux))
-  updater.dispatcher.add_handler(CommandHandler('gef', send_gef))
   updater.dispatcher.add_handler(CommandHandler('geost', send_geost))
   updater.dispatcher.add_handler(CommandHandler('help', help_command))
   updater.dispatcher.add_handler(CommandHandler('ki', send_kindex))
