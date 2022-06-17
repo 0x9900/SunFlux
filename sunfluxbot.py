@@ -236,7 +236,7 @@ def send_flux(update: Update, context: CallbackContext):
     if now - img_st.st_atime > 3600:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
-    cmd = os.path.join(os.getcwd(), "flux.py")
+    cmd = os.path.join(os.getcwd(), "fluxgraph.py")
     value = subprocess.call([cmd], shell=True)
     logging.info(f'Call {cmd} returned {value}')
     if value:
