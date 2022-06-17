@@ -28,6 +28,9 @@ from telegram.ext import (
 
 import showdxcc
 
+from config import Config
+
+
 logging.basicConfig(
   format='%(asctime)s %(module)s %(levelname)s: %(message)s',
   datefmt='%H:%M:%S',
