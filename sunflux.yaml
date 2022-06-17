@@ -1,0 +1,16 @@
+---
+cluster:
+  call: N0CALL
+  db_name: /tmp/cluster/cluster.db
+  db_timeout: 5
+  log_file: /tmp/cluster/cluster.log
+  log_level: INFO
+  servers:
+  - dx.maritimecontestclub.ca:7373
+  - dxc.ai9t.com:7373
+  - dxc.nc7j.com:7373
+  - n8dxe.dxengineering.com:7373
+  - w3lpl.net:7373
+sunfluxbot:
+  cachedir: /tmp
+  token: 1234567890:TelegramTolenGoesHere
