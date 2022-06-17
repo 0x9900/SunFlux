@@ -29,9 +29,9 @@ parameters = {
 plt.rcParams.update(parameters)
 plt.style.use(['classic', 'seaborn-talk'])
 
-class KIndex:
+class KPIndex:
   def __init__(self, cache_dir):
-    self.log = logging.getLogger('KIndex')
+    self.log = logging.getLogger('KPIndex')
     self.cachefile = os.path.join(cache_dir, self.__class__.__name__ + '.pkl')
     self.data = None
 
@@ -56,7 +56,7 @@ class KIndex:
     y = np.array([round(x['k_index'], 2) for x in self.data])
 
     fig = plt.figure()
-    fig.suptitle('Planetary KIndex (Boulder)', fontsize=14)
+    fig.suptitle('Planetary KPIndex (Boulder)', fontsize=14)
     fig.text(0.01, 0.02, 'SunFluxBot By W6BSD {}'.format(
       datetime.utcnow().strftime('%Y:%m:%d %H:%M')
     ))
@@ -103,10 +103,10 @@ def main():
   try:
     name = sys.argv[1]
   except IndexError:
-    name = '/tmp/kindex.png'
+    name = '/tmp/kpindex.png'
 
-  kindex = KIndex('/tmp')
-  kindex.graph(name)
+  kpindex = KPIndex('/tmp')
+  kpindex.graph(name)
 
 if __name__ == "__main__":
   main()

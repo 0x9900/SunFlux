@@ -27,7 +27,7 @@ from telegram.ext import (
 )
 
 import showdxcc
-import kindex
+import kpindex
 
 from config import Config
 
@@ -196,13 +196,13 @@ def help_command(update: Update, context: CallbackContext):
     "> /dxcc: Show dxcc contacts",
     "> /flux: 10cm Flux",
     "> /geost: GeoSpace Timeline",
-    "> /kindex: K Index",
+    "> /kpindex: K Index",
     "> /swx: Solar indices overvew",
     "> /tec: Total Electron Content",
     "> /warning: Warning timelines",
     "\n*Propagation information:*",
     "> _For best radio propagation_",
-    "> `Flux >= 80, KIndex >= 3, AIndex >= 10`",
+    "> `Flux >= 80, KPIndex >= 3, AIndex >= 10`",
     "\n_For more information see /credits_"
   ]
   update.message.reply_text("\n".join(help), parse_mode='Markdown')
@@ -286,27 +286,27 @@ def send_aindex(update: Update, context: CallbackContext):
                          caption='A Index',
                          filename=os.path.basename(filename), timeout=100)
 
-def send_kindex(update: Update, context: CallbackContext):
+def send_kpindex(update: Update, context: CallbackContext):
   config = Config()
   cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
   now = time.time()
-  image = os.path.join(cache_dir, 'kindex.png')
+  image = os.path.join(cache_dir, 'kpindex.png')
   try:
     img_st = os.stat(image)
     if now - img_st.st_atime > 3600:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
-    cmd = os.path.join(os.getcwd(), "kindex.py")
+    cmd = os.path.join(os.getcwd(), "kpindex.py")
     value = subprocess.call([cmd], shell=True)
     logging.info(f'Call {cmd} returned {value}')
     if value:
-      logging.error('Error generating the kindex graph')
+      logging.error('Error generating the KPIndex graph')
       return
 
   chat_id = update.message.chat_id
   today = datetime.now().strftime('%a %b %d %Y')
   context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
-                         caption="KIndex for: {}".format(today),
+                         caption="KPIndex for: {}".format(today),
                          filename=os.path.basename(image), timeout=100)
 
 
@@ -413,8 +413,8 @@ def main():
   updater.dispatcher.add_handler(CommandHandler('flux', send_flux))
   updater.dispatcher.add_handler(CommandHandler('geost', send_geost))
   updater.dispatcher.add_handler(CommandHandler('help', help_command))
-  updater.dispatcher.add_handler(CommandHandler('ki', send_kindex))
-  updater.dispatcher.add_handler(CommandHandler('kindex', send_kindex))
+  updater.dispatcher.add_handler(CommandHandler('kpi', send_kpindex))
+  updater.dispatcher.add_handler(CommandHandler('KPIndex', send_kpindex))
   updater.dispatcher.add_handler(CommandHandler('start', start))
   updater.dispatcher.add_handler(CommandHandler('swx', send_swx))
   updater.dispatcher.add_handler(CommandHandler('tec', send_tec))
