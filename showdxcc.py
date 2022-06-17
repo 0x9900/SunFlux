@@ -77,7 +77,9 @@ def get_dxcc(continent, filename):
                      color="yellow")
 
   ax.set_title(f"DX Spots From {continent}", fontsize=22)
-  fig.text(.01, .02, "By W6BSD ({})".format(datetime.now().isoformat()))
+  fig.text(0.01, 0.02, 'SunFluxBot By W6BSD {}'.format(
+    datetime.utcnow().strftime('%Y:%m:%d %H:%M')
+  ))
   fig.tight_layout()
   fig.savefig(filename, transparent=False, dpi=100)
 
