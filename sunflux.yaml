@@ -11,6 +11,15 @@ cluster:
   - dxc.nc7j.com:7373
   - n8dxe.dxengineering.com:7373
   - w3lpl.net:7373
+
 sunfluxbot:
-  cachedir: /tmp
-  token: 1234567890:TelegramTolenGoesHere
+  cache_dir: /tmp
+  token: 1234567890:YourTokenGoesHere
+
+fluxgraph:
+  cache_file: /tmp/flux.pkl
+
+showdxcc:
+  db_name: /tmp/cluster/cluster.db
+  color_map: PRGn
+  interleave: gaussian
