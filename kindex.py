@@ -16,6 +16,8 @@ import numpy as np
 
 from config import Config
 
+NOAA_URL = 'https://services.swpc.noaa.gov/json/boulder_k_index_1m.json'
+
 parameters = {
   'axes.labelsize': 12,
   'axes.titlesize': 20,
@@ -27,10 +29,10 @@ parameters = {
 plt.rcParams.update(parameters)
 plt.style.use(['classic', 'seaborn-talk'])
 
-class Flux:
-  def __init__(self, cache_file):
-    self.log = logging.getLogger('Flux')
-    self.cachefile = cache_file
+class KIndex:
+  def __init__(self, cache_dir):
+    self.log = logging.getLogger('KIndex')
+    self.cachefile = os.path.join(cache_dir, self.__class__.__name__ + '.pkl')
     self.data = None
 
     now = time.time()
@@ -39,7 +41,7 @@ class Flux:
       if now - filest.st_atime > 43200:
         raise FileNotFoundError
     except FileNotFoundError:
-      self.download_flux()
+      self.download()
       if self.data:
         self.writecache()
     finally:
@@ -50,19 +52,19 @@ class Flux:
       self.log.warning('No data to graph')
       return
 
-    x = np.array([datetime.strptime(d[0], '%Y-%m-%d %H:%M:%S.%f') for d in self.data])
-    y = np.array([int(x[1]) for x in self.data])
+    x = np.array([datetime.strptime(d['time_tag'], '%Y-%m-%dT%H:%M:%S') for d in self.data])
+    y = np.array([round(x['k_index'], 2) for x in self.data])
 
     fig = plt.figure()
-    fig.suptitle('Daily 10cm Flux Index', fontsize=14)
+    fig.suptitle('Planetary KIndex (Boulder)', fontsize=14)
     fig.text(0.01, 0.02, 'SunFluxBot By W6BSD {}'.format(
-      datetime.utcnow().strftime('%Y/%m/%d %H:%M')
+      datetime.utcnow().strftime('%Y:%m:%d %H:%M')
     ))
     ax = plt.gca()
     ax.plot(x, y)
 
-    loc = mdates.DayLocator(interval=3)
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
+    loc = mdates.HourLocator(interval=2)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d %H:S'))
     ax.xaxis.set_major_locator(loc)
     ax.grid()
     fig.autofmt_xdate()
@@ -71,9 +73,9 @@ class Flux:
     self.log.info('Graph "%s" saved', filename)
     return filename
 
-  def download_flux(self):
+  def download(self):
     self.log.info('Downloading data from NOAA')
-    res = urllib.request.urlopen('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json')
+    res = urllib.request.urlopen(NOAA_URL)
     webdata = res.read()
     encoding = res.info().get_content_charset('utf-8')
     data = json.loads(webdata.decode(encoding))
@@ -101,11 +103,10 @@ def main():
   try:
     name = sys.argv[1]
   except IndexError:
-    name = '/tmp/flux.png'
+    name = '/tmp/kindex.png'
 
-  cache_file = config.get('fluxgraph.cache_file', '/tmp/flux.pkl')
-  flux = Flux(cache_file)
-  flux.graph(name)
+  kindex = KIndex('/tmp')
+  kindex.graph(name)
 
 if __name__ == "__main__":
   main()

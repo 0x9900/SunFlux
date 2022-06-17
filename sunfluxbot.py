@@ -27,6 +27,7 @@ from telegram.ext import (
 )
 
 import showdxcc
+import kindex
 
 from config import Config
 
@@ -226,7 +227,7 @@ def send_credits(update: Update, context: CallbackContext):
   update.message.reply_text("\n".join(credits), parse_mode='Markdown')
 
 def send_flux(update: Update, context: CallbackContext):
-  config = Config
+  config = Config()
   cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
   now = time.time()
   image = os.path.join(cache_dir, 'flux.png')
@@ -300,18 +301,29 @@ def send_ai(update: Update, context: CallbackContext):
                          caption='A Index',
                          filename=os.path.basename(filename), timeout=100)
 
-def send_ki(update: Update, context: CallbackContext):
+def send_kindex(update: Update, context: CallbackContext):
+  config = Config()
+  cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
+  now = time.time()
+  image = os.path.join(cache_dir, 'kindex.png')
   try:
-    filename = noaa_download('ki')
-  except Exception as exp:
-    logger.error(exp)
-    update.message.reply_text(f'Error: {exp}')
-    return
+    img_st = os.stat(image)
+    if now - img_st.st_atime > 3600:
+      raise FileNotFoundError
+  except (FileNotFoundError, EOFError):
+    cmd = os.path.join(os.getcwd(), "kindex.py")
+    value = subprocess.call([cmd], shell=True)
+    logging.info(f'Call {cmd} returned {value}')
+    if value:
+      logging.error('Error generating the kindex graph')
+      return
 
   chat_id = update.message.chat_id
-  context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
-                         caption='K index',
-                         filename=os.path.basename(filename), timeout=100)
+  today = datetime.now().strftime('%a %b %d %Y')
+  context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
+                         caption="KIndex for: {}".format(today),
+                         filename=os.path.basename(image), timeout=100)
+
 
 def send_swx(update: Update, context: CallbackContext):
   try:
@@ -417,8 +429,8 @@ def main():
   updater.dispatcher.add_handler(CommandHandler('gef', send_gef))
   updater.dispatcher.add_handler(CommandHandler('geost', send_geost))
   updater.dispatcher.add_handler(CommandHandler('help', help_command))
-  updater.dispatcher.add_handler(CommandHandler('ki', send_ki))
-  updater.dispatcher.add_handler(CommandHandler('kindex', send_ki))
+  updater.dispatcher.add_handler(CommandHandler('ki', send_kindex))
+  updater.dispatcher.add_handler(CommandHandler('kindex', send_kindex))
   updater.dispatcher.add_handler(CommandHandler('start', start))
   updater.dispatcher.add_handler(CommandHandler('swx', send_swx))
   updater.dispatcher.add_handler(CommandHandler('tec', send_tec))
