@@ -150,12 +150,14 @@ class Alerts:
 
 
 def noaa_download(image):
+  config = Config()
+  cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
   if image not in IMG_SOURCE:
     logging.error(f"Image {image} not available")
     return
 
   url = NOAA_URL + IMG_SOURCE[image]
-  full_path = os.path.join(CACHEDIR, image +'.png')
+  full_path = os.path.join(cache_dir, image +'.png')
   now = time.time()
 
   try:
@@ -221,8 +223,10 @@ def send_credits(update: Update, context: CallbackContext):
   update.message.reply_text("\n".join(credits), parse_mode='Markdown')
 
 def send_flux(update: Update, context: CallbackContext):
+  config = Config
+  cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
   now = time.time()
-  image = os.path.join(CACHEDIR, 'flux.png')
+  image = os.path.join(cache_dir, 'flux.png')
   try:
     img_st = os.stat(image)
     if now - img_st.st_atime > 3600:
@@ -346,7 +350,9 @@ def send_warn(update: Update, context: CallbackContext):
                          filename=os.path.basename(filename), timeout=100)
 
 def send_alerts(update: Update, context: CallbackContext):
-  alerts = Alerts(CACHEDIR)
+  config = Config()
+  cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
+  alerts = Alerts(cache_dir)
   update.message.reply_text(alerts.text)
 
 def dxcc_handler(update: Update, context: CallbackContext):
@@ -395,7 +401,8 @@ def text_handler(update: Update, context: CallbackContext):
   help_command(update, context)
 
 def main():
-  updater = Updater('5317289660:AAEaI9DgWpjN49SuplTLoaGXa3VymAlJ4qQ')
+  config = Config()
+  updater = Updater(config['sunfluxbot.token'])
   updater.bot.logger.level = logging.INFO
   updater.dispatcher.add_handler(CommandHandler('ai', send_ai))
   updater.dispatcher.add_handler(CommandHandler('aindex', send_ai))
