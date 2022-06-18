@@ -220,10 +220,11 @@ def send_flux(update: Update, context: CallbackContext):
       context.bot.send_message(chat_id, (
         'The flux graph is not available at the moment\n'
         'Please come back latter.'))
-  else:
-    context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
-                           caption="10cm flux for: {}".format(today),
-                           filename=os.path.basename(image), timeout=100)
+      return
+
+  context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
+                         caption="10cm flux for: {}".format(today),
+                         filename=os.path.basename(image), timeout=100)
 
 def send_tec(update: Update, context: CallbackContext):
   try:
@@ -271,7 +272,6 @@ def send_kpindex(update: Update, context: CallbackContext):
   image = os.path.join(cache_dir, 'kpindex.png')
   chat_id = update.message.chat_id
   today = datetime.now().strftime('%a %b %d %Y')
-
   try:
     img_st = os.stat(image)
     if now - img_st.st_atime > IMG_CACHE_TIME:
@@ -285,10 +285,11 @@ def send_kpindex(update: Update, context: CallbackContext):
       context.bot.send_message(chat_id, (
         'The kpindex graph is not available at the moment\n'
         'Please come back latter.'))
-  else:
-    context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
-                           caption="Planetary KPIndex for: {}".format(today),
-                           filename=os.path.basename(image), timeout=100)
+      return
+
+  context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
+                         caption="Planetary KPIndex for: {}".format(today),
+                         filename=os.path.basename(image), timeout=100)
 
 def send_swx(update: Update, context: CallbackContext):
   try:
@@ -353,7 +354,6 @@ def send_dxcc(update: Update, context: CallbackContext):
                          filename=os.path.basename(filename), timeout=100)
 
 def start(update: Update, context: CallbackContext):
-  import ipdb; ipdb.set_trace()
   botname = update.message.bot.first_name
   user = update.message.chat.username or "Stranger"
   chat_id = update.message.chat.id
