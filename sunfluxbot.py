@@ -336,7 +336,6 @@ def dxcc_handler(update: Update, context: CallbackContext):
   reply_markup = InlineKeyboardMarkup([keyboard])
   update.message.reply_text('What is your continent?', reply_markup=reply_markup)
 
-
 def send_dxcc(update: Update, context: CallbackContext):
   query = update.callback_query
   user = query.message.chat.username or "Stranger"
@@ -346,7 +345,6 @@ def send_dxcc(update: Update, context: CallbackContext):
   context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
                          caption='DXCC contacts',
                          filename=os.path.basename(filename), timeout=100)
-
 
 def start(update: Update, context: CallbackContext):
   import ipdb; ipdb.set_trace()

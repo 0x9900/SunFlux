@@ -20,7 +20,8 @@ from telnetlib import Telnet
 
 import sqlite3
 
-from adapters import *
+import adapters
+
 from config import Config
 
 # Sorted by the most popular to the least popular band
@@ -60,12 +61,12 @@ CREATE TABLE IF NOT EXISTS dxspot
 );
 CREATE INDEX IF NOT EXISTS idx_time on dxspot (time);
 CREATE INDEX IF NOT EXISTS idx_cont_dx on dxspot (cont_dx);
-""".format(',\n  '.join(FIELDS))
+"""
 
-logger = logging.getLogger(__name__)
+sqlite3.register_adapter(datetime, adapters.adapt_datetime)
+sqlite3.register_converter('timestamp', adapters.convert_datetime)
 
-sqlite3.register_adapter(datetime, adapt_datetime)
-sqlite3.register_converter('timestamp', convert_datetime)
+LOG = logging.getLogger(__name__)
 
 class DXCC:
 
@@ -77,7 +78,7 @@ class DXCC:
     self._map = {}
     if not filename:
       filename = 'bigcty/cty.csv'
-    with open(filename) as csvfile:
+    with open(filename, 'r', encoding='utf-8') as csvfile:
       csvfd = csv.reader(csvfile)
       for row in csvfd:
         self._map[row[0].strip('*')] = row[3]
@@ -100,11 +101,11 @@ class DXCC:
     if call in self._map:
       return self._map[call]
 
-    prefixes = set([call[:c] for c in range(self.max_len, 0, -1)])
+    prefixes = {call[:c] for c in range(self.max_len, 0, -1)}
     for prefix in sorted(prefixes, reverse=True):
       if prefix in self._map:
         return self._map[prefix]
-    logger.warning('DXCC lookup error for "%s"', call)
+    LOG.warning('DXCC lookup error for "%s"', call)
     return ''
 
 class Record(namedtuple('UserRecord', FIELDS)):
@@ -118,19 +119,19 @@ class Record(namedtuple('UserRecord', FIELDS)):
 def get_band(freq):
   # Quick and dirty way to convert frequencies to bands.
   # I should probably have a band plan for each ITU zones.
-  for min, max, band in BANDS:
-    if min <= freq <= max:
+  for _min, _max, band in BANDS:
+    if _min <= freq <= _max:
       return band
-  logger.warning(f"no band for the frequency {freq}")
+  LOG.warning("No band for the frequency %s", freq)
   return 0
 
 def login(call, cnx):
   try:
     match = cnx.expect([b'Please enter your call.*\n'])
   except socket.timeout:
-    raise OSError('Connection timeout')
+    raise OSError('Connection timeout') from None
   except EOFError as err:
-    raise OSError(err)
+    raise OSError(err) from None
   cnx.write(str.encode(f'{call}\n'))
   match = cnx.expect([str.encode(f'{call} de .*\n')])
   print(match[2].decode('ASCII'))
@@ -140,10 +141,9 @@ def login(call, cnx):
   print(match[2].decode('ASCII'))
 
 def read_stream(cdb, cnx):
-  global logger
   dxcc = DXCC()
   regex = re.compile(
-    '^DX de\s(\w+)(?:.*):\s+(\d+.\d+)\s+(\w+)(?:|\S+)\s+(.*)(?:\d{4}Z).*'
+    r'^DX de\s(\w+)(?:.*):\s+(\d+.\d+)\s+(\w+)(?:|\S+)\s+(.*)(?:\d{4}Z).*'
   )
   while True:
     code, _, buffer = cnx.expect([b'DX.*\n', b'WWV de .*\n'], timeout=5)
@@ -151,14 +151,14 @@ def read_stream(cdb, cnx):
       buffer = buffer.decode('UTF-8')
       match = regex.match(buffer)
       if not match:
-        logger.error(f'Error: {buffer}')
+        LOG.error("Error: %s", buffer)
         continue
 
       fields = list(match.groups())
       fields.append(dxcc.lookup(fields[0]))
       fields.append(dxcc.lookup(fields[2]))
       rec = Record(fields)
-      logger.debug(rec)
+      LOG.debug(rec)
       try:
         with cdb:
           curs = cdb.cursor()
@@ -170,13 +170,12 @@ def read_stream(cdb, cnx):
         logging.error(err)
     elif code == 1:
       buffer = buffer.decode('UTF-8')
-      logger.info(buffer)
+      LOG.info(buffer)
     elif code == -1:
-      logger.warning('Timeout - sleeping for a few seconds')
+      LOG.warning('Timeout - sleeping for a few seconds')
       time.sleep(7)
 
 def main():
-  global logger
   config = Config()
 
   formatter = logging.Formatter("%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s")
@@ -189,11 +188,11 @@ def main():
   console_handler.setFormatter(formatter)
 
   loglevel = logging.getLevelName(os.getenv('LOGLEVEL', 'INFO'))
-  if loglevel not in logging._levelToName:
+  if loglevel not in logging._levelToName: # pylint: disable=protected-access
     loglevel = logging.INFO
-  logger.setLevel(loglevel)
-  logger.addHandler(file_handler)
-  logger.addHandler(console_handler)
+  LOG.setLevel(loglevel)
+  LOG.addHandler(file_handler)
+  LOG.addHandler(console_handler)
 
   con = sqlite3.connect(
     config['cluster.db_name'],
@@ -211,13 +210,13 @@ def main():
   random.shuffle(clusters)
   for cluster in cycle(clusters):
     try:
-      tn = Telnet(*cluster, timeout=15)
-      logger.info(f'Connection to {tn.host} open')
-      login(config['cluster.call'], tn)
-      logger.info('{} identified'.format(config['cluster.call']))
-      read_stream(con, tn)
+      telnet = Telnet(*cluster, timeout=15)
+      LOG.info("Connection to %s open", telnet.host)
+      login(config['cluster.call'], telnet)
+      LOG.info("%s identified", config['cluster.call'])
+      read_stream(con, telnet)
     except OSError as err:
-      logger.error(err)
+      LOG.error(err)
     time.sleep(30)
 
 

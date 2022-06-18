@@ -7,9 +7,10 @@
 #
 
 import os
-import yaml
 import logging
 import sys
+
+import yaml
 
 CONFIG_FILENAME = "sunflux.yaml"
 CONFIG_LOCATIONS = ['/etc', '~/.local', '.']
@@ -18,6 +19,7 @@ class Config:
   _instance = None
   config_data = None
   def __new__(cls, *args, **kwargs):
+    # pylint: disable=unused-argument
     if cls._instance is None:
       cls._instance = super(Config, cls).__new__(cls)
       cls._instance.config_data = {}
@@ -38,7 +40,7 @@ class Config:
           self.log.error('Configuration error "%s"', err)
           sys.exit(os.EX_CONFIG)
         return
-    self.log.error(f'Configuration file "{CONFIG_FILENAME}" not found')
+    self.log.error('Configuration file "%s" not found', CONFIG_FILENAME)
     sys.exit(os.EX_CONFIG)
 
   def to_yaml(self):
@@ -51,16 +53,22 @@ class Config:
       return default
 
   def __getitem__(self, attr):
-    section, attribute = attr.split('.')
+    if '.' in attr:
+      section, attribute = attr.split('.')
+    else:
+      section = attr
+      attribute = None
     if section not in self.config_data:
       raise KeyError("'{}' object has no section '{}'".format(self.__class__, section))
     config = self.config_data[section]
+    if not attribute:
+      return config
     if attribute not in config:
       raise KeyError("'{}' object has no attribute '{}'".format(self.__class__, attr))
     return config[attribute]
 
   @staticmethod
   def _read_config(filename):
-    with open(filename, 'r') as confd:
+    with open(filename, 'r', encoding='utf-8') as confd:
       configuration = yaml.safe_load(confd)
     return configuration
