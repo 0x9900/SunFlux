@@ -180,7 +180,7 @@ def help_command(update: Update, context: CallbackContext):
     "\n_For more information see /credits_"
   ]
   update.message.reply_text("\n".join(help), parse_mode='Markdown')
-  user = update.message.chat.username.upper()
+  user = update.message.chat.username
   chat_id = update.message.chat.id
   logger.info(f"Command /help by {user}:{chat_id}")
 
@@ -350,7 +350,7 @@ def send_dxcc(update: Update, context: CallbackContext):
 
 def start(update: Update, context: CallbackContext):
   botname = update.message.bot.first_name
-  user = update.message.chat.username.upper()
+  user = update.message.chat.username
   chat_id = update.message.chat.id
   lines = [f"Welcome {user} to the {botname} developped by W6BSD",
            "This bot is experimental any feedback is welcome",
