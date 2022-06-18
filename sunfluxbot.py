@@ -139,7 +139,7 @@ def noaa_download(image):
 
   try:
     filest = os.stat(full_path)
-    if now - filest.st_atime > 900:
+    if now - filest.st_atime > 1900:
       raise FileNotFoundError
   except FileNotFoundError:
     urllib.request.urlretrieve(url, full_path)
