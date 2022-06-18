@@ -169,11 +169,11 @@ def help_command(update: Update, context: CallbackContext):
     "> /alerts: NOAA Alerts",
     "> /dxcc: Show dxcc contacts",
     "> /flux: 10cm Flux",
-    "> /geost: GeoSpace Timeline",
+    "> /geost: Geo-Space Time line",
     "> /kpindex: K Index",
-    "> /swx: Solar indices overvew",
+    "> /swx: Solar indices overview",
     "> /tec: Total Electron Content",
-    "> /warning: Warning timelines",
+    "> /warning: Warning time lines",
     "\n*Propagation information:*",
     "> _For best radio propagation_",
     "> `Flux >= 80, KPIndex >= 3, AIndex >= 10`",
@@ -195,7 +195,7 @@ def send_credits(update: Update, context: CallbackContext):
     "> n8dxe.dxengineering.com",
     "> w3lpl.net",
     "The SunFluxBot was developed by Fred (W6BSD)",
-    "To report a bug send an email to tbot-fred@hidzz.com",
+    "To report a bug send a message on https://t.me/w6bsd",
   ]
   update.message.reply_text("\n".join(credits), parse_mode='Markdown')
 
