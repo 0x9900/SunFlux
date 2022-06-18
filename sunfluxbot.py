@@ -2,6 +2,7 @@
 #
 #
 
+import json
 import logging
 import os
 import pickle
@@ -39,7 +40,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 NOAA_URL = 'https://services.swpc.noaa.gov'
-ALERTS_URL = NOAA_URL + "/text/wwv.txt"
+ALERTS_URL = NOAA_URL + '/products/alerts.json'
 
 NOAA_URL = "https://services.swpc.noaa.gov/"
 IMG_SOURCE = {
@@ -51,22 +52,6 @@ IMG_SOURCE = {
   'swo':   'images/swx-overview-large.gif',
   'warn':  'images/notifications-timeline.png',
 }
-
-class NoaaData:
-  """Data structure storing all the sun indices predictions"""
-
-  def __init__(self):
-    self.date = None
-    self.fields = []
-
-  def __cmp__(self, other):
-    return (self.date > other.date) - (self.date < other.date)
-
-  def __eq__(self, other):
-    if other is None:
-      return False
-    return self.date == other.date
-
 
 class SunRecord:
   """Datastructure holding the sun Flux information"""
@@ -98,57 +83,47 @@ class SunRecord:
   def kp_index(self):
     return self.data['kp_index']
 
-class Alerts:
+def get_alert(cache_dir):
   """NOAA space weather alerts"""
+  cachefile = os.path.join(cache_dir, 'alerts.pkl')
+  now = time.time()
+  try:
+    cache_st = os.stat(cachefile)
+    if now - cache_st.st_atime > (4 * 3600):
+      raise FileNotFoundError
+  except (FileNotFoundError, EOFError):
+    alert = download_alert()
+    writecache(cachefile, alert)
+    return alert
 
-  def __init__(self, cache_dir):
-    os.makedirs(cache_dir, exist_ok=True)
-    cachefile = os.path.join(cache_dir, 'alerts.pkl')
-    self.data = None
+  alert = readcache(cachefile)
+  return alert
 
-    cached_data = readcache(cachefile)
-    self.data = self.download()
+def download_alert():
+  try:
+    req = urllib.request.urlopen(ALERTS_URL)
+    webdata = req.read()
+    encoding = req.info().get_content_charset('utf-8')
+    webdata = webdata.decode(encoding)
+  except urllib.request.URLError as err:
+    logging.error('Connection error: %s we will try later', err)
+    return
 
-    if self.data == cached_data:
-      self.newdata = False
-    else:
-      self.newdata = True
-      writecache(cachefile, self.data)
+  if req.status != 200:
+    return
 
-  @staticmethod
-  def download():
-    try:
-      req = urllib.request.urlopen(ALERTS_URL)
-      webdata = req.read()
-      encoding = req.info().get_content_charset('utf-8')
-      webdata = webdata.decode(encoding)
-    except urllib.request.URLError as err:
-      logging.error('Connection error: %s we will try later', err)
+  data = json.loads(webdata)
+  alerts = dict()
+  for record  in data:
+    issue_date = datetime.strptime(record['issue_datetime'],
+                                   '%Y-%m-%d %H:%M:%S.%f')
+    alerts[issue_date] = record['message']
+
+    if not alerts:
       return
 
-    alerts = NoaaData()
-    if req.status == 200:
-      for line in webdata.splitlines():
-        line = line.strip()
-        if line.startswith(':Issued'):
-          alerts.date = datetime.strptime(line, ':Issued: %Y %b %d %H%M %Z')
-          continue
-        if not line or line.startswith(':') or line.startswith('#'):
-          continue
-        alerts.fields.append(line)
-
-    return alerts
-
-  def __repr__(self):
-    return "<{}> at: {}".format(self.__class__.__name__, self.time.isoformat())
-
-  @property
-  def time(self):
-    return self.data.date
-
-  @property
-  def text(self):
-    return '\n'.join(f for f in self.data.fields if not f.startswith('No space weather'))
+    key = sorted(alerts, reverse=True)[0]
+    return alerts[key]
 
 
 def noaa_download(image):
@@ -351,8 +326,8 @@ def send_warn(update: Update, context: CallbackContext):
 def send_alerts(update: Update, context: CallbackContext):
   config = Config()
   cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
-  alerts = Alerts(cache_dir)
-  update.message.reply_text(alerts.text)
+  alert = get_alert(cache_dir)
+  update.message.reply_text(alert)
 
 def dxcc_handler(update: Update, context: CallbackContext):
   keyboard = []
