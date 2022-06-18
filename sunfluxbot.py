@@ -180,7 +180,7 @@ def help_command(update: Update, context: CallbackContext):
     "\n_For more information see /credits_"
   ]
   update.message.reply_text("\n".join(help), parse_mode='Markdown')
-  user = update.message.chat.username
+  user = update.message.chat.username or "Stranger"
   chat_id = update.message.chat.id
   logger.info(f"Command /help by {user}:{chat_id}")
 
@@ -339,7 +339,7 @@ def dxcc_handler(update: Update, context: CallbackContext):
 
 def send_dxcc(update: Update, context: CallbackContext):
   query = update.callback_query
-  user = query.message.chat.username
+  user = query.message.chat.username or "Stranger"
   chat_id = query.message.chat.id
   filename = f'/tmp/dxcc-{user}.png'
   showdxcc.get_dxcc(query.data, filename)
@@ -349,8 +349,9 @@ def send_dxcc(update: Update, context: CallbackContext):
 
 
 def start(update: Update, context: CallbackContext):
+  import ipdb; ipdb.set_trace()
   botname = update.message.bot.first_name
-  user = update.message.chat.username
+  user = update.message.chat.username or "Stranger"
   chat_id = update.message.chat.id
   lines = [f"Welcome {user} to the {botname} developped by W6BSD",
            "This bot is experimental any feedback is welcome",
@@ -359,7 +360,7 @@ def start(update: Update, context: CallbackContext):
   logger.info(f"Command /start by {user}:{chat_id}")
 
 def text_handler(update: Update, context: CallbackContext):
-  user = update.message.chat.username
+  user = update.message.chat.username or "Stranger"
   message = update.message.text
   logging.info(f">>> {user} sent the message \"{message}\"")
   if not message.startswith('/'):
