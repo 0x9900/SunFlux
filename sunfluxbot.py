@@ -39,10 +39,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-NOAA_URL = 'https://services.swpc.noaa.gov'
-ALERTS_URL = NOAA_URL + '/products/alerts.json'
-
-NOAA_URL = "https://services.swpc.noaa.gov/"
+NOAA_URL = 'https://services.swpc.noaa.gov/'
+ALERTS_URL = NOAA_URL + 'products/alerts.json'
 IMG_SOURCE = {
   'ai':    'images/station-a-index.png',
   'geost': 'images/geospace/geospace_7_day.png',
@@ -52,6 +50,7 @@ IMG_SOURCE = {
   'swo':   'images/swx-overview-large.gif',
   'warn':  'images/notifications-timeline.png',
 }
+IMG_CACHE_TIME = (3600 * 4)
 
 class SunRecord:
   """Datastructure holding the sun Flux information"""
@@ -89,7 +88,7 @@ def get_alert(cache_dir):
   now = time.time()
   try:
     cache_st = os.stat(cachefile)
-    if now - cache_st.st_atime > (4 * 3600):
+    if now - cache_st.st_atime > (3600 * 6):
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
     alert = download_alert()
@@ -139,7 +138,7 @@ def noaa_download(image):
 
   try:
     filest = os.stat(full_path)
-    if now - filest.st_atime > 1900:
+    if now - filest.st_atime > IMG_CACHE_TIME:
       raise FileNotFoundError
   except FileNotFoundError:
     urllib.request.urlretrieve(url, full_path)
@@ -160,7 +159,8 @@ def writecache(cachefile, data):
     pickle.dump(data, fd_cache)
 
 def error_callback(update, context):
-  logger.warning('error_callback - Update "%s" error "%s"', update, context.error)
+  logger.warning('error_callback - Update "%s" error "%s"',
+                 update, context.error)
 
 def help_command(update: Update, context: CallbackContext):
   help = [
@@ -177,7 +177,7 @@ def help_command(update: Update, context: CallbackContext):
     "\n*Propagation information:*",
     "> _For best radio propagation_",
     "> `Flux >= 80, KPIndex >= 3, AIndex >= 10`",
-    "\n_For more information see /credits_"
+    "\n_For more information or contact see /credits_"
   ]
   update.message.reply_text("\n".join(help), parse_mode='Markdown')
   user = update.message.chat.username or "Stranger"
@@ -195,6 +195,7 @@ def send_credits(update: Update, context: CallbackContext):
     "> n8dxe.dxengineering.com",
     "> w3lpl.net",
     "The SunFluxBot was developed by Fred (W6BSD)",
+    "To report a bug send an email to tbot-fred@hidzz.com",
   ]
   update.message.reply_text("\n".join(credits), parse_mode='Markdown')
 
@@ -203,23 +204,26 @@ def send_flux(update: Update, context: CallbackContext):
   cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
   now = time.time()
   image = os.path.join(cache_dir, 'flux.png')
+  chat_id = update.message.chat_id
+  today = datetime.now().strftime('%a %b %d %Y')
+
   try:
     img_st = os.stat(image)
-    if now - img_st.st_atime > 3600:
+    if now - img_st.st_atime > IMG_CACHE_TIME:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(os.getcwd(), "fluxgraph.py")
-    value = subprocess.call([cmd], shell=True)
-    logging.info(f'Call {cmd} returned {value}')
-    if value:
+    status = subprocess.call([cmd], shell=True)
+    logging.info(f'Call {cmd} returned {status}')
+    if status:
       logging.error('Error generating the flux graph')
-      return
-
-  chat_id = update.message.chat_id
-  today = datetime.now().strftime('%a %b %d %Y')
-  context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
-                         caption="10cm flux for: {}".format(today),
-                         filename=os.path.basename(image), timeout=100)
+      context.bot.send_message(chat_id, (
+        'The flux graph is not available at the moment\n'
+        'Please come back latter.'))
+  else:
+    context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
+                           caption="10cm flux for: {}".format(today),
+                           filename=os.path.basename(image), timeout=100)
 
 def send_tec(update: Update, context: CallbackContext):
   try:
@@ -265,24 +269,26 @@ def send_kpindex(update: Update, context: CallbackContext):
   cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
   now = time.time()
   image = os.path.join(cache_dir, 'kpindex.png')
+  chat_id = update.message.chat_id
+  today = datetime.now().strftime('%a %b %d %Y')
+
   try:
     img_st = os.stat(image)
-    if now - img_st.st_atime > 3600:
+    if now - img_st.st_atime > IMG_CACHE_TIME:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(os.getcwd(), "kpindexgraph.py")
-    value = subprocess.call([cmd], shell=True)
-    logging.info(f'Call {cmd} returned {value}')
-    if value:
-      logging.error('Error generating the KPIndex graph')
-      return
-
-  chat_id = update.message.chat_id
-  today = datetime.now().strftime('%a %b %d %Y')
-  context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
-                         caption="KPIndex for: {}".format(today),
-                         filename=os.path.basename(image), timeout=100)
-
+    status = subprocess.call([cmd], shell=True)
+    logging.info(f'Call {cmd} returned {status}')
+    if status:
+      logging.error('Error generating the kpindex graph')
+      context.bot.send_message(chat_id, (
+        'The kpindex graph is not available at the moment\n'
+        'Please come back latter.'))
+  else:
+    context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
+                           caption="Planetary KPIndex for: {}".format(today),
+                           filename=os.path.basename(image), timeout=100)
 
 def send_swx(update: Update, context: CallbackContext):
   try:

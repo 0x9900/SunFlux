@@ -59,12 +59,12 @@ class Config:
       section = attr
       attribute = None
     if section not in self.config_data:
-      raise KeyError("'{}' object has no section '{}'".format(self.__class__, section))
+      raise KeyError(f'"Config" object has no section "{section}"')
     config = self.config_data[section]
     if not attribute:
       return config
     if attribute not in config:
-      raise KeyError("'{}' object has no attribute '{}'".format(self.__class__, attr))
+      raise KeyError(f'"Config" object has no attribute "{attr}"')
     return config[attribute]
 
   @staticmethod

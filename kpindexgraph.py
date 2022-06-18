@@ -38,7 +38,7 @@ class KPIndex:
     now = time.time()
     try:
       filest = os.stat(self.cachefile)
-      if now - filest.st_atime > 43200:
+      if now - filest.st_atime > 21600: # 6 hours
         raise FileNotFoundError
     except FileNotFoundError:
       self.download()
@@ -50,23 +50,22 @@ class KPIndex:
   def graph(self, filename):
     if not self.data:
       self.log.warning('No data to graph')
-      return
+      return None
 
     x = np.array([datetime.strptime(d['time_tag'], '%Y-%m-%dT%H:%M:%S') for d in self.data])
     y = np.array([round(x['k_index'], 2) for x in self.data])
 
+    date = datetime.utcnow().strftime('%Y:%m:%d %H:%M')
     fig = plt.figure()
     fig.suptitle('Planetary KPIndex (Boulder)', fontsize=14)
-    fig.text(0.01, 0.02, 'SunFluxBot By W6BSD {}'.format(
-      datetime.utcnow().strftime('%Y:%m:%d %H:%M')
-    ))
-    ax = plt.gca()
-    ax.plot(x, y)
+    fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {date}')
+    axgc = plt.gca()
+    axgc.plot(x, y)
 
     loc = mdates.HourLocator(interval=2)
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d %H:S'))
-    ax.xaxis.set_major_locator(loc)
-    ax.grid()
+    axgc.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d %H:S'))
+    axgc.xaxis.set_major_locator(loc)
+    axgc.grid()
     fig.autofmt_xdate()
     plt.savefig(filename, transparent=False, dpi=100)
     plt.close()
@@ -107,7 +106,10 @@ def main():
 
   cache_file = config.get('kpindexgraph.cache_file', '/tmp/kpindex.pkl')
   kpindex = KPIndex(cache_file)
-  kpindex.graph(name)
+  if not kpindex.graph(name):
+    return os.EX_DATAERR
+
+  return os.EX_OK
 
 if __name__ == "__main__":
-  main()
+  sys.exit(main())

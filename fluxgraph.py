@@ -27,6 +27,8 @@ parameters = {
 plt.rcParams.update(parameters)
 plt.style.use(['classic', 'seaborn-talk'])
 
+NOAA_URL = 'https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'
+
 class Flux:
   def __init__(self, cache_file):
     self.log = logging.getLogger('Flux')
@@ -36,7 +38,7 @@ class Flux:
     now = time.time()
     try:
       filest = os.stat(self.cachefile)
-      if now - filest.st_atime > 43200:
+      if now - filest.st_atime > 43200: # 12 hours
         raise FileNotFoundError
     except FileNotFoundError:
       self.download_flux()
@@ -48,23 +50,23 @@ class Flux:
   def graph(self, filename):
     if not self.data:
       self.log.warning('No data to graph')
-      return
+      return None
 
-    x = np.array([datetime.strptime(d[0], '%Y-%m-%d %H:%M:%S.%f') for d in self.data])
+    x = np.array([datetime.strptime(d[0], '%Y-%m-%d %H:%M:%S.%f')
+                  for d in self.data])
     y = np.array([int(x[1]) for x in self.data])
 
+    date = datetime.utcnow().strftime('%Y/%m/%d %H:%M')
     fig = plt.figure()
     fig.suptitle('Daily 10cm Flux Index', fontsize=14)
-    fig.text(0.01, 0.02, 'SunFluxBot By W6BSD {}'.format(
-      datetime.utcnow().strftime('%Y/%m/%d %H:%M')
-    ))
-    ax = plt.gca()
-    ax.plot(x, y)
+    fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {date}')
+    axgc = plt.gca()
+    axgc.plot(x, y)
 
     loc = mdates.DayLocator(interval=3)
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
-    ax.xaxis.set_major_locator(loc)
-    ax.grid()
+    axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
+    axgc.xaxis.set_major_locator(loc)
+    axgc.grid()
     fig.autofmt_xdate()
     plt.savefig(filename, transparent=False, dpi=100)
     plt.close()
@@ -73,7 +75,7 @@ class Flux:
 
   def download_flux(self):
     self.log.info('Downloading data from NOAA')
-    res = urllib.request.urlopen('https://services.swpc.noaa.gov/products/10cm-flux-30-day.json')
+    res = urllib.request.urlopen(NOAA_URL)
     webdata = res.read()
     encoding = res.info().get_content_charset('utf-8')
     data = json.loads(webdata.decode(encoding))
@@ -96,7 +98,9 @@ class Flux:
       pickle.dump(self.data, fd_cache)
 
 def main():
-  logging.basicConfig(level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO')))
+  logging.basicConfig(level=logging.getLevelName(
+    os.getenv('LOG_LEVEL', 'INFO')
+  ))
   config = Config()
   try:
     name = sys.argv[1]
@@ -105,7 +109,10 @@ def main():
 
   cache_file = config.get('fluxgraph.cache_file', '/tmp/flux.pkl')
   flux = Flux(cache_file)
-  flux.graph(name)
+  if not flux.graph(name):
+    return os.EX_DATAERR
+
+  return os.EX_OK
 
 if __name__ == "__main__":
-  main()
+  sys.exit(main())
