@@ -84,7 +84,8 @@ def get_dxcc(continent, filename):
   fig.savefig(filename, transparent=False, dpi=100)
 
 def main():
-  if len(sys.argv) != 2:
+
+  if len(sys.argv) < 2:
     print("showdxcc [{}]".format('|'.join(CONTINENTS)))
     sys.exit(os.EX_USAGE)
 
@@ -93,10 +94,14 @@ def main():
     print("showdxcc [{}]".format('|'.join(CONTINENTS)))
     sys.exit(os.EX_USAGE)
 
-  now = datetime.utcnow().strftime('%Y%m%d%H%S')
-  filename = f'/tmp/dxcc-{now}.png'
+  if len(sys.argv) == 3:
+    filename = os.path.join('/tmp', sys.argv[2])
+  else:
+    now = datetime.utcnow().strftime('%Y%m%d%H%S')
+    filename = f'/tmp/dxcc-{now}.png'
   get_dxcc(continent, filename)
   print(f'Save {filename}')
+  sys.exit(os.EX_OK)
 
 if __name__ == "__main__":
-  main()
+  sys.exit(main())

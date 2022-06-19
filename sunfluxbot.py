@@ -22,15 +22,14 @@ from telegram.ext import (
   CallbackContext,
   CallbackQueryHandler,
   CommandHandler,
+  ConversationHandler,
   Filters,
   MessageHandler,
   Updater,
 )
 
-import showdxcc
-
 from config import Config
-
+from showdxcc import CONTINENTS
 
 logging.basicConfig(
   format='%(asctime)s %(module)s %(levelname)s: %(message)s',
@@ -183,6 +182,7 @@ def help_command(update: Update, context: CallbackContext):
   user = update.message.chat.username or "Stranger"
   chat_id = update.message.chat.id
   logger.info(f"Command /help by {user}:{chat_id}")
+  return ConversationHandler.END
 
 def send_credits(update: Update, context: CallbackContext):
   credits = [
@@ -198,6 +198,7 @@ def send_credits(update: Update, context: CallbackContext):
     "To report a bug send a message on https://t.me/w6bsd",
   ]
   update.message.reply_text("\n".join(credits), parse_mode='Markdown')
+  return ConversationHandler.END
 
 def send_flux(update: Update, context: CallbackContext):
   config = Config()
@@ -213,18 +214,19 @@ def send_flux(update: Update, context: CallbackContext):
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(os.getcwd(), "fluxgraph.py")
-    status = subprocess.call([cmd], shell=True)
+    status = subprocess.call([cmd], shell=False)
     logging.info(f'Call {cmd} returned {status}')
     if status:
       logging.error('Error generating the flux graph')
       context.bot.send_message(chat_id, (
         'The flux graph is not available at the moment\n'
         'Please come back latter.'))
-      return
+      return ConversationHandler.END
 
   context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
                          caption="10cm flux for: {}".format(today),
                          filename=os.path.basename(image), timeout=100)
+  return ConversationHandler.END
 
 def send_tec(update: Update, context: CallbackContext):
   try:
@@ -232,12 +234,13 @@ def send_tec(update: Update, context: CallbackContext):
   except Exception as exp:
     logger.error(exp)
     update.message.reply_text(f'Error: {exp}')
-    return
+    return ConversationHandler.END
 
   chat_id = update.message.chat_id
   context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
                          caption='Total Electron Content',
                          filename=os.path.basename(filename), timeout=100)
+  return ConversationHandler.END
 
 def send_geost(update: Update, context: CallbackContext):
   try:
@@ -245,12 +248,13 @@ def send_geost(update: Update, context: CallbackContext):
   except Exception as exp:
     logger.error(exp)
     update.message.reply_text(f'Error: {exp}')
-    return
+    return ConversationHandler.END
 
   chat_id = update.message.chat_id
   context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
                          caption='Geospace timeline',
                          filename=os.path.basename(filename), timeout=100)
+  return ConversationHandler.END
 
 def send_aindex(update: Update, context: CallbackContext):
   try:
@@ -258,12 +262,13 @@ def send_aindex(update: Update, context: CallbackContext):
   except Exception as exp:
     logger.error(exp)
     update.message.reply_text(f'Error: {exp}')
-    return
+    return ConversationHandler.END
 
   chat_id = update.message.chat_id
   context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
                          caption='A Index',
                          filename=os.path.basename(filename), timeout=100)
+  return ConversationHandler.END
 
 def send_kpindex(update: Update, context: CallbackContext):
   config = Config()
@@ -278,18 +283,19 @@ def send_kpindex(update: Update, context: CallbackContext):
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(os.getcwd(), "kpindexgraph.py")
-    status = subprocess.call([cmd], shell=True)
+    status = subprocess.call([cmd], shell=False)
     logging.info(f'Call {cmd} returned {status}')
     if status:
       logging.error('Error generating the kpindex graph')
       context.bot.send_message(chat_id, (
         'The kpindex graph is not available at the moment\n'
         'Please come back latter.'))
-      return
+      return ConversationHandler.END
 
   context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
                          caption="Planetary KPIndex for: {}".format(today),
                          filename=os.path.basename(image), timeout=100)
+  return ConversationHandler.END
 
 def send_swx(update: Update, context: CallbackContext):
   try:
@@ -310,12 +316,13 @@ def send_swo(update: Update, context: CallbackContext):
   except Exception as exp:
     logger.error(exp)
     update.message.reply_text(f'Error: {exp}')
-    return
+    return ConversationHandler.END
 
   chat_id = update.message.chat_id
   context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
                          caption='Space weather indices overview',
                          filename=os.path.basename(filename), timeout=100)
+  return ConversationHandler.END
 
 def send_warn(update: Update, context: CallbackContext):
   try:
@@ -323,35 +330,59 @@ def send_warn(update: Update, context: CallbackContext):
   except Exception as exp:
     logger.error(exp)
     update.message.reply_text(f'Error: {exp}')
-    return
+    return ConversationHandler.END
 
   chat_id = update.message.chat_id
   context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
                          caption='Space weather warning timelines',
                          filename=os.path.basename(filename), timeout=100)
+  return ConversationHandler.END
 
 def send_alerts(update: Update, context: CallbackContext):
   config = Config()
   cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
   alert = get_alert(cache_dir)
   update.message.reply_text(alert)
+  return ConversationHandler.END
 
 def dxcc_handler(update: Update, context: CallbackContext):
   keyboard = []
-  for key in showdxcc.CONTINENTS:
+  for key in CONTINENTS:
     keyboard.append(InlineKeyboardButton(key, callback_data=key))
   reply_markup = InlineKeyboardMarkup([keyboard])
   update.message.reply_text('What is your continent?', reply_markup=reply_markup)
 
 def send_dxcc(update: Update, context: CallbackContext):
+  config = Config()
+  cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
   query = update.callback_query
-  user = query.message.chat.username or "Stranger"
   chat_id = query.message.chat.id
-  filename = f'/tmp/dxcc-{user}.png'
-  showdxcc.get_dxcc(query.data, filename)
-  context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
-                         caption='DXCC contacts',
-                         filename=os.path.basename(filename), timeout=100)
+  user = query.message.chat.username or str(chat_id)
+  image = f'/tmp/dxcc-{query.data}-{user}.png'
+  now = time.time()
+  today = datetime.now().strftime('%a %b %d %Y at %H:%M')
+
+  try:
+    img_st = os.stat(image)
+    if now - img_st.st_atime > 150:
+      raise FileNotFoundError
+  except (FileNotFoundError, EOFError):
+    cmd = os.path.join(os.getcwd(), "showdxcc.py")
+    status = subprocess.call([cmd, query.data, image], shell=False)
+    logging.info(f'Call "{cmd} {query.data} {image}" returned {status}')
+    if status:
+      logging.error('Error generating the dxcc graph')
+      context.bot.send_message(chat_id, (
+        'The dxcc graph is not available at the moment\n'
+        'Please come back latter.'))
+      return ConversationHandler.END
+  else:
+    logging.info(f'Send {image} from cache')
+
+  context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
+                         caption=f"DX activity for: {today}",
+                         filename=os.path.basename(image), timeout=100)
+  return ConversationHandler.END
 
 def start(update: Update, context: CallbackContext):
   botname = update.message.bot.first_name
@@ -362,6 +393,7 @@ def start(update: Update, context: CallbackContext):
            "Use '/help' to see the list of commands"]
   update.message.reply_text('\n'.join(lines))
   logger.info(f"Command /start by {user}:{chat_id}")
+  return ConversationHandler.END
 
 def text_handler(update: Update, context: CallbackContext):
   user = update.message.chat.username or "Stranger"
@@ -378,6 +410,7 @@ def text_handler(update: Update, context: CallbackContext):
     update.message.reply_text(f'Command "{message.strip("/")}" unknown')
 
   help_command(update, context)
+  return ConversationHandler.END
 
 def main():
   config = Config()
