@@ -364,7 +364,7 @@ def send_dxcc(update: Update, context: CallbackContext):
 
   try:
     img_st = os.stat(image)
-    if now - img_st.st_atime > 150:
+    if now - img_st.st_atime > 300:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(os.getcwd(), "showdxcc.py")
