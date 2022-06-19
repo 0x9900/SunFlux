@@ -39,7 +39,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 NOAA_URL = 'https://services.swpc.noaa.gov/'
-ALERTS_URL = NOAA_URL + 'products/alerts.json'
+ALERT_SHORT = NOAA_URL + 'text/wwv.txt'
+ALERT_URL = NOAA_URL + 'products/alerts.json'
+
 IMG_SOURCE = {
   'ai':    'images/station-a-index.png',
   'geost': 'images/geospace/geospace_7_day.png',
@@ -87,28 +89,58 @@ def get_alert(cache_dir):
   now = time.time()
   try:
     cache_st = os.stat(cachefile)
-    if now - cache_st.st_atime > (3600 * 6):
+    if now - cache_st.st_atime > 3600:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
-    alert = download_alert()
+    alerts = []
+    alerts.append(download_alert())
+    alerts.append('=' * 5)
+    alerts.append(download_short_alert())
+    alerts.append(
+      ('\nFor more information on the sun activity:\n'
+       'https://www.swpc.noaa.gov/communities/space-weather-enthusiasts')
+    )
+    alert = '\n'.join(alerts)
     writecache(cachefile, alert)
     return alert
 
   alert = readcache(cachefile)
   return alert
 
-def download_alert():
+def download_short_alert():
   try:
-    req = urllib.request.urlopen(ALERTS_URL)
+    req = urllib.request.urlopen(ALERT_SHORT)
     webdata = req.read()
     encoding = req.info().get_content_charset('utf-8')
     webdata = webdata.decode(encoding)
   except urllib.request.URLError as err:
     logging.error('Connection error: %s we will try later', err)
-    return
+    return ""
+
+  lines = []
+  if req.status == 200:
+    for line in webdata.splitlines():
+      line = line.strip()
+      if not line or line.startswith(':') or line.startswith('#'):
+        continue
+      if line.startswith('No space weather storms'):
+        continue
+      lines.append(line)
+
+  return '\n'.join(lines)
+
+def download_alert():
+  try:
+    req = urllib.request.urlopen(ALERT_URL)
+    webdata = req.read()
+    encoding = req.info().get_content_charset('utf-8')
+    webdata = webdata.decode(encoding)
+  except urllib.request.URLError as err:
+    logging.error('Connection error: %s we will try later', err)
+    return ""
 
   if req.status != 200:
-    return
+    return ""
 
   data = json.loads(webdata)
   alerts = dict()
@@ -118,7 +150,7 @@ def download_alert():
     alerts[issue_date] = record['message']
 
     if not alerts:
-      return
+      return ""
 
     key = sorted(alerts, reverse=True)[0]
     return alerts[key]
