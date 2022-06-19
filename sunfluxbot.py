@@ -195,7 +195,7 @@ def send_credits(update: Update, context: CallbackContext):
     "> n8dxe.dxengineering.com",
     "> w3lpl.net",
     "The SunFluxBot was developed by Fred (W6BSD)",
-    "To report a bug send a message on https://t.me/w6bsd",
+    "To report a bug send a message at https://t.me/w6bsd",
   ]
   update.message.reply_text("\n".join(credits), parse_mode='Markdown')
   return ConversationHandler.END
