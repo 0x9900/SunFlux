@@ -123,7 +123,8 @@ def download_short_alert():
       line = line.strip()
       if not line or line.startswith(':') or line.startswith('#'):
         continue
-      if line.startswith('No space weather storms'):
+      if (line.startswith('Solar-terrestrial indices for') or
+          line.startswith('No space weather storms')):
         continue
       lines.append(line)
 
