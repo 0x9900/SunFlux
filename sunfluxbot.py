@@ -209,6 +209,7 @@ def help_command(update: Update, context: CallbackContext):
     "> /flux: 10cm Flux",
     "> /geost: Geo-Space Time line",
     "> /kpindex: K Index",
+    "> /legend: Index information",
     "> /ssn: Sun Spots",
     "> /swx: Solar indices overview",
     "> /tec: Total Electron Content",
@@ -216,6 +217,7 @@ def help_command(update: Update, context: CallbackContext):
     "\n*Propagation information:*",
     "> _For best radio propagation_",
     "> `Flux >= 80, KPIndex >= 3, AIndex >= 10`",
+    "",
     "\n_For more information or contact see /credits_"
   ]
   update.message.reply_text("\n".join(help), parse_mode='Markdown')
@@ -482,6 +484,32 @@ def text_handler(update: Update, context: CallbackContext):
   help_command(update, context)
   return ConversationHandler.END
 
+def send_legend(update: Update, context: CallbackContext):
+  legend = (
+    "/Aindex *LOW = GOOD*",
+    "- 1 to 6 is Best",
+    "- 7 to 9 is Ok",
+    "- >11 is Bad",
+    "_A lower A-Index suggests better propagation._",
+    "",
+    "/flux *HIGH = GOOD*",
+    "- 70 is Bad",
+    "- 80 is Good",
+    "- 90 is Better",
+    "- >100 is Best",
+    "_Total radio emissions from the sun at 2800MHz._",
+    "",
+    "/Kpindex *LOW = Good*",
+    "- 0..1 is Best",
+    "- 2 is Ok",
+    "- 3 or Bad",
+    "- 5 very Bad",
+    "_Kp Index is the planet's average over the last 3 hours._"
+  )
+  update.message.reply_text("\n".join(legend), parse_mode='Markdown')
+  return ConversationHandler.END
+
+
 def main():
   config = Config()
   updater = Updater(config['sunfluxbot.token'])
@@ -502,6 +530,7 @@ def main():
   updater.dispatcher.add_handler(CommandHandler('swx', send_swx))
   updater.dispatcher.add_handler(CommandHandler('tec', send_tec))
   updater.dispatcher.add_handler(CommandHandler('warning', send_warn))
+  updater.dispatcher.add_handler(CommandHandler('legend', send_legend))
   updater.dispatcher.add_handler(MessageHandler(Filters.text, text_handler))
   updater.dispatcher.add_handler(CallbackQueryHandler(send_dxcc))
   updater.dispatcher.add_error_handler(error_callback)
