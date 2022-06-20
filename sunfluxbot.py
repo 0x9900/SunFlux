@@ -209,6 +209,7 @@ def help_command(update: Update, context: CallbackContext):
     "> /flux: 10cm Flux",
     "> /geost: Geo-Space Time line",
     "> /kpindex: K Index",
+    "> /ssn: Sun Spots"
     "> /swx: Solar indices overview",
     "> /tec: Total Electron Content",
     "> /warning: Warning time lines",
@@ -266,6 +267,36 @@ def send_flux(update: Update, context: CallbackContext):
                          caption="10cm flux for: {}".format(today),
                          filename=os.path.basename(image), timeout=100)
   return ConversationHandler.END
+
+def send_ssn(update: Update, context: CallbackContext):
+  config = Config()
+  cache_dir = config.get('ssn.cache_dir', '/tmp')
+  now = time.time()
+  image = os.path.join(cache_dir, 'ssn.png')
+  chat_id = update.message.chat_id
+  today = datetime.now().strftime('%a %b %d %Y')
+
+  try:
+    img_st = os.stat(image)
+    if now - img_st.st_atime > IMG_CACHE_TIME:
+      raise FileNotFoundError
+  except (FileNotFoundError, EOFError):
+    cmd = os.path.join(os.getcwd(), "ssngraph.py")
+    status = subprocess.call([cmd], shell=False)
+    logging.info(f'Call {cmd} returned {status}')
+    if status:
+      logging.error('Error generating the sun spot graph')
+      context.bot.send_message(chat_id, (
+        'The Sun Spot graph is not available at the moment\n'
+        'Please come back latter.'))
+      return ConversationHandler.END
+
+  context.bot.send_photo(
+    chat_id=chat_id, photo=open(image, 'rb'),
+    caption="Estimated International Sunspot Number: {}".format(today),
+    filename=os.path.basename(image), timeout=100)
+  return ConversationHandler.END
+
 
 def send_tec(update: Update, context: CallbackContext):
   try:
@@ -465,7 +496,8 @@ def main():
   updater.dispatcher.add_handler(CommandHandler('geost', send_geost))
   updater.dispatcher.add_handler(CommandHandler('help', help_command))
   updater.dispatcher.add_handler(CommandHandler('kpi', send_kpindex))
-  updater.dispatcher.add_handler(CommandHandler('KPIndex', send_kpindex))
+  updater.dispatcher.add_handler(CommandHandler('kpindex', send_kpindex))
+  updater.dispatcher.add_handler(CommandHandler('ssn', send_ssn))
   updater.dispatcher.add_handler(CommandHandler('start', start))
   updater.dispatcher.add_handler(CommandHandler('swx', send_swx))
   updater.dispatcher.add_handler(CommandHandler('tec', send_tec))

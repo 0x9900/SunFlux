@@ -16,6 +16,9 @@ sunfluxbot:
   cache_dir: /tmp
   token: 1234567890:YourTokenGoesHere
 
+ssngraph:
+  cache_file: /tmp/ssn.pkl
+
 fluxgraph:
   cache_file: /tmp/flux.pkl
 
