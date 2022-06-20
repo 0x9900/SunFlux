@@ -209,7 +209,7 @@ def help_command(update: Update, context: CallbackContext):
     "> /flux: 10cm Flux",
     "> /geost: Geo-Space Time line",
     "> /kpindex: K Index",
-    "> /ssn: Sun Spots"
+    "> /ssn: Sun Spots",
     "> /swx: Solar indices overview",
     "> /tec: Total Electron Content",
     "> /warning: Warning time lines",
