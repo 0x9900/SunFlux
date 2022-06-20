@@ -96,10 +96,9 @@ def get_alert(cache_dir):
     alerts.append(download_alert())
     alerts.append('=' * 5)
     alerts.append(download_short_alert())
-    alerts.append(
-      ('\nFor more information on the sun activity:\n'
-       'https://www.swpc.noaa.gov/communities/space-weather-enthusiasts')
-    )
+    alerts.append('=' * 5)
+    alerts.append('For more information on the sun activity:')
+    alerts.append('https://www.swpc.noaa.gov/communities/space-weather-enthusiasts')
     alert = '\n'.join(alerts)
     writecache(cachefile, alert)
     return alert
@@ -156,9 +155,11 @@ def download_alert():
     alert = alerts[sorted(alerts, reverse=True)[0]]
     text_alert = []
     for line in alert.splitlines():
-      if (not line or line.startswith('NOAA Space Weather Scale desc')):
+      line = line.rstrip()
+      if (not line or line.startswith('NOAA Space Weather Scale desc') or
+          line.endswith('explanation')):
         continue
-      text_alert.append(line.rstrip())
+      text_alert.append(line)
     return '\n'.join(text_alert)
 
 
