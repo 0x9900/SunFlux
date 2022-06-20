@@ -153,8 +153,13 @@ def download_alert():
     if not alerts:
       return ""
 
-    key = sorted(alerts, reverse=True)[0]
-    return alerts[key]
+    alert = alerts[sorted(alerts, reverse=True)[0]]
+    text_alert = []
+    for line in alert.splitlines():
+      if (not line or line.startswith('NOAA Space Weather Scale desc')):
+        continue
+      text_alert.append(line.rstrip())
+    return '\n'.join(text_alert)
 
 
 def noaa_download(image):
