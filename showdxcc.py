@@ -82,9 +82,10 @@ def get_dxcc(continent, filename):
   fig.savefig(filename, transparent=False, dpi=100)
 
 def main():
-  logging.basicConfig(level=logging.getLevelName(
-    os.getenv('LOG_LEVEL', 'INFO')
-  ))
+  logging.basicConfig(
+    format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%H:%M:%S',
+    level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
+  )
   if len(sys.argv) < 2:
     logging.error("showdxcc [%s]", '|'.join(CONTINENTS))
     sys.exit(os.EX_USAGE)

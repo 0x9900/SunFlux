@@ -32,3 +32,7 @@ showdxcc:
   db_name: /tmp/cluster/cluster.db
   color_map: PRGn
   interleave: gaussian
+
+ssn:
+  cache_dir: /tmp
+  cache_file: /tmp/ssn.pkl

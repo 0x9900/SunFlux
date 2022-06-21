@@ -96,6 +96,7 @@ class SSN:
 
 def main():
   logging.basicConfig(
+    format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%H:%M:%S',
     level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
   )
   config = Config()
@@ -104,8 +105,8 @@ def main():
   except IndexError:
     name = '/tmp/ssn.png'
 
-  cache_file = config.get('ssn.cache_file', '/tmp/ssn.pkl')
-  cache_time = config.get('ssn.cache_time', 43200)
+  cache_file = config.get('ssngraph.cache_file', '/tmp/ssn.pkl')
+  cache_time = config.get('ssngraph.cache_time', 43200)
   ssn = SSN(cache_file, cache_time)
   if not ssn.graph(name):
     return os.EX_DATAERR

@@ -98,9 +98,10 @@ class Flux:
       pickle.dump(self.data, fd_cache)
 
 def main():
-  logging.basicConfig(level=logging.getLevelName(
-    os.getenv('LOG_LEVEL', 'INFO')
-  ))
+  logging.basicConfig(
+    format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%H:%M:%S',
+    level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
+  )
   config = Config()
   try:
     name = sys.argv[1]

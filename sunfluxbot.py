@@ -32,8 +32,7 @@ from config import Config
 from showdxcc import CONTINENTS
 
 logging.basicConfig(
-  format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s',
-  datefmt='%H:%M:%S',
+  format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%H:%M:%S',
   level=logging.getLevelName(os.getenv('LEVEL', 'INFO'))
 )
 logger = logging.getLogger(__name__)
@@ -146,8 +145,9 @@ def download_alert():
   data = json.loads(webdata)
   alerts = dict()
   for record  in data:
-    issue_date = datetime.strptime(record['issue_datetime'],
-                                   '%Y-%m-%d %H:%M:%S.%f')
+    issue_date = datetime.strptime(
+      record['issue_datetime'], '%Y-%m-%d %H:%M:%S.%f'
+    )
     alerts[issue_date] = record['message']
 
     if not alerts:
@@ -270,6 +270,8 @@ def send_flux(update: Update, context: CallbackContext):
   context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
                          caption="10cm flux for: {}".format(today),
                          filename=os.path.basename(image), timeout=100)
+  user = update.message.chat.username or "Stranger"
+  logger.info(f"Command /flux {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_ssn(update: Update, context: CallbackContext):
@@ -299,6 +301,9 @@ def send_ssn(update: Update, context: CallbackContext):
     chat_id=chat_id, photo=open(image, 'rb'),
     caption="Estimated International Sunspot Number: {}".format(today),
     filename=os.path.basename(image), timeout=100)
+
+  user = update.message.chat.username or "Stranger"
+  logger.info(f"Command /ssn {user}:{chat_id}")
   return ConversationHandler.END
 
 
@@ -314,6 +319,9 @@ def send_drap(update: Update, context: CallbackContext):
   context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
                          caption='D Layer Absorption Prediction',
                          filename=os.path.basename(filename), timeout=100)
+
+  user = update.message.chat.username or "Stranger"
+  logger.info(f"Command /drap {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_tec(update: Update, context: CallbackContext):
@@ -328,6 +336,9 @@ def send_tec(update: Update, context: CallbackContext):
   context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
                          caption='Total Electron Content',
                          filename=os.path.basename(filename), timeout=100)
+
+  user = update.message.chat.username or "Stranger"
+  logger.info(f"Command /tec {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_geost(update: Update, context: CallbackContext):
@@ -342,6 +353,9 @@ def send_geost(update: Update, context: CallbackContext):
   context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
                          caption='Geospace timeline',
                          filename=os.path.basename(filename), timeout=100)
+
+  user = update.message.chat.username or "Stranger"
+  logger.info(f"Command /geost {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_aindex(update: Update, context: CallbackContext):
@@ -356,6 +370,9 @@ def send_aindex(update: Update, context: CallbackContext):
   context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
                          caption='A Index',
                          filename=os.path.basename(filename), timeout=100)
+
+  user = update.message.chat.username or "Stranger"
+  logger.info(f"Command /aindex {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_kpindex(update: Update, context: CallbackContext):
@@ -383,6 +400,9 @@ def send_kpindex(update: Update, context: CallbackContext):
   context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
                          caption="Planetary KPIndex for: {}".format(today),
                          filename=os.path.basename(image), timeout=100)
+
+  user = update.message.chat.username or "Stranger"
+  logger.info(f"Command /kpindex {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_swx(update: Update, context: CallbackContext):
@@ -398,6 +418,10 @@ def send_swx(update: Update, context: CallbackContext):
                          caption='Space weather indices',
                          filename=os.path.basename(filename), timeout=100)
 
+  user = update.message.chat.username or "Stranger"
+  logger.info(f"Command /swx {user}:{chat_id}")
+  return ConversationHandler.END
+
 def send_swo(update: Update, context: CallbackContext):
   try:
     filename = noaa_download('swo')
@@ -410,6 +434,9 @@ def send_swo(update: Update, context: CallbackContext):
   context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
                          caption='Space weather indices overview',
                          filename=os.path.basename(filename), timeout=100)
+
+  user = update.message.chat.username or "Stranger"
+  logger.info(f"Command /swo {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_warn(update: Update, context: CallbackContext):
@@ -424,6 +451,9 @@ def send_warn(update: Update, context: CallbackContext):
   context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
                          caption='Space weather warning timelines',
                          filename=os.path.basename(filename), timeout=100)
+
+  user = update.message.chat.username or "Stranger"
+  logger.info(f"Command /warn {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_alerts(update: Update, context: CallbackContext):
@@ -431,6 +461,10 @@ def send_alerts(update: Update, context: CallbackContext):
   cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
   alert = get_alert(cache_dir)
   update.message.reply_text(alert)
+
+  chat_id = update.message.chat_id
+  user = update.message.chat.username or "Stranger"
+  logger.info(f"Command /alerts {user}:{chat_id}")
   return ConversationHandler.END
 
 def dxcc_handler(update: Update, context: CallbackContext):
@@ -470,6 +504,8 @@ def send_dxcc(update: Update, context: CallbackContext):
   context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
                          caption=f"DX activity for: {today}",
                          filename=os.path.basename(image), timeout=100)
+
+  logger.info(f"Command /dxcc {user}:{chat_id}:{query.data}")
   return ConversationHandler.END
 
 def start(update: Update, context: CallbackContext):
