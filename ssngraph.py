@@ -79,8 +79,10 @@ class SSN:
     axgc.plot(x, y, color="blue")
     axgc.plot(x, vdata, '^', linewidth=0, color='orange')
     axgc.plot(x, cdata, 'v', linewidth=0, color='green')
-    axgc.errorbar(x, y, yerr=error, fmt='x', color="plum")
-    axgc.legend(['EISN', 'Entries', 'Valid Data'], loc='upper left',
+    axgc.errorbar(x, y, yerr=error, fmt='o', color='green',
+                  ecolor='darkolivegreen', elinewidth=1.5, capsize=7,
+                  capthick=1)
+    axgc.legend(['EISN', 'Valid Data', 'Entries'], loc='upper left',
                 facecolor="linen")
     loc = mdates.DayLocator(interval=3)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))

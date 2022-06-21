@@ -66,6 +66,8 @@ class Flux:
     loc = mdates.DayLocator(interval=3)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
     axgc.xaxis.set_major_locator(loc)
+    axgc.set_yticks(range(0, int(y.max() * 1.25), 20))
+
     axgc.grid()
     fig.autofmt_xdate()
     plt.savefig(filename, transparent=False, dpi=100)
