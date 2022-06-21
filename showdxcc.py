@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 #
 
+import logging
 import os
 import sqlite3
 import sys
 
-from collections import defaultdict
 from datetime import datetime, timedelta
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from adapters import *
+from adapters import adapt_datetime, convert_datetime
 from config import Config
 
 sqlite3.register_adapter(datetime, adapt_datetime)
@@ -46,12 +46,12 @@ def get_dxcc(continent, filename):
     results = curs.execute(REQUEST, (continent, time_span,)).fetchall()
 
   data = np.zeros((len(dxcc), len(bands)), dtype=int)
-  for band, de, to, count in results:
-    x = dxcc.index(to)
+  for band, _, to_continent, count in results:
+    x = dxcc.index(to_continent)
     y = bands.index(band)
     data[x, y] = count
 
-  fig, ax = plt.subplots(figsize=(12,8))
+  fig, axgc = plt.subplots(figsize=(12,8))
 
   # Show all ticks and label them with the respective list entries
   plt.xticks(np.arange(len(bands)), labels=bands, fontsize=14)
@@ -59,11 +59,11 @@ def get_dxcc(continent, filename):
   plt.yticks(np.arange(len(dxcc)), labels=dxcc, fontsize=14)
   plt.ylabel("DX Continent", fontsize=14)
 
-  im = ax.imshow(data, cmap=color_map, interpolation=inter)
-  ax.set_aspect(aspect=1)
-  ax.tick_params(top=True, bottom=True, labeltop=True, labelbottom=True)
+  image = axgc.imshow(data, cmap=color_map, interpolation=inter)
+  axgc.set_aspect(aspect=1)
+  axgc.tick_params(top=True, bottom=True, labeltop=True, labelbottom=True)
 
-  cbar = ax.figure.colorbar(im, ax=ax)
+  cbar = axgc.figure.colorbar(image, ax=axgc)
   cbar.ax.set_ylabel("Number of contacts for the last hour",
                      rotation=-90, va="bottom")
 
@@ -72,11 +72,9 @@ def get_dxcc(continent, filename):
     for j in range(len(bands)):
       if data[i, j] < 1:
         continue
-      text = ax.text(j, i, data[i, j],
-                     ha="center", va="center",
-                     color="yellow")
+      axgc.text(j, i, data[i, j], ha="center", va="center", color="yellow")
 
-  ax.set_title(f"DX Spots From {continent}", fontsize=22)
+  axgc.set_title(f"DX Spots From {continent}", fontsize=22)
   fig.text(0.01, 0.02, 'SunFluxBot By W6BSD {}'.format(
     datetime.utcnow().strftime('%Y:%m:%d %H:%M')
   ))
@@ -84,14 +82,16 @@ def get_dxcc(continent, filename):
   fig.savefig(filename, transparent=False, dpi=100)
 
 def main():
-
+  logging.basicConfig(level=logging.getLevelName(
+    os.getenv('LOG_LEVEL', 'INFO')
+  ))
   if len(sys.argv) < 2:
-    print("showdxcc [{}]".format('|'.join(CONTINENTS)))
+    logging.error("showdxcc [%s]", '|'.join(CONTINENTS))
     sys.exit(os.EX_USAGE)
 
   continent = sys.argv[1].upper()
   if continent not in CONTINENTS:
-    print("showdxcc [{}]".format('|'.join(CONTINENTS)))
+    logging.error("showdxcc [%s]", '|'.join(CONTINENTS))
     sys.exit(os.EX_USAGE)
 
   if len(sys.argv) == 3:
@@ -100,7 +100,7 @@ def main():
     now = datetime.utcnow().strftime('%Y%m%d%H%S')
     filename = f'/tmp/dxcc-{now}.png'
   get_dxcc(continent, filename)
-  print(f'Save {filename}')
+  logging.info('Save %s', filename)
   sys.exit(os.EX_OK)
 
 if __name__ == "__main__":

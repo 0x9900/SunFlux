@@ -18,12 +18,15 @@ sunfluxbot:
 
 ssngraph:
   cache_file: /tmp/ssn.pkl
+  cache_time: 43200
 
 fluxgraph:
   cache_file: /tmp/flux.pkl
+  cache_time: 43200
 
 pkindexgraph:
   cache_file: /tmp/kpindex.pkl
+  cache_time: 21600
 
 showdxcc:
   db_name: /tmp/cluster/cluster.db

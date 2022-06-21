@@ -30,7 +30,7 @@ plt.style.use(['classic', 'seaborn-talk'])
 NOAA_URL = 'https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'
 
 class Flux:
-  def __init__(self, cache_file):
+  def __init__(self, cache_file, cache_time=43200):
     self.log = logging.getLogger('Flux')
     self.cachefile = cache_file
     self.data = None
@@ -38,7 +38,7 @@ class Flux:
     now = time.time()
     try:
       filest = os.stat(self.cachefile)
-      if now - filest.st_atime > 43200: # 12 hours
+      if now - filest.st_atime > cache_time: # 12 hours
         raise FileNotFoundError
     except FileNotFoundError:
       self.download_flux()
@@ -108,7 +108,8 @@ def main():
     name = '/tmp/flux.png'
 
   cache_file = config.get('fluxgraph.cache_file', '/tmp/flux.pkl')
-  flux = Flux(cache_file)
+  cache_time = config.get('fluxgraphb.cache_time', 43200)
+  flux = Flux(cache_file, cache_time)
   if not flux.graph(name):
     return os.EX_DATAERR
 

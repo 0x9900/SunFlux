@@ -30,7 +30,7 @@ plt.rcParams.update(parameters)
 plt.style.use(['classic', 'seaborn-talk'])
 
 class KPIndex:
-  def __init__(self, cache_file):
+  def __init__(self, cache_file, cache_time=21600):
     self.log = logging.getLogger('KPIndex')
     self.cachefile = cache_file
     self.data = None
@@ -38,7 +38,7 @@ class KPIndex:
     now = time.time()
     try:
       filest = os.stat(self.cachefile)
-      if now - filest.st_atime > 21600: # 6 hours
+      if now - filest.st_atime > cache_time: # 6 hours
         raise FileNotFoundError
     except FileNotFoundError:
       self.download()
@@ -52,7 +52,8 @@ class KPIndex:
       self.log.warning('No data to graph')
       return None
 
-    x = np.array([datetime.strptime(d['time_tag'], '%Y-%m-%dT%H:%M:%S') for d in self.data])
+    x = np.array([datetime.strptime(d['time_tag'], '%Y-%m-%dT%H:%M:%S')
+                  for d in self.data])
     y = np.array([round(x['k_index'], 2) for x in self.data])
 
     date = datetime.utcnow().strftime('%Y:%m:%d %H:%M')
@@ -97,7 +98,9 @@ class KPIndex:
       pickle.dump(self.data, fd_cache)
 
 def main():
-  logging.basicConfig(level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO')))
+  logging.basicConfig(
+    level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
+  )
   config = Config()
   try:
     name = sys.argv[1]
@@ -105,7 +108,8 @@ def main():
     name = '/tmp/kpindex.png'
 
   cache_file = config.get('kpindexgraph.cache_file', '/tmp/kpindex.pkl')
-  kpindex = KPIndex(cache_file)
+  cache_time = config.get('kpindexgraph.cache_time', 21600)
+  kpindex = KPIndex(cache_file, cache_time)
   if not kpindex.graph(name):
     return os.EX_DATAERR
 

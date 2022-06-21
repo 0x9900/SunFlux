@@ -1,12 +1,10 @@
 #!/usr/bin/env python3.9
 #
-import json
+import csv
 import logging
 import os
-import pickle
 import sys
 import time
-import csv
 
 from datetime import datetime, date
 from urllib.request import urlretrieve
@@ -31,7 +29,7 @@ plt.style.use(['classic', 'seaborn-talk'])
 SIDC_URL = 'https://www.sidc.be/silso/DATA/EISN/EISN_current.csv'
 
 class SSN:
-  def __init__(self, cache_file):
+  def __init__(self, cache_file, cache_time=43200):
     self.log = logging.getLogger('SSN')
     self.cachefile = cache_file
     self.data = []
@@ -39,7 +37,7 @@ class SSN:
     now = time.time()
     try:
       filest = os.stat(self.cachefile)
-      if now - filest.st_atime > 43200: # 12 hours
+      if now - filest.st_atime > cache_time:
         raise FileNotFoundError
     except FileNotFoundError:
       urlretrieve(SIDC_URL, self.cachefile)
@@ -73,10 +71,10 @@ class SSN:
     vdata = np.array([int(x[4]) for x in self.data])
     cdata = np.array([int(x[5]) for x in self.data])
 
-    date = datetime.utcnow().strftime('%Y/%m/%d %H:%M')
+    today = datetime.utcnow().strftime('%Y/%m/%d %H:%M')
     fig = plt.figure()
     fig.suptitle('Estimated International Sunspot Number (EISN)', fontsize=14)
-    fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {date}')
+    fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
     axgc = plt.gca()
     axgc.plot(x, y, color="blue")
     axgc.plot(x, vdata, '^', linewidth=0, color='orange')
@@ -97,9 +95,9 @@ class SSN:
     return filename
 
 def main():
-  logging.basicConfig(level=logging.getLevelName(
-    os.getenv('LOG_LEVEL', 'INFO')
-  ))
+  logging.basicConfig(
+    level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
+  )
   config = Config()
   try:
     name = sys.argv[1]
@@ -107,7 +105,8 @@ def main():
     name = '/tmp/ssn.png'
 
   cache_file = config.get('ssn.cache_file', '/tmp/ssn.pkl')
-  ssn = SSN(cache_file)
+  cache_time = config.get('ssn.cache_time', 43200)
+  ssn = SSN(cache_file, cache_time)
   if not ssn.graph(name):
     return os.EX_DATAERR
 
