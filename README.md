@@ -21,3 +21,5 @@ The Telegram Bot has the following commands:
   - swx - Solar indices overvew
   - tec - Total Electron Content
   - warning - Warning timelines
+
+For more information check [0x9900's blog](https://0x9900.com/telegram-propagation-bot/) post

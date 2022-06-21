@@ -50,6 +50,7 @@ IMG_SOURCE = {
   'tec':   'images/animations/ctipe/tec/latest.png',
   'swo':   'images/swx-overview-large.gif',
   'warn':  'images/notifications-timeline.png',
+  'drap':  'images/animations/d-rap/global_f05/d-rap/latest.png',
 }
 IMG_CACHE_TIME = (3600 * 4)
 
@@ -205,6 +206,7 @@ def help_command(update: Update, context: CallbackContext):
     "*Use the following commands:*",
     "> /aindex: A Index",
     "> /alerts: NOAA Alerts",
+    "> /drap: D Layer Absorption Prediction",
     "> /dxcc: Show dxcc contacts",
     "> /flux: 10cm Flux",
     "> /geost: Geo-Space Time line",
@@ -299,6 +301,20 @@ def send_ssn(update: Update, context: CallbackContext):
     filename=os.path.basename(image), timeout=100)
   return ConversationHandler.END
 
+
+def send_drap(update: Update, context: CallbackContext):
+  try:
+    filename = noaa_download('drap')
+  except Exception as exp:
+    logger.error(exp)
+    update.message.reply_text(f'Error: {exp}')
+    return ConversationHandler.END
+
+  chat_id = update.message.chat_id
+  context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
+                         caption='D Layer Absorption Prediction',
+                         filename=os.path.basename(filename), timeout=100)
+  return ConversationHandler.END
 
 def send_tec(update: Update, context: CallbackContext):
   try:
@@ -519,18 +535,19 @@ def main():
   updater.dispatcher.add_handler(CommandHandler('alert', send_alerts))
   updater.dispatcher.add_handler(CommandHandler('alerts', send_alerts))
   updater.dispatcher.add_handler(CommandHandler('credits', send_credits))
+  updater.dispatcher.add_handler(CommandHandler('drap', send_drap))
   updater.dispatcher.add_handler(CommandHandler('dxcc', dxcc_handler))
   updater.dispatcher.add_handler(CommandHandler('flux', send_flux))
   updater.dispatcher.add_handler(CommandHandler('geost', send_geost))
   updater.dispatcher.add_handler(CommandHandler('help', help_command))
   updater.dispatcher.add_handler(CommandHandler('kpi', send_kpindex))
   updater.dispatcher.add_handler(CommandHandler('kpindex', send_kpindex))
+  updater.dispatcher.add_handler(CommandHandler('legend', send_legend))
   updater.dispatcher.add_handler(CommandHandler('ssn', send_ssn))
   updater.dispatcher.add_handler(CommandHandler('start', start))
   updater.dispatcher.add_handler(CommandHandler('swx', send_swx))
   updater.dispatcher.add_handler(CommandHandler('tec', send_tec))
   updater.dispatcher.add_handler(CommandHandler('warning', send_warn))
-  updater.dispatcher.add_handler(CommandHandler('legend', send_legend))
   updater.dispatcher.add_handler(MessageHandler(Filters.text, text_handler))
   updater.dispatcher.add_handler(CallbackQueryHandler(send_dxcc))
   updater.dispatcher.add_error_handler(error_callback)
