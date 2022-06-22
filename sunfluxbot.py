@@ -204,21 +204,19 @@ def error_callback(update, context):
 def help_command(update: Update, context: CallbackContext):
   help = [
     "*Use the following commands:*",
-    "> /aindex: A Index",
-    "> /alerts: NOAA Alerts",
-    "> /drap: D Layer Absorption Prediction",
-    "> /dxcc: Show dxcc contacts",
-    "> /flux: 10cm Flux",
-    "> /geost: Geo-Space Time line",
-    "> /kpindex: K Index",
-    "> /legend: Index information",
-    "> /ssn: Sun Spots",
-    "> /swx: Solar indices overview",
-    "> /tec: Total Electron Content",
-    "> /warning: Warning time lines",
-    "\n*Propagation information:*",
-    "> _For best radio propagation_",
-    "> `Flux >= 80, KPIndex >= 3, AIndex >= 10`",
+    "> /aindex - A Index",
+    "> /alerts - NOAA Alerts",
+    "> /drap - D Layer Absorption Prediction",
+    "> /dxcc - Show dxcc contacts",
+    "> /flux - 10cm Flux",
+    "> /geost - Geo-Space Time line",
+    "> /kpindex - K Index",
+    "> /legend - Index information",
+    "> /outlook - 27 day Solar Predictions",
+    "> /ssn - Sun Spots",
+    "> /swx - Solar indices overview",
+    "> /tec - Total Electron Content",
+    "> /warning - Warning time lines",
     "",
     "\n_For more information or contact see /credits_"
   ]
@@ -243,6 +241,36 @@ def send_credits(update: Update, context: CallbackContext):
   ]
   update.message.reply_text("\n".join(credits), parse_mode='Markdown')
   return ConversationHandler.END
+
+def send_outlook(update: Update, context: CallbackContext):
+  config = Config()
+  cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
+  now = time.time()
+  image = os.path.join(cache_dir, 'outlook.png')
+  chat_id = update.message.chat_id
+
+  try:
+    img_st = os.stat(image)
+    if now - img_st.st_atime > IMG_CACHE_TIME:
+      raise FileNotFoundError
+  except (FileNotFoundError, EOFError):
+    cmd = os.path.join(os.getcwd(), "outlookgraph.py")
+    status = subprocess.call([cmd], shell=False)
+    logging.info(f'Call {cmd} returned {status}')
+    if status:
+      logging.error('Error generating the outlook graph')
+      context.bot.send_message(chat_id, (
+        'The outlook graph is not available at the moment\n'
+        'Please come back latter.'))
+      return ConversationHandler.END
+
+  context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
+                         caption="27 day Solar Predictions",
+                         filename=os.path.basename(image), timeout=100)
+  user = update.message.chat.username or "Stranger"
+  logger.info(f"Command /outlook {user}:{chat_id}")
+  return ConversationHandler.END
+
 
 def send_flux(update: Update, context: CallbackContext):
   config = Config()
@@ -579,6 +607,7 @@ def main():
   updater.dispatcher.add_handler(CommandHandler('kpi', send_kpindex))
   updater.dispatcher.add_handler(CommandHandler('kpindex', send_kpindex))
   updater.dispatcher.add_handler(CommandHandler('legend', send_legend))
+  updater.dispatcher.add_handler(CommandHandler('outlook', send_outlook))
   updater.dispatcher.add_handler(CommandHandler('ssn', send_ssn))
   updater.dispatcher.add_handler(CommandHandler('start', start))
   updater.dispatcher.add_handler(CommandHandler('swx', send_swx))
