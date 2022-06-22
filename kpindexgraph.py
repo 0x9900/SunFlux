@@ -67,9 +67,9 @@ class KPIndex:
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d %H:%S'))
     axgc.xaxis.set_major_locator(loc)
     axgc.set_yticks(ticks)
-    axgc.axhspan(0, 3, facecolor='orange', alpha=0.4, label="Ok")
-    axgc.axhspan(3, 4, facecolor='green', alpha=0.4, label="Good")
     axgc.axhspan(4, ticks.max(), facecolor='red', alpha=0.4, label="Bad")
+    axgc.axhspan(3, 4, facecolor='orange', alpha=0.4, label="Ok")
+    axgc.axhspan(0, 3, facecolor='green', alpha=0.4, label="Good")
     axgc.legend(loc="upper left")
 
     axgc.grid()
