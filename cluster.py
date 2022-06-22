@@ -157,7 +157,11 @@ def read_stream(cdb, cnx):
       fields = list(match.groups())
       fields.append(dxcc.lookup(fields[0]))
       fields.append(dxcc.lookup(fields[2]))
-      rec = Record(fields)
+      try:
+        rec = Record(fields)
+      except ValueError as err:
+        LOG.error("%s - %s", err, repr(fields))
+        continue
       LOG.debug(rec)
       try:
         with cdb:
