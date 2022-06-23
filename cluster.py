@@ -176,7 +176,7 @@ def read_stream(cdb, cnx):
       buffer = buffer.decode('UTF-8')
       LOG.info(buffer)
     elif code == -1:
-      LOG.warning('Timeout - sleeping for a few seconds')
+      LOG.warning('Timeout - sleeping for a few seconds [%s]', cnx.host)
       time.sleep(7)
 
 def main():
