@@ -45,6 +45,7 @@ class OutLook:
       if now - filest.st_atime > cache_time:
         raise FileNotFoundError
     except FileNotFoundError:
+      self.log.info('Downloading data from NOAA')
       urlretrieve(NOAA_URL, cache_file)
     self.read_cache(cache_file)
 

@@ -163,7 +163,6 @@ def download_alert():
       text_alert.append(line)
     return '\n'.join(text_alert)
 
-
 def noaa_download(image):
   config = Config()
   cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')

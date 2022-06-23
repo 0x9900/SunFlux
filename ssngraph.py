@@ -40,6 +40,7 @@ class SSN:
       if now - filest.st_atime > cache_time:
         raise FileNotFoundError
     except FileNotFoundError:
+      self.log.info('Downloading data from NOAA')
       urlretrieve(SIDC_URL, self.cachefile)
 
     with open(self.cachefile, 'r', encoding='utf-8') as csvfile:
