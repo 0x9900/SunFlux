@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS dxspot
   band INTEGER,
   time TIMESTAMP
 );
-CREATE INDEX IF NOT EXISTS idx_time on dxspot (time);
+CREATE INDEX IF NOT EXISTS idx_time on dxspot (time DESC);
 CREATE INDEX IF NOT EXISTS idx_cont_dx on dxspot (cont_dx);
 """
 
