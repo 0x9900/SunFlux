@@ -43,13 +43,13 @@ ALERT_URL = NOAA_URL + 'products/alerts.json'
 
 IMG_SOURCE = {
   'ai':    'images/station-a-index.png',
+  'drap':  'images/animations/d-rap/global_f05/d-rap/latest.png',
   'geost': 'images/geospace/geospace_7_day.png',
   'ki':    'images/station-k-index.png',
-  'swx':   'images/swx-overview-large.gif',
-  'tec':   'images/animations/ctipe/tec/latest.png',
+  'muf':   'experimental/images/animations/ctipe/muf/latest.png',
   'swo':   'images/swx-overview-large.gif',
+  'swx':   'images/swx-overview-large.gif',
   'warn':  'images/notifications-timeline.png',
-  'drap':  'images/animations/d-rap/global_f05/d-rap/latest.png',
 }
 IMG_CACHE_TIME = (3600 * 4)
 
@@ -163,7 +163,7 @@ def download_alert():
       text_alert.append(line)
     return '\n'.join(text_alert)
 
-def noaa_download(image):
+def noaa_download(image, cache_time=IMG_CACHE_TIME):
   config = Config()
   cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
   if image not in IMG_SOURCE:
@@ -176,7 +176,7 @@ def noaa_download(image):
 
   try:
     filest = os.stat(full_path)
-    if now - filest.st_atime > IMG_CACHE_TIME:
+    if now - filest.st_atime > cache_time:
       raise FileNotFoundError
   except FileNotFoundError:
     urllib.request.urlretrieve(url, full_path)
@@ -208,13 +208,13 @@ def help_command(update: Update, context: CallbackContext):
     "> /drap - D Layer Absorption Prediction",
     "> /dxcc - Show dxcc contacts",
     "> /flux - 10cm Flux",
+    "> /muf - Maximum Usable Frequency",
     "> /geost - Geo-Space Time line",
     "> /kpindex - K Index",
     "> /legend - Index information",
     "> /outlook - 27 day Solar Predictions",
     "> /ssn - Sun Spots",
     "> /swx - Solar indices overview",
-    "> /tec - Total Electron Content",
     "> /warning - Warning time lines",
     "",
     "\n_For more information or contact see /credits_"
@@ -333,7 +333,6 @@ def send_ssn(update: Update, context: CallbackContext):
   logger.info(f"Command /ssn {user}:{chat_id}")
   return ConversationHandler.END
 
-
 def send_drap(update: Update, context: CallbackContext):
   try:
     filename = noaa_download('drap')
@@ -351,9 +350,9 @@ def send_drap(update: Update, context: CallbackContext):
   logger.info(f"Command /drap {user}:{chat_id}")
   return ConversationHandler.END
 
-def send_tec(update: Update, context: CallbackContext):
+def send_muf(update: Update, context: CallbackContext):
   try:
-    filename = noaa_download('tec')
+    filename = noaa_download('muf', cache_time=900)
   except Exception as exp:
     logger.error(exp)
     update.message.reply_text(f'Error: {exp}')
@@ -361,11 +360,11 @@ def send_tec(update: Update, context: CallbackContext):
 
   chat_id = update.message.chat_id
   context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
-                         caption='Total Electron Content',
+                         caption='Maximum Usable Frequency',
                          filename=os.path.basename(filename), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /tec {user}:{chat_id}")
+  logger.info(f"Command /muf {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_geost(update: Update, context: CallbackContext):
@@ -606,11 +605,11 @@ def main():
   updater.dispatcher.add_handler(CommandHandler('kpi', send_kpindex))
   updater.dispatcher.add_handler(CommandHandler('kpindex', send_kpindex))
   updater.dispatcher.add_handler(CommandHandler('legend', send_legend))
+  updater.dispatcher.add_handler(CommandHandler('muf', send_muf))
   updater.dispatcher.add_handler(CommandHandler('outlook', send_outlook))
   updater.dispatcher.add_handler(CommandHandler('ssn', send_ssn))
   updater.dispatcher.add_handler(CommandHandler('start', start))
   updater.dispatcher.add_handler(CommandHandler('swx', send_swx))
-  updater.dispatcher.add_handler(CommandHandler('tec', send_tec))
   updater.dispatcher.add_handler(CommandHandler('warning', send_warn))
   updater.dispatcher.add_handler(MessageHandler(Filters.text, text_handler))
   updater.dispatcher.add_handler(CallbackQueryHandler(send_dxcc))
