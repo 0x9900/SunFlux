@@ -358,9 +358,10 @@ def send_muf(update: Update, context: CallbackContext):
     update.message.reply_text(f'Error: {exp}')
     return ConversationHandler.END
 
+  today = datetime.now().strftime('%a %b %d %Y at %H:%M')
   chat_id = update.message.chat_id
   context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
-                         caption='Maximum Usable Frequency',
+                         caption=f'Maximum Usable Frequency for: {today}',
                          filename=os.path.basename(filename), timeout=100)
 
   user = update.message.chat.username or "Stranger"
