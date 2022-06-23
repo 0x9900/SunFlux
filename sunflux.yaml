@@ -36,3 +36,7 @@ showdxcc:
 ssn:
   cache_dir: /tmp
   cache_file: /tmp/ssn.pkl
+
+outlookgraph:
+  cache_file: /tmp/outlook.dat
+  cache_time: 43200
