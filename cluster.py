@@ -145,7 +145,7 @@ def read_stream(cdb, cnx):
   regex = re.compile(
     r'^DX de\s(\w+)(?:.*):\s+(\d+.\d+)\s+(\w+)(?:|\S+)\s+(.*)(?:\d{4}Z).*'
   )
-  count = 50
+  count = 5000
   while count:
     count -= 1
     code, _, buffer = cnx.expect([b'DX.*\n', b'WWV de .*\n'], timeout=5)
@@ -223,8 +223,6 @@ def main():
       read_stream(con, telnet)
     except OSError as err:
       LOG.error(err)
-    time.sleep(30)
-
 
 if __name__ == "__main__":
   main()
