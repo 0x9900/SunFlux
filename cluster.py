@@ -145,11 +145,11 @@ def read_stream(cdb, cnx):
   regex = re.compile(
     r'^DX de\s(\w+)(?:.*):\s+(\d+.\d+)\s+(\w+)(?:|\S+)\s+(.*)(?:\d{4}Z).*'
   )
-  count = 5000
-  while count:
-    count -= 1
+  current = time.time()
+  while True:
     code, _, buffer = cnx.expect([b'DX.*\n', b'WWV de .*\n'], timeout=5)
     if code == 0:         # timeout
+      current = time.time()
       buffer = buffer.decode('UTF-8')
       match = regex.match(buffer)
       if not match:
@@ -180,6 +180,9 @@ def read_stream(cdb, cnx):
     elif code == -1:
       LOG.warning('Timeout - sleeping for a few seconds [%s]', cnx.host)
       time.sleep(15)
+
+    if current < time.time() - 300:
+      break
 
 def main():
   config = Config()
