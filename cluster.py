@@ -146,7 +146,7 @@ def read_stream(cdb, cnx):
     r'^DX de\s(\w+)(?:.*):\s+(\d+.\d+)\s+(\w+)(?:|\S+)\s+(.*)(?:\d{4}Z).*'
   )
   while True:
-    code, _, buffer = cnx.expect([b'DX.*\n', b'WWV de .*\n'], timeout=5)
+    code, _, buffer = cnx.expect([b'DX.*\n', b'WWV de .*\n'], timeout=10)
     if code == 0:         # timeout
       buffer = buffer.decode('UTF-8')
       match = regex.match(buffer)
@@ -177,7 +177,7 @@ def read_stream(cdb, cnx):
       LOG.info(buffer)
     elif code == -1:
       LOG.warning('Timeout - sleeping for a few seconds [%s]', cnx.host)
-      time.sleep(7)
+      return
 
 def main():
   config = Config()
@@ -214,7 +214,7 @@ def main():
   random.shuffle(clusters)
   for cluster in cycle(clusters):
     try:
-      telnet = Telnet(*cluster, timeout=15)
+      telnet = Telnet(*cluster, timeout=300)
       LOG.info("Connection to %s open", telnet.host)
       login(config['cluster.call'], telnet)
       LOG.info("%s identified", config['cluster.call'])
