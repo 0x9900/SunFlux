@@ -27,8 +27,7 @@ WHERE band >= 6 AND cont_de == ? AND cont_dx != '' AND time > ?
 GROUP BY band, cont_dx;
 """
 
-def get_dxcc(continent, filename):
-  config = Config()
+def get_dxcc(config, continent, filename):
   db_cluster = config['showdxcc.db_name']
   inter = config.get('showdxcc.interleave', 'gaussian')
   color_map = config.get('showdxcc.color_map', 'PRGn')
@@ -82,6 +81,8 @@ def get_dxcc(continent, filename):
   fig.savefig(filename, transparent=False, dpi=100)
 
 def main():
+  config = Config()
+
   logging.basicConfig(
     format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%H:%M:%S',
     level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
@@ -103,7 +104,7 @@ def main():
     now = datetime.utcnow().strftime('%Y%m%d%H%S')
     filename = os.path.join(target_dir, f'dxcc-{continent}-{now}.png')
 
-  get_dxcc(continent, filename)
+  get_dxcc(config, continent, filename)
   logging.info('Save %s', filename)
   sys.exit(os.EX_OK)
 
