@@ -36,9 +36,9 @@ def main():
 
   with conn:
     curs = conn.cursor()
-    curs.execute('delete from dxspot where time < ?;', (PURGE_TIME,))
+    curs.execute('delete from dxspot where time < ?;', (purge_time,))
     logging.info("Now: %s <=> %s", datetime.utcnow().isoformat(),
-                 PURGE_TIME.isoformat())
+                 purge_time.isoformat())
   with conn:
     curs = conn.cursor()
     res = curs.execute('select count(*) from dxspot;')
@@ -47,3 +47,6 @@ def main():
   logging.info('Count %d before delete', count1)
   logging.info('Count %d after delete', count2)
   logging.info('%d records deleted', count1 - count2)
+
+if __name__ == "__main__":
+  main()
