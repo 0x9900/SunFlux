@@ -99,7 +99,7 @@ def main():
     filename = os.path.join('/tmp', sys.argv[2])
   else:
     now = datetime.utcnow().strftime('%Y%m%d%H%S')
-    filename = f'/tmp/dxcc-{now}.png'
+    filename = f'/var/tmp/dxcc-{continent}-{now}.png'
   get_dxcc(continent, filename)
   logging.info('Save %s', filename)
   sys.exit(os.EX_OK)
