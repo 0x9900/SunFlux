@@ -32,7 +32,8 @@ from config import Config
 from showdxcc import CONTINENTS
 
 logging.basicConfig(
-  format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%H:%M:%S',
+  format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s',
+  datefmt='%Y-%m-%d %H:%M:%S',
   level=logging.getLevelName(os.getenv('LEVEL', 'INFO'))
 )
 logger = logging.getLogger(__name__)

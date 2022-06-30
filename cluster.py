@@ -24,26 +24,6 @@ import adapters
 
 from config import Config
 
-# Sorted by the most popular to the least popular band
-BANDS = [
-  (14000, 14350, 20),
-  (7000, 7300, 40),
-  (10100, 10150, 30),
-  (3500, 4000, 80),
-  (21000, 21450, 15),
-  (18068, 18168, 17),
-  (28000, 29700, 10),
-  (50000, 54000, 6),
-  (24890, 24990, 12),
-  (1800, 2000, 160),
-  (144000, 148000, 2),
-  (69900, 70500, 4),
-  (5330, 5410, 60),
-  (420000, 450000, 0.70),
-  (219000, 225000, 1.25),
-  (472, 479, 630),
-]
-
 FIELDS = ['DE', 'FREQUENCY', 'DX', 'MESSAGE', 'CONT_DE', 'CONT_DX',
           'BAND', 'DX_TIME']
 
@@ -119,7 +99,27 @@ class Record(namedtuple('UserRecord', FIELDS)):
 def get_band(freq):
   # Quick and dirty way to convert frequencies to bands.
   # I should probably have a band plan for each ITU zones.
-  for _min, _max, band in BANDS:
+  # Sorted by the most popular to the least popular band
+  _bands = [
+    (14000, 14350, 20),
+    (7000, 7300, 40),
+    (10100, 10150, 30),
+    (3500, 4000, 80),
+    (21000, 21450, 15),
+    (18068, 18168, 17),
+    (28000, 29700, 10),
+    (50000, 54000, 6),
+    (24890, 24990, 12),
+    (1800, 2000, 160),
+    (144000, 148000, 2),
+    (69900, 70500, 4),
+    (5330, 5410, 60),
+    (420000, 450000, 0.70),
+    (219000, 225000, 1.25),
+    (472, 479, 630),
+  ]
+
+  for _min, _max, band in _bands:
     if _min <= freq <= _max:
       return band
   LOG.warning("No band for the frequency %s", freq)
@@ -181,8 +181,10 @@ def read_stream(cdb, cnx):
       LOG.warning('Timeout - sleeping for a few seconds [%s]', cnx.host)
       time.sleep(15)
 
-    if current < time.time() - 300:
+    if current < time.time() - 120:
       break
+
+  return
 
 def main():
   config = Config()
