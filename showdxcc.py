@@ -98,8 +98,11 @@ def main():
   if len(sys.argv) == 3:
     filename = os.path.join('/tmp', sys.argv[2])
   else:
+    target_dir = config.get('showdxcc.target_dir', '/var/tmp/dxcc')
+    os.makedirs('/tmp/foo', exist_ok=True)
     now = datetime.utcnow().strftime('%Y%m%d%H%S')
-    filename = f'/var/tmp/dxcc-{continent}-{now}.png'
+    filename = os.path.join(target_dir, f'dxcc-{continent}-{now}.png')
+
   get_dxcc(continent, filename)
   logging.info('Save %s', filename)
   sys.exit(os.EX_OK)
