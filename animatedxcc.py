@@ -18,7 +18,7 @@ except ImportError:
   tqdm = iter
 
 #TARGET_DIR = '/Volumes/WDPassport/tmp/dxcc'
-TARGET_DIR = '/var/tmp/dxcc'
+TARGET_DIR = '/var/www/html'
 CONVERTER = os.path.join(os.getcwd(), 'convert.sh')
 
 logging.basicConfig(level=logging.INFO)
