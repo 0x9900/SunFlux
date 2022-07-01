@@ -14,8 +14,9 @@ from datetime import datetime, timedelta
 from PIL import Image
 from tqdm import tqdm
 
-TARGET_DIR = '/Volumes/WDPassport/tmp/dxcc'
-CONVERTER = '/Volumes/WDPassport/tmp/muf/convert.sh'
+#TARGET_DIR = '/Volumes/WDPassport/tmp/dxcc'
+TARGET_DIR = '/var/tmp/dxcc'
+CONVERTER = os.path.join(os.getcwd, 'convert.sh')
 
 logging.basicConfig(level=logging.INFO)
 
