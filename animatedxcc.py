@@ -40,7 +40,7 @@ def animate(continent):
     image_list.append(image)
 
   if len(image_list) > 2:
-    logging.info('Saving animation into %s', animation)
+    logging.info('Saving animation into %s [%d] images', animation, len(image_list))
     image_list[0].save(animation, save_all=True, optimize=True, duration=75,
                        loop=0, append_images=image_list[1:])
   else:
