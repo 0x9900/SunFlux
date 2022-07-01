@@ -18,7 +18,8 @@ except ImportError:
   tqdm = iter
 
 #TARGET_DIR = '/Volumes/WDPassport/tmp/dxcc'
-TARGET_DIR = '/var/www/html'
+TARGET_DIR = '/var/tmp/dxcc'
+VIDEO_DIR = '/var/www/html'
 CONVERTER = os.path.join(os.getcwd(), 'convert.sh')
 
 logging.basicConfig(level=logging.INFO)
@@ -49,7 +50,7 @@ def animate(continent):
 def gen_video(continent):
   logfile = '/tmp/animatedxcc.log'
   gif_file = os.path.join(TARGET_DIR, f'dxcc-{continent}.gif')
-  video_file = os.path.join(TARGET_DIR, f'dxcc-{continent}.mp4')
+  video_file = os.path.join(VIDEO_DIR, f'dxcc-{continent}.mp4')
   cmd = f'{CONVERTER} {gif_file} {video_file}'
 
   with open(logfile, "w") as err:
