@@ -19,7 +19,7 @@ except ImportError:
 
 #TARGET_DIR = '/Volumes/WDPassport/tmp/dxcc'
 TARGET_DIR = '/var/tmp/dxcc'
-CONVERTER = os.path.join(os.getcwd, 'convert.sh')
+CONVERTER = os.path.join(os.getcwd(), 'convert.sh')
 
 logging.basicConfig(level=logging.INFO)
 
