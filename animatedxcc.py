@@ -12,7 +12,10 @@ from urllib.request import urlretrieve
 from datetime import datetime, timedelta
 
 from PIL import Image
-from tqdm import tqdm
+try:
+  from tqdm import tqdm
+except ImportError:
+  tqdm = iter
 
 #TARGET_DIR = '/Volumes/WDPassport/tmp/dxcc'
 TARGET_DIR = '/var/tmp/dxcc'
