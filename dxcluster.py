@@ -5,6 +5,7 @@
 # b'DX de SP5NOF:   10136.0  UI5A     FT8 +13dB from KO85 1778Hz   2138Z\r\n'
 
 import csv
+import io
 import logging
 import logging.handlers
 import os
@@ -19,6 +20,8 @@ from itertools import cycle
 from telnetlib import Telnet
 
 import sqlite3
+
+from importlib.resources import files
 
 import adapters
 
@@ -54,16 +57,15 @@ class DXCC:
     re.compile(r'^(?:=|)(\w+).*$'),
   )
 
-  def __init__(self, filename=None):
+  def __init__(self):
     self._map = {}
-    if not filename:
-      filename = 'bigcty/cty.csv'
-    with open(filename, 'r', encoding='utf-8') as csvfile:
-      csvfd = csv.reader(csvfile)
-      for row in csvfd:
-        self._map[row[0].strip('*')] = row[3]
-        for prefix in DXCC.parse(row[9]):
-          self._map[prefix] = row[3]
+    cty = files('bigcty').joinpath('cty.csv').read_text()
+    LOG.debug('Read bigcty callsign database')
+    csvfd = csv.reader(io.StringIO(cty))
+    for row in csvfd:
+      self._map[row[0].strip('*')] = row[3]
+      for prefix in DXCC.parse(row[9]):
+        self._map[prefix] = row[3]
     self.max_len = max([len(v) for v in self._map])
 
   @staticmethod
@@ -190,7 +192,7 @@ def main():
   config = Config()
 
   formatter = logging.Formatter("%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s")
-  file_handler = logging.FileHandler(config['cluster.log_file'], 'a')
+  file_handler = logging.FileHandler(config['dxcluster.log_file'], 'a')
   file_handler.setLevel(logging.DEBUG)
   file_handler.setFormatter(formatter)
 
@@ -206,12 +208,12 @@ def main():
   LOG.addHandler(console_handler)
 
   con = sqlite3.connect(
-    config['cluster.db_name'],
-    timeout=config['cluster.db_timeout'],
+    config['dxcluster.db_name'],
+    timeout=config['dxcluster.db_timeout'],
     detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES
   )
   clusters = []
-  for server in config['cluster.servers']:
+  for server in config['dxcluster.servers']:
     clusters.append(server.split(':'))
 
   with con:
@@ -223,8 +225,8 @@ def main():
     try:
       telnet = Telnet(*cluster, timeout=300)
       LOG.info("Connection to %s open", telnet.host)
-      login(config['cluster.call'], telnet)
-      LOG.info("%s identified", config['cluster.call'])
+      login(config['dxcluster.call'], telnet)
+      LOG.info("%s identified", config['dxcluster.call'])
       read_stream(con, telnet)
     except OSError as err:
       LOG.error(err)
