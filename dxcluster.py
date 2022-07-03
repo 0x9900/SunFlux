@@ -190,7 +190,7 @@ def main():
   config = Config()
 
   formatter = logging.Formatter("%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s")
-  file_handler = logging.FileHandler(config['cluster.log_file'], 'a')
+  file_handler = logging.FileHandler(config['dxcluster.log_file'], 'a')
   file_handler.setLevel(logging.DEBUG)
   file_handler.setFormatter(formatter)
 
@@ -206,12 +206,12 @@ def main():
   LOG.addHandler(console_handler)
 
   con = sqlite3.connect(
-    config['cluster.db_name'],
-    timeout=config['cluster.db_timeout'],
+    config['dxcluster.db_name'],
+    timeout=config['dxcluster.db_timeout'],
     detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES
   )
   clusters = []
-  for server in config['cluster.servers']:
+  for server in config['dxcluster.servers']:
     clusters.append(server.split(':'))
 
   with con:
@@ -223,8 +223,8 @@ def main():
     try:
       telnet = Telnet(*cluster, timeout=300)
       LOG.info("Connection to %s open", telnet.host)
-      login(config['cluster.call'], telnet)
-      LOG.info("%s identified", config['cluster.call'])
+      login(config['dxcluster.call'], telnet)
+      LOG.info("%s identified", config['dxcluster.call'])
       read_stream(con, telnet)
     except OSError as err:
       LOG.error(err)

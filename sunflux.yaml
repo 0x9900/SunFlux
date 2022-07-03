@@ -1,5 +1,5 @@
 ---
-cluster:
+dxcluster:
   call: N0CALL
   db_name: /tmp/cluster/cluster.db
   db_timeout: 5
