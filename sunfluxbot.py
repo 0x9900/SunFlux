@@ -7,6 +7,7 @@ import logging
 import os
 import pickle
 import subprocess
+import sys
 import time
 import urllib.parse
 import urllib.request
@@ -254,7 +255,7 @@ def send_outlook(update: Update, context: CallbackContext):
     if now - img_st.st_atime > IMG_CACHE_TIME:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
-    cmd = os.path.join(os.getcwd(), "outlookgraph.py")
+    cmd = os.path.join(sys.path[0], "outlookgraph")
     status = subprocess.call([cmd], shell=False)
     logging.info(f'Call {cmd} returned {status}')
     if status:
@@ -285,7 +286,7 @@ def send_flux(update: Update, context: CallbackContext):
     if now - img_st.st_atime > IMG_CACHE_TIME:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
-    cmd = os.path.join(os.getcwd(), "fluxgraph.py")
+    cmd = os.path.join(sys.path[0], "fluxgraph")
     status = subprocess.call([cmd], shell=False)
     logging.info(f'Call {cmd} returned {status}')
     if status:
@@ -315,7 +316,7 @@ def send_ssn(update: Update, context: CallbackContext):
     if now - img_st.st_atime > IMG_CACHE_TIME:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
-    cmd = os.path.join(os.getcwd(), "ssngraph.py")
+    cmd = os.path.join(sys.path[0], "ssngraph")
     status = subprocess.call([cmd], shell=False)
     logging.info(f'Call {cmd} returned {status}')
     if status:
@@ -415,7 +416,7 @@ def send_kpindex(update: Update, context: CallbackContext):
     if now - img_st.st_atime > IMG_CACHE_TIME:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
-    cmd = os.path.join(os.getcwd(), "kpindexgraph.py")
+    cmd = os.path.join(sys.path[0], "kpindexgraph")
     status = subprocess.call([cmd], shell=False)
     logging.info(f'Call {cmd} returned {status}')
     if status:
@@ -517,7 +518,7 @@ def send_dxcc(update: Update, context: CallbackContext):
     if now - img_st.st_atime > 300:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
-    cmd = os.path.join(os.getcwd(), "showdxcc.py")
+    cmd = os.path.join(sys.path[0], "showdxcc")
     status = subprocess.call([cmd, query.data, image], shell=False)
     logging.info(f'Call "{cmd} {query.data} {image}" returned {status}')
     if status:
