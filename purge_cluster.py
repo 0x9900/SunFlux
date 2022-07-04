@@ -25,7 +25,7 @@ def main():
   purge_time = datetime.utcnow() - delta
 
   conn = sqlite3.connect(
-    config['cluster.db_name'], timeout=config['cluster.db_timeout'],
+    config['dxcluster.db_name'], timeout=config['dxcluster.db_timeout'],
     detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES
   )
 
