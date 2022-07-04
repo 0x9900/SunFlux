@@ -3,11 +3,12 @@
 import csv
 import logging
 import os
+import pickle
 import sys
 import time
 
 from datetime import datetime, date
-from urllib.request import urlretrieve
+from urllib.request import urlopen
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
@@ -31,22 +32,26 @@ SIDC_URL = 'https://www.sidc.be/silso/DATA/EISN/EISN_current.csv'
 class SSN:
   def __init__(self, cache_file, cache_time=43200):
     self.log = logging.getLogger('SSN')
-    self.cachefile = cache_file
-    self.data = []
+    self.data = SSN.read_cache(cache_file)
 
-    now = time.time()
-    try:
-      filest = os.stat(self.cachefile)
-      if now - filest.st_atime > cache_time:
-        raise FileNotFoundError
-    except FileNotFoundError:
-      self.log.info('Downloading data from NOAA')
-      urlretrieve(SIDC_URL, self.cachefile)
+    if SSN.is_expired(cache_file, cache_time):
+      self.log.info('Downloading data from SIDC')
+      self.data = SSN.read_url(SIDC_URL, self.data)
+      SSN.write_cache(cache_file, self.data)
 
-    with open(self.cachefile, 'r', encoding='utf-8') as csvfile:
-      csvfd = csv.reader(csvfile)
-      for row in csvfd:
-        self.data.append(SSN.convert(row))
+  @staticmethod
+  def read_url(url, current_data):
+    resp = urlopen(SIDC_URL)
+    if resp.status != 200:
+      return current_data
+    charset = resp.info().get_content_charset('utf-8')
+    csvfd = csv.reader(r.decode(charset) for r in resp)
+    data = current_data
+    for fields in csvfd:
+      data.append(SSN.convert(fields))
+    # de-dup
+    _data = {v[0]: v for v in data}
+    return sorted(_data.values())[-90:]
 
   @staticmethod
   def convert(fields):
@@ -60,6 +65,29 @@ class SSN:
       else:
         ftmp.append(0)
     return (date(*ftmp[:3]), *ftmp[3:])
+
+  @staticmethod
+  def read_cache(cache_file):
+    try:
+      with open(cache_file, 'rb') as cfd:
+        return pickle.load(cfd)
+    except (FileNotFoundError, EOFError):
+      return []
+
+  def write_cache(cache_file, data):
+    with open(cache_file, 'wb') as cfd:
+      pickle.dump(data, cfd)
+
+  @staticmethod
+  def is_expired(cache_file, cache_time):
+    now = time.time()
+    try:
+      filest = os.stat(cache_file)
+      if now - filest.st_atime > cache_time:
+        return True
+    except FileNotFoundError:
+      return True
+    return False
 
   def graph(self, filename):
     if not self.data:
