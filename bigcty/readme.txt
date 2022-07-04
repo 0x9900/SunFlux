@@ -1,4 +1,4 @@
-BIG cty.dat was released on 09 June 2022.
+BIG cty.dat was released on 30 June 2022.
 
    This is a special version of CTY.DAT which is more tailored to everyday
    logging. For more information on what CTY.DAT is, go HERE
