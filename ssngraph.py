@@ -74,6 +74,7 @@ class SSN:
     except (FileNotFoundError, EOFError):
       return []
 
+  @staticmethod
   def write_cache(cache_file, data):
     with open(cache_file, 'wb') as cfd:
       pickle.dump(data, cfd)
