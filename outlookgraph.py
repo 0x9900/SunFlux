@@ -72,8 +72,8 @@ class OutLook:
     fig.suptitle('27 day Solar Predictions', fontsize=16, fontweight='bold')
 
     # first axis
-    ax1.plot(dates, aindex, ":b", label='A-index')
-    ax1.plot(dates, kindex, "--m", label='KP-index')
+    ax1.plot(dates, aindex, ":b", linewidth=1.5, label='A-index')
+    ax1.plot(dates, kindex, "--m", linewidth=1.5, label='KP-index')
     ax1.set_ylim([0, aindex.max() * 1.15])
     ax1.set_ylabel('Index')
     ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y %b %d'))
@@ -83,8 +83,8 @@ class OutLook:
 
     # second axis
     ax2 = ax1.twinx()
-    ax2.plot(dates, flux, "r", label='Flux')
-    ax2.set_ylim([40, max(flux)*1.15])
+    ax2.plot(dates, flux, "darkgreen", linewidth=1.5, label='Flux')
+    ax2.set_ylim([50, max(flux) * 1.12])
     ax2.set_ylabel('Flux', fontweight='bold')
     ax2.grid(color='lightgray', linestyle='dashed', linewidth=.5)
     ax2.legend(loc='upper right')
