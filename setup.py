@@ -22,7 +22,7 @@ setup(
   license=__license__,
   author=__author__,
   author_email='w6bsd@bsdworld.org',
-  packages=find_namespace_packages(where="."),
+  packages=find_namespace_packages(where=".", exclude=["build*", "misc*"]),
   py_modules=['config', 'adapters', 'dxcluster', 'fluxgraph',
               'kpindexgraph', 'outlookgraph', 'showdxcc',
               'ssngraph', 'sunfluxbot'],
