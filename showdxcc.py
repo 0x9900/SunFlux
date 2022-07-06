@@ -101,7 +101,7 @@ def main():
   else:
     target_dir = config.get('showdxcc.target_dir', '/var/tmp/dxcc')
     os.makedirs(target_dir, exist_ok=True)
-    now = datetime.utcnow().strftime('%Y%m%d%H%S')
+    now = datetime.utcnow().strftime('%Y%m%d%H%M')
     filename = os.path.join(target_dir, f'dxcc-{continent}-{now}.png')
 
   get_dxcc(config, continent, filename)
