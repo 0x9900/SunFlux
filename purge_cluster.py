@@ -21,7 +21,7 @@ sqlite3.register_converter('timestamp', adapters.convert_datetime)
 
 def main():
   config = Config()
-  delta = timedelta(hours=config.get('purge.time', 12))
+  delta = timedelta(hours=config.get('dxcluster.purge_time', 12))
   purge_time = datetime.utcnow() - delta
 
   conn = sqlite3.connect(
