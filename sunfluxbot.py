@@ -269,7 +269,7 @@ def send_outlook(update: Update, context: CallbackContext):
                          caption="27 day Solar Predictions",
                          filename=os.path.basename(image), timeout=100)
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /outlook {user}:{chat_id}")
+  logger.info(f"Command /outlook by {user}:{chat_id}")
   return ConversationHandler.END
 
 
@@ -300,7 +300,7 @@ def send_flux(update: Update, context: CallbackContext):
                          caption="10cm flux for: {}".format(today),
                          filename=os.path.basename(image), timeout=100)
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /flux {user}:{chat_id}")
+  logger.info(f"Command /flux by {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_ssn(update: Update, context: CallbackContext):
@@ -332,7 +332,7 @@ def send_ssn(update: Update, context: CallbackContext):
     filename=os.path.basename(image), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /ssn {user}:{chat_id}")
+  logger.info(f"Command /ssn by {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_drap(update: Update, context: CallbackContext):
@@ -349,7 +349,7 @@ def send_drap(update: Update, context: CallbackContext):
                          filename=os.path.basename(filename), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /drap {user}:{chat_id}")
+  logger.info(f"Command /drap by {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_muf(update: Update, context: CallbackContext):
@@ -367,7 +367,7 @@ def send_muf(update: Update, context: CallbackContext):
                          filename=os.path.basename(filename), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /muf {user}:{chat_id}")
+  logger.info(f"Command /muf by {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_geost(update: Update, context: CallbackContext):
@@ -384,7 +384,7 @@ def send_geost(update: Update, context: CallbackContext):
                          filename=os.path.basename(filename), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /geost {user}:{chat_id}")
+  logger.info(f"Command /geost by {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_aindex(update: Update, context: CallbackContext):
@@ -401,7 +401,7 @@ def send_aindex(update: Update, context: CallbackContext):
                          filename=os.path.basename(filename), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /aindex {user}:{chat_id}")
+  logger.info(f"Command /aindex by {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_kpindex(update: Update, context: CallbackContext):
@@ -431,7 +431,7 @@ def send_kpindex(update: Update, context: CallbackContext):
                          filename=os.path.basename(image), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /kpindex {user}:{chat_id}")
+  logger.info(f"Command /kpindex by {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_swx(update: Update, context: CallbackContext):
@@ -448,7 +448,7 @@ def send_swx(update: Update, context: CallbackContext):
                          filename=os.path.basename(filename), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /swx {user}:{chat_id}")
+  logger.info(f"Command /swx by {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_swo(update: Update, context: CallbackContext):
@@ -465,7 +465,7 @@ def send_swo(update: Update, context: CallbackContext):
                          filename=os.path.basename(filename), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /swo {user}:{chat_id}")
+  logger.info(f"Command /swo by {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_warn(update: Update, context: CallbackContext):
@@ -482,7 +482,7 @@ def send_warn(update: Update, context: CallbackContext):
                          filename=os.path.basename(filename), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /warn {user}:{chat_id}")
+  logger.info(f"Command /warn by {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_alerts(update: Update, context: CallbackContext):
@@ -493,7 +493,7 @@ def send_alerts(update: Update, context: CallbackContext):
 
   chat_id = update.message.chat_id
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /alerts {user}:{chat_id}")
+  logger.info(f"Command /alerts by {user}:{chat_id}")
   return ConversationHandler.END
 
 def dxcc_handler(update: Update, context: CallbackContext):
@@ -534,7 +534,7 @@ def send_dxcc(update: Update, context: CallbackContext):
                          caption=f"DX activity for the last hour on: {today}",
                          filename=os.path.basename(image), timeout=100)
 
-  logger.info(f"Command /dxcc {user}:{chat_id}:{query.data}")
+  logger.info(f"Command /dxcc by {user}:{chat_id}:{query.data}")
   return ConversationHandler.END
 
 def start(update: Update, context: CallbackContext):
