@@ -67,11 +67,13 @@ def get_dxcc(config, continent, filename):
                      rotation=-90, va="bottom")
 
   # Loop over data dimensions and create text annotations.
+  threshold = np.percentile(data, 96)
   for i in range(len(dxcc)):
     for j in range(len(bands)):
       if data[i, j] < 1:
         continue
-      axgc.text(j, i, data[i, j], ha="center", va="center", color="yellow")
+      color = 'firebrick' if data[i, j] > threshold else 'lime'
+      axgc.text(j, i, data[i, j], ha="center", va="center", color=color)
 
   axgc.set_title(f"DX Spots From {continent}", fontsize=22)
   fig.text(0.01, 0.02, 'SunFluxBot By W6BSD {}'.format(
