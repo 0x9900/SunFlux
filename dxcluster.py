@@ -80,9 +80,6 @@ class DXCC:
     return prefixes
 
   def lookup(self, call):
-    if call in self._map:
-      return self._map[call]
-
     prefixes = {call[:c] for c in range(self.max_len, 0, -1)}
     for prefix in sorted(prefixes, reverse=True):
       if prefix in self._map:
