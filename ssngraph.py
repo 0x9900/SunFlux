@@ -84,7 +84,7 @@ class SSN:
     now = time.time()
     try:
       filest = os.stat(cache_file)
-      if now - filest.st_atime > cache_time:
+      if now - filest.st_mtime > cache_time:
         return True
     except FileNotFoundError:
       return True

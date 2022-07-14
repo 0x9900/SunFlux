@@ -42,7 +42,7 @@ class OutLook:
     now = time.time()
     try:
       filest = os.stat(cache_file)
-      if now - filest.st_atime > cache_time:
+      if now - filest.st_mtime > cache_time:
         raise FileNotFoundError
     except FileNotFoundError:
       self.log.info('Downloading data from NOAA')

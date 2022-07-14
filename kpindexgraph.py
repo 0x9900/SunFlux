@@ -38,7 +38,7 @@ class KPIndex:
     now = time.time()
     try:
       filest = os.stat(self.cachefile)
-      if now - filest.st_atime > cache_time: # 6 hours
+      if now - filest.st_mtime > cache_time: # 6 hours
         raise FileNotFoundError
     except FileNotFoundError:
       self.download()

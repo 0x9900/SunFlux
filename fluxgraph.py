@@ -38,7 +38,7 @@ class Flux:
     now = time.time()
     try:
       filest = os.stat(self.cachefile)
-      if now - filest.st_atime > cache_time: # 12 hours
+      if now - filest.st_mtime > cache_time: # 12 hours
         raise FileNotFoundError
     except FileNotFoundError:
       self.download_flux()

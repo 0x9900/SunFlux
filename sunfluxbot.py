@@ -91,7 +91,7 @@ def get_alert(cache_dir):
   now = time.time()
   try:
     cache_st = os.stat(cachefile)
-    if now - cache_st.st_atime > 3600:
+    if now - cache_st.st_mtime > 3600:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
     alerts = []
@@ -178,7 +178,7 @@ def noaa_download(image, cache_time=IMG_CACHE_TIME):
 
   try:
     filest = os.stat(full_path)
-    if now - filest.st_atime > cache_time:
+    if now - filest.st_mtime > cache_time:
       raise FileNotFoundError
   except FileNotFoundError:
     urllib.request.urlretrieve(url, full_path)
@@ -252,7 +252,7 @@ def send_outlook(update: Update, context: CallbackContext):
 
   try:
     img_st = os.stat(image)
-    if now - img_st.st_atime > IMG_CACHE_TIME:
+    if now - img_st.st_mtime > IMG_CACHE_TIME:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(sys.path[0], "outlookgraph")
@@ -283,7 +283,7 @@ def send_flux(update: Update, context: CallbackContext):
 
   try:
     img_st = os.stat(image)
-    if now - img_st.st_atime > IMG_CACHE_TIME:
+    if now - img_st.st_mtime > IMG_CACHE_TIME:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(sys.path[0], "fluxgraph")
@@ -313,7 +313,7 @@ def send_ssn(update: Update, context: CallbackContext):
 
   try:
     img_st = os.stat(image)
-    if now - img_st.st_atime > IMG_CACHE_TIME:
+    if now - img_st.st_mtime > IMG_CACHE_TIME:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(sys.path[0], "ssngraph")
@@ -413,7 +413,7 @@ def send_kpindex(update: Update, context: CallbackContext):
   today = datetime.now().strftime('%a %b %d %Y')
   try:
     img_st = os.stat(image)
-    if now - img_st.st_atime > IMG_CACHE_TIME:
+    if now - img_st.st_mtime > IMG_CACHE_TIME:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(sys.path[0], "kpindexgraph")
@@ -515,7 +515,7 @@ def send_dxcc(update: Update, context: CallbackContext):
 
   try:
     img_st = os.stat(image)
-    if now - img_st.st_atime > 300:
+    if now - img_st.st_mtime > 300:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(sys.path[0], "showdxcc")
