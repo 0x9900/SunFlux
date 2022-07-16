@@ -497,19 +497,35 @@ def send_alerts(update: Update, context: CallbackContext):
   return ConversationHandler.END
 
 def dxcc_handler(update: Update, context: CallbackContext):
-  keyboard = []
-  for key in CONTINENTS:
-    keyboard.append(InlineKeyboardButton(key, callback_data=key))
-  reply_markup = InlineKeyboardMarkup([keyboard])
-  update.message.reply_text('What is your continent?', reply_markup=reply_markup)
+  try:
+    command, continent = update.message.text.split()
+    continent = continent.upper()
+    if continent not in CONTINENTS:
+      raise ValueError
+    update.callback_query = type("data", (object,), {"data": continent,})
+    send_dxcc(update, context)
+
+  except ValueError:
+      keyboard = []
+      for key in CONTINENTS:
+        keyboard.append(InlineKeyboardButton(key, callback_data=key))
+      reply_markup = InlineKeyboardMarkup([keyboard])
+      update.message.reply_text('What is your continent?', reply_markup=reply_markup)
+
 
 def send_dxcc(update: Update, context: CallbackContext):
   config = Config()
   cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
-  query = update.callback_query
-  chat_id = query.message.chat.id
-  user = query.message.chat.username or str(chat_id)
-  image = f'/tmp/dxcc-{query.data}-{user}.png'
+
+  query = update.callback_query.data
+  if update.message:
+    message = update.message
+  else:
+    message = update.callback_query.message
+
+  chat_id = message.chat.id
+  user = message.chat.username or str(chat_id)
+  image = f'/tmp/dxcc-{query}-{user}.png'
   now = time.time()
   today = datetime.now().strftime('%a %b %d %Y at %H:%M')
 
@@ -519,8 +535,8 @@ def send_dxcc(update: Update, context: CallbackContext):
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(sys.path[0], "showdxcc")
-    status = subprocess.call([cmd, query.data, image], shell=False)
-    logging.info(f'Call "{cmd} {query.data} {image}" returned {status}')
+    status = subprocess.call([cmd, query, image], shell=False)
+    logging.info(f'Call "{cmd} {query} {image}" returned {status}')
     if status:
       logging.error('Error generating the dxcc graph')
       context.bot.send_message(chat_id, (
@@ -534,7 +550,7 @@ def send_dxcc(update: Update, context: CallbackContext):
                          caption=f"DX activity for the last hour on: {today}",
                          filename=os.path.basename(image), timeout=100)
 
-  logger.info(f"Command /dxcc by {user}:{chat_id}:{query.data}")
+  logger.info(f"Command /dxcc by {user}:{chat_id}:{query}")
   return ConversationHandler.END
 
 def start(update: Update, context: CallbackContext):
