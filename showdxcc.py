@@ -51,7 +51,7 @@ def get_dxcc(config, continent, filename):
     y = bands.index(band)
     data[x, y] = count
 
-  facecolor = 'white' if 6 < now.hour <= 18 else 'lightgray'
+  facecolor = 'white' if 6 < now.hour <= 18 else 'gray'
   fig, axgc = plt.subplots(figsize=(12,8), facecolor=facecolor)
 
   # Show all ticks and label them with the respective list entries
