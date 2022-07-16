@@ -1,39 +1,47 @@
-    Big CTY - 30 June 2022
-    Version entity is Swains Island, KH8/s
+    Big CTY - 13 July 2022
+    Version entity is Kermadec Islands, ZL8
 
     Added/changed Entities/Prefixes/Callsigns:
 
-	* 7O/DL7ZM is Yemen, 7O in CQ zone 37, ITU zone 48
-	* EC5AHA/P is Spain, EA
-	* 2Q0WMN, GQ0PGC, GQ4TAJ and GQ4TAJ/70 are all Northern Ireland, GI
-	* MQ0FNR is Scotland, GM
-	* I2DMK/RM is Italy, I
-	* WL7T/P is in ITU zone 8, not ITU zone 6
-	* WL7T/P is in CQ zone 5, not CQ zone 3
-	* AL1C, KH7WW, KL4GY, NH6G and WH6IW are all United States, K in CQ zone 3, ITU zone 6
-	* WL7CL is United States, K in CQ zone 4, ITU zone 8
-	* KL7HE is United States, K in CQ zone 5, ITU zone 8
-	* KB5RSJ and KK4QAX are both Hawaii, KH6
-	* LU3DRM/H is Argentina, LU
-	* UB5O/1 is in ITU zone 29, not ITU zone 19
-	* R9GM/M is in ITU zone 30, not ITU zone 29
-	* R9GM/M is in CQ zone 17, not CQ zone 16
-	* R9LM/M and UA9JKB/6 are both European Russia, UA
-	* UA9JLL/M is in ITU zone 30, not ITU zone 20
-	* RU1TA/0 is Asiatic Russia, UA9 in CQ zone 18, ITU zone 32
-	* VF0X is Canada, VE in CQ zone 2, ITU zone 4
-	* VE6SH/7 is Canada, VE in CQ zone 3, ITU zone 2
-	* VK6NZ/7 is Australia, VK
-	* ZL90GQ is New Zealand, ZL
+	* DX0NE is Spratly Islands, 1S
+	* TX5XG is Austral Islands, FO/a
+	* GB2OGI and GB5OTA are both Northern Ireland, GI
+	* II0IGNL is Sardinia, IS
+	* WL7T/P is in ITU zone 7, not ITU zone 8
+	* WL7T/P is in CQ zone 4, not CQ zone 5
+	* AH0RN, KL1TQ, NP2LW, WH6GDA, WH6OQ and WL7CJK are all United States, K in CQ zone 3, ITU zone 6
+	* NH6SM is United States, K in CQ zone 4, ITU zone 7
+	* NP2WJ is United States, K in CQ zone 4, ITU zone 8
+	* WH6JQ is United States, K in CQ zone 5, ITU zone 8
+	* KH0P is Guam, KH2
+	* KA7IMO, KE7HKK and KE8QB are all Hawaii, KH6
+	* K9UL and W4BZB are both Alaska, KL
+	* N1NHN is Puerto Rico, KP4
+	* LU9EKQ/E, LW5DHG/E and LW9EUE/E are all Argentina, LU
+	* PP9, PQ6, PQ7, PQ9, PR6, PR9, PS6, PS9, PT6, PU6, PU7, PU8, PU9,
+	  PV6, PV7, PV9, PW6, PW7, PW9, PX6, PX7, PX8, PX9, ZV6, ZV7, ZV8, ZV9, ZW6,
+	  ZW7, ZW8, ZW9, ZX6, ZX7, ZX8, ZX9, ZY6, ZY7, ZY8, ZY9, ZZ6, ZZ7, ZZ8 and ZZ9
+	  are all Brazil, PY in ITU zone 13
+	* RM1O/M is in ITU zone 19, not ITU zone 29
+	* RV1CC/P is in ITU zone 29, not ITU zone 19
+	* RA4M/P, RV9WB/M, UA9KBF/6 and UE02SRM are all European Russia, UA
+	* R65RKP is European Russia, UA in ITU zone 19
+	* R8JAJ/P is in ITU zone 30, not ITU zone 20
+	* R8JAJ/P is in CQ zone 16, not CQ zone 17
+	* RA/DK2AI/M is in CQ zone 18, not CQ zone 17
+	* RA0AM/P is in CQ zone 18, not CQ zone 23
+	* R2DXU/8 is Asiatic Russia, UA9 in ITU zone 20
+	* R0FBA/9 is Asiatic Russia, UA9 in CQ zone 18
+	* R2BDY/9, R9HAF/M and UB8M/M are all Asiatic Russia, UA9 in CQ zone 18, ITU zone 31
+	* UB5O/M is Asiatic Russia, UA9 in CQ zone 18, ITU zone 32
+	* VK5AYL/8 is Australia, VK in CQ zone 29, ITU zone 55
 
     Removed Entities/Prefixes/Callsigns:
 
-	* 2Q in England, G
-	* GQ4JTF/70 in Northern Ireland, GI
-	* GQ3WUX/70 and GQ4FFF/70 in Scotland, GM
-	* GB4BSG in Wales, GW
-	* KL1JJ in United States, K
-	* KI7PEZ in Hawaii, KH6
-	* RZ90W in Asiatic Russia, UA9
-	* VF0 in Canada, VE
-	* ZQ in Gibraltar, ZB
+	* FO/W1XGI in Austral Islands, FO/a
+	* AL1C and KH6BE in United States, K
+	* AA6OC in Hawaii, KH6
+	* UB5O/M in European Russia, UA
+	* R9HAF/M in Kaliningrad, UA2
+	* RV9WB/M in Asiatic Russia, UA9
+	* R200A in Ukraine, UR
