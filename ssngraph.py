@@ -120,6 +120,7 @@ class SSN:
     axgc.set_ylim(0, y.max()*1.2)
 
     axgc.grid()
+    axgc.margins(.01)
     fig.autofmt_xdate()
     plt.savefig(filename, transparent=False, dpi=100)
     plt.close()
