@@ -33,7 +33,8 @@ def get_dxcc(config, continent, filename):
   color_map = config.get('showdxcc.color_map', 'PRGn')
   dxcc = CONTINENTS
   bands = BANDS
-  time_span = datetime.utcnow() - timedelta(hours=1, minutes=0)
+  now = datetime.utcnow()
+  time_span = now - timedelta(hours=1, minutes=0)
   conn = sqlite3.connect(
     db_cluster,
     timeout=5,
@@ -50,7 +51,8 @@ def get_dxcc(config, continent, filename):
     y = bands.index(band)
     data[x, y] = count
 
-  fig, axgc = plt.subplots(figsize=(12,8))
+  facecolor = 'white' if 6 < now.hour <= 18 else 'lightgray'
+  fig, axgc = plt.subplots(figsize=(12,8), facecolor=facecolor)
 
   # Show all ticks and label them with the respective list entries
   plt.xticks(np.arange(len(bands)), labels=bands, fontsize=14)
@@ -76,9 +78,7 @@ def get_dxcc(config, continent, filename):
       axgc.text(j, i, data[i, j], ha="center", va="center", color=color)
 
   axgc.set_title(f"DX Spots From {continent}", fontsize=22)
-  fig.text(0.01, 0.02, 'SunFluxBot By W6BSD {}'.format(
-    datetime.utcnow().strftime('%Y:%m:%d %H:%M')
-  ))
+  fig.text(0.01, 0.02, 'SunFluxBot By W6BSD {}'.format(now.strftime('%Y:%m:%d %H:%M')))
   fig.tight_layout()
   fig.savefig(filename, transparent=False, dpi=100)
 

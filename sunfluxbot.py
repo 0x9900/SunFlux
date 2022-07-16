@@ -512,7 +512,6 @@ def dxcc_handler(update: Update, context: CallbackContext):
       reply_markup = InlineKeyboardMarkup([keyboard])
       update.message.reply_text('What is your continent?', reply_markup=reply_markup)
 
-
 def send_dxcc(update: Update, context: CallbackContext):
   config = Config()
   cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
