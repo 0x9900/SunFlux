@@ -305,7 +305,7 @@ def send_flux(update: Update, context: CallbackContext):
 
 def send_ssn(update: Update, context: CallbackContext):
   config = Config()
-  cache_dir = config.get('ssn.cache_dir', '/tmp')
+  cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
   now = time.time()
   image = os.path.join(cache_dir, 'ssn.png')
   chat_id = update.message.chat_id
