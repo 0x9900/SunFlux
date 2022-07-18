@@ -22,18 +22,16 @@ sqlite3.register_converter('timestamp', adapters.convert_datetime)
 def purge(conn, purge_time):
   with conn:
     res = conn.execute('select count(*) from dxspot;')
-    count1 =  res.fetchone()[0]
-
+    cnt_before =  res.fetchone()[0]
+    # Delete old records
     conn.execute('delete from dxspot where time < ?;', (purge_time,))
-    logging.info("Purge from: %s to: %s", purge_time.isoformat(),
-                 datetime.utcnow().isoformat())
-
     res = conn.execute('select count(*) from dxspot;')
-    count2 =  res.fetchone()[0]
+    cnt_after =  res.fetchone()[0]
 
-  logging.info('Count %d before delete', count1)
-  logging.info('Count %d after delete', count2)
-  logging.info('%d records deleted', count1 - count2)
+  logging.info("Purge from: %s to: %s", purge_time.isoformat(), datetime.utcnow().isoformat())
+  logging.info('Count %d before delete', cnt_before)
+  logging.info('Count %d after delete', cnt_after)
+  logging.info('%d records deleted', cnt_before - cnt_after)
 
 def main():
   config = Config()
