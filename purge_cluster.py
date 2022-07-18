@@ -25,8 +25,8 @@ def purge(conn, purge_time):
     count1 =  res.fetchone()[0]
 
     conn.execute('delete from dxspot where time < ?;', (purge_time,))
-    logging.info("Now: %s <=> %s", datetime.utcnow().isoformat(),
-                 purge_time.isoformat())
+    logging.info("Purge from: %s to: %s", purge_time.isoformat(),
+                 datetime.utcnow().isoformat())
 
     res = conn.execute('select count(*) from dxspot;')
     count2 =  res.fetchone()[0]
