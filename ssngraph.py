@@ -16,15 +16,6 @@ import numpy as np
 
 from config import Config
 
-parameters = {
-  'axes.labelsize': 12,
-  'axes.titlesize': 20,
-  'figure.figsize': [12, 8],
-  'axes.labelcolor': 'gray',
-  'axes.titlecolor': 'gray',
-  'font.size': 12.0,
-}
-plt.rcParams.update(parameters)
 plt.style.use(['classic', 'seaborn-talk'])
 
 SIDC_URL = 'https://www.sidc.be/silso/DATA/EISN/EISN_current.csv'
@@ -102,7 +93,7 @@ class SSN:
     cdata = np.array([int(x[5]) for x in self.data])
 
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M')
-    fig = plt.figure()
+    fig = plt.figure(figsize=(12, 5))
     fig.suptitle('Estimated International Sunspot Number (EISN)', fontsize=14)
     fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
     axgc = plt.gca()
@@ -117,6 +108,7 @@ class SSN:
     loc = mdates.DayLocator(interval=3)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
     axgc.xaxis.set_major_locator(loc)
+    axgc.xaxis.set_tick_params(labelsize=10)
     axgc.set_ylim(0, y.max()*1.2)
 
     axgc.grid()

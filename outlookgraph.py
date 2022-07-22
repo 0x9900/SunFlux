@@ -15,15 +15,6 @@ import numpy as np
 
 from config import Config
 
-parameters = {
-  'axes.labelsize': 12,
-  'axes.titlesize': 20,
-  'figure.figsize': [12, 8],
-  'axes.labelcolor': 'gray',
-  'axes.titlecolor': 'gray',
-  'font.size': 12.0,
-}
-plt.rcParams.update(parameters)
 plt.style.use(['classic', 'seaborn-talk'])
 
 NOAA_URL = 'https://services.swpc.noaa.gov/text/27-day-outlook.txt'
@@ -68,7 +59,7 @@ class OutLook:
     kindex = np.array([int(x[3]) for x in self.data])
     now = datetime.utcnow().strftime('%Y/%m/%d %H:%M')
 
-    fig, ax1 = plt.subplots()
+    fig, ax1 = plt.subplots(figsize=(12, 5))
     fig.suptitle('27 day Solar Predictions', fontsize=16, fontweight='bold')
 
     # first axis
@@ -89,7 +80,7 @@ class OutLook:
     ax2.grid(color='lightgray', linestyle='dashed', linewidth=.5)
     ax2.legend(loc='upper right')
 
-    plt.subplots_adjust(bottom=0.15)
+    plt.subplots_adjust(bottom=0.20)
 
     plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {now}', rotation=90)
     plt.savefig(filename, transparent=False, dpi=100)

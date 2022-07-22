@@ -16,15 +16,6 @@ import numpy as np
 
 from config import Config
 
-parameters = {
-  'axes.labelsize': 12,
-  'axes.titlesize': 20,
-  'figure.figsize': [12, 8],
-  'axes.labelcolor': 'gray',
-  'axes.titlecolor': 'gray',
-  'font.size': 12.0,
-}
-plt.rcParams.update(parameters)
 plt.style.use(['classic', 'seaborn-talk'])
 
 NOAA_URL = 'https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'
@@ -57,7 +48,7 @@ class Flux:
     y = np.array([int(x[1]) for x in self.data])
 
     date = datetime.utcnow().strftime('%Y/%m/%d %H:%M')
-    fig = plt.figure()
+    fig = plt.figure(figsize=(12, 5))
     fig.suptitle('Daily 10cm Flux Index', fontsize=14)
     axgc = plt.gca()
     axgc.plot(x, y)
@@ -66,11 +57,13 @@ class Flux:
     ticks = np.arange(40, int(y.max() * 1.25), 20)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
     axgc.xaxis.set_major_locator(loc)
+    axgc.xaxis.set_tick_params(labelsize=10)
     axgc.set_yticks(ticks)
+
     axgc.axhspan(90, ticks.max(), facecolor='green', alpha=0.4, label='Good')
     axgc.axhspan(70, 90, facecolor='orange', alpha=0.4, label='Ok')
     axgc.axhspan(40, 70, facecolor='red', alpha=0.4, label='Bad')
-    axgc.legend(loc ="upper left")
+    axgc.legend(fontsize=10, loc="upper left")
 
     axgc.grid()
     fig.autofmt_xdate()
