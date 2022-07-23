@@ -23,12 +23,12 @@ def purge(conn, purge_time):
   logging.info("Purge entries from before: %s", purge_time.isoformat())
 
   with conn:
-    res = conn.execute('SELECT COUNT(*) FROM dxspot;')
+    curs = conn.cursor()
+    res = curs.execute('SELECT COUNT(*) FROM dxspot;')
     cnt_before =  res.fetchone()[0]
     # Delete old records
-    conn.execute('DELETE FROM dxspot WHERE time < ?;', (purge_time,))
-    conn.commit()
-    res = conn.execute('SELECT COUNT(*) FROM dxspot;')
+    curs.execute('DELETE FROM dxspot WHERE time < ?;', (purge_time,))
+    res = curs.execute('SELECT COUNT(*) FROM dxspot;')
     cnt_after =  res.fetchone()[0]
 
   logging.info('Count %d before delete', cnt_before)
@@ -38,12 +38,13 @@ def purge(conn, purge_time):
 def main():
   config = Config()
   delta = timedelta(hours=config.get('dxcluster.purge_time', 12))
+  cnx_timeout = int(config['dxcluster.db_timeout']/3) or 1
   purge_time = datetime.utcnow() - delta
 
   logging.info('Database: %s, timeout %d', config['dxcluster.db_name'],
                config['dxcluster.db_timeout'])
   conn = sqlite3.connect(
-    config['dxcluster.db_name'], timeout=config['dxcluster.db_timeout'],
+    config['dxcluster.db_name'], timeout=cnx_timeout,
     detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES
   )
 
