@@ -134,11 +134,9 @@ def login(call, cnx):
     raise OSError(err) from None
   cnx.write(str.encode(f'{call}\n'))
   match = cnx.expect([str.encode(f'{call} de .*\n')])
-  print(match[2].decode('ASCII'))
   # cnx.write(b'Set Dx Filter SpotterCont=NA\n')
   cnx.write(b'Set Dx Filter\n')
   match = cnx.expect(['DX filter.*\n'.encode()])
-  print(match[2].decode('ASCII'))
 
 def read_stream(cdb, cnx):
   dxcc = DXCC()
@@ -208,7 +206,8 @@ def main():
   con = sqlite3.connect(
     config['dxcluster.db_name'],
     timeout=config['dxcluster.db_timeout'],
-    detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES
+    detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES,
+    isolation_level=None
   )
   clusters = []
   for server in config['dxcluster.servers']:

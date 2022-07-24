@@ -24,16 +24,8 @@ def purge(conn, purge_time):
 
   with conn:
     curs = conn.cursor()
-    res = curs.execute('SELECT COUNT(*) FROM dxspot;')
-    cnt_before =  res.fetchone()[0]
-    # Delete old records
     curs.execute('DELETE FROM dxspot WHERE time < ?;', (purge_time,))
-    res = curs.execute('SELECT COUNT(*) FROM dxspot;')
-    cnt_after =  res.fetchone()[0]
-
-  logging.info('Count %d before delete', cnt_before)
-  logging.info('Count %d after delete', cnt_after)
-  logging.info('%d records deleted', cnt_before - cnt_after)
+    logging.info('%d record deleted', curs.rowcount)
 
 def main():
   config = Config()
