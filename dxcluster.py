@@ -143,7 +143,7 @@ def login(call, cnx):
 def read_stream(cdb, cnx):
   dxcc = DXCC()
   regex = re.compile(
-    r'^DX de\s(\w+)(?:.*):\s+(\d+.\d+)\s+(\w+)(?:|\S+)\s+(.*)(?:\d{4}Z).*'
+    r'^DX de\s(\w+)(?:|.*):\s+(\d+.\d+)\s+(\w+)(?:|\S+)\s+(.*)(?:\d{4}Z).*'
   )
   current = time.time()
   while True:
