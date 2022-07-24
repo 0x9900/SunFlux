@@ -46,6 +46,8 @@ CREATE INDEX IF NOT EXISTS idx_time on dxspot (time DESC);
 CREATE INDEX IF NOT EXISTS idx_cont_dx on dxspot (cont_dx);
 """
 
+DETECT_TYPES = sqlite3.PARSE_DECLTYPES
+
 sqlite3.register_adapter(datetime, adapters.adapt_datetime)
 sqlite3.register_converter('timestamp', adapters.convert_datetime)
 
@@ -127,16 +129,16 @@ def get_band(freq):
 
 def login(call, cnx):
   try:
-    match = cnx.expect([b'Please enter your call.*\n'])
+    cnx.expect([b'Please enter your call.*\n'])
   except socket.timeout:
     raise OSError('Connection timeout') from None
   except EOFError as err:
     raise OSError(err) from None
   cnx.write(str.encode(f'{call}\n'))
-  match = cnx.expect([str.encode(f'{call} de .*\n')])
+  cnx.expect([str.encode(f'{call} de .*\n')])
   # cnx.write(b'Set Dx Filter SpotterCont=NA\n')
   cnx.write(b'Set Dx Filter\n')
-  match = cnx.expect(['DX filter.*\n'.encode()])
+  cnx.expect(['DX filter.*\n'.encode()])
 
 def read_stream(cdb, cnx):
   dxcc = DXCC()
@@ -182,7 +184,6 @@ def read_stream(cdb, cnx):
     if current < time.time() - 120:
       break
 
-  return
 
 def main():
   config = Config()
@@ -206,7 +207,7 @@ def main():
   con = sqlite3.connect(
     config['dxcluster.db_name'],
     timeout=config['dxcluster.db_timeout'],
-    detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES,
+    detect_types=DETECT_TYPES,
     isolation_level=None
   )
   clusters = []
