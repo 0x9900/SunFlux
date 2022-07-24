@@ -162,7 +162,7 @@ def read_stream(cdb, cnx):
       try:
         rec = Record(fields)
       except ValueError as err:
-        LOG.error("%s - %s", err, repr(fields))
+        LOG.warning("%s - %s", err, buffer)
         continue
       LOG.debug(rec)
       try:
@@ -173,7 +173,7 @@ def read_stream(cdb, cnx):
             rec.CONT_DE, rec.CONT_DX, rec.BAND, rec.DX_TIME,
           ))
       except sqlite3.OperationalError as err:
-        logging.error(err)
+        LOG.error(err)
     elif code == 1:
       buffer = buffer.decode('UTF-8')
       LOG.info(buffer)
