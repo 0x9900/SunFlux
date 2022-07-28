@@ -3,6 +3,8 @@
 # (c) 2022 Fred C. (W6BSD)
 #
 # b'DX de SP5NOF:   10136.0  UI5A     FT8 +13dB from KO85 1778Hz   2138Z\r\n'
+#
+# pylint: disable=no-member,unspecified-encoding
 
 import csv
 import io
@@ -15,6 +17,7 @@ import socket
 import time
 
 from collections import namedtuple
+from copy import copy
 from datetime import datetime
 from itertools import cycle
 from telnetlib import Telnet
@@ -27,7 +30,8 @@ import adapters
 
 from config import Config
 
-FIELDS = ['DE', 'FREQUENCY', 'DX', 'MESSAGE', 'CONT_DE', 'CONT_DX',
+FIELDS = ['DE', 'FREQUENCY', 'DX', 'MESSAGE', 'DE_CONT', 'TO_CONT',
+          'DE_ITUZONE', 'TO_ITUZONE', 'DE_CQZONE', 'TO_CQZONE',
           'BAND', 'DX_TIME']
 
 SQL_TABLE = """
@@ -37,15 +41,21 @@ CREATE TABLE IF NOT EXISTS dxspot
   frequency NUMERIC,
   dx TEXT,
   message TEXT,
-  cont_de TEXT,
-  cont_dx TEXT,
+  de_cont TEXT,
+  to_cont TEXT,
+  de_ituzone INTEGER,
+  to_ituzone INTEGER,
+  de_cqzone INTEGER,
+  to_cqzone INTEGER,
   band INTEGER,
   time TIMESTAMP
 );
 CREATE INDEX IF NOT EXISTS idx_time on dxspot (time DESC);
-CREATE INDEX IF NOT EXISTS idx_cont_dx on dxspot (cont_dx);
+CREATE INDEX IF NOT EXISTS idx_de_cont on dxspot (de_cont);
+CREATE INDEX IF NOT EXISTS idx_de_cqzone on dxspot (de_cqzone);
 """
 
+TELNET_TIMEOUT = 37
 DETECT_TYPES = sqlite3.PARSE_DECLTYPES
 
 sqlite3.register_adapter(datetime, adapters.adapt_datetime)
@@ -53,49 +63,84 @@ sqlite3.register_converter('timestamp', adapters.convert_datetime)
 
 LOG = logging.getLogger(__name__)
 
+class DXCCRecord:
+  __slots__ = ['prefix', 'country', 'ctn', 'continent', 'cqzone',
+               'ituzone', 'lat', 'lon', 'tz']
+
+  def __init__(self, *args):
+    for idx, field in enumerate(DXCCRecord.__slots__):
+      if field == 'prefix':
+        prefix, *_ = args[idx].lstrip('*').split('/')
+        setattr(self, field, prefix)
+      elif field in ('cqzone', 'ituzone'):
+        setattr(self, field, int(args[idx]))
+      elif field in ('lat', 'lon', 'tz'):
+        setattr(self, field, float(args[idx]))
+      else:
+        setattr(self, field, args[idx])
+
+  def __copy__(self):
+    return type(self)(*[getattr(self, f) for f in DXCCRecord.__slots__])
+
+  def __repr__(self):
+    buffer = ', '.join([f"{f}: {getattr(self, f)}" for f in DXCCRecord.__slots__])
+    return f"<DXCCRecord> {buffer}"
+
 class DXCC:
 
-  __parsers = (
-    re.compile(r'^(?:=|)(\w+).*$'),
-  )
-
+  __parser = re.compile(r'(?:=|)(?P<prefix>\w+)(?:/\w+|)(?:\((?P<cqzone>\d+)\)|)'
+                        r'(?:\[(?P<ituzone>\d+)\]|)(?:{(?P<continent>\w+)}|).*')
   def __init__(self):
     self._map = {}
     cty = files('bigcty').joinpath('cty.csv').read_text()
     LOG.debug('Read bigcty callsign database')
     csvfd = csv.reader(io.StringIO(cty))
     for row in csvfd:
-      self._map[row[0].strip('*')] = row[3]
-      for prefix in DXCC.parse(row[9]):
-        self._map[prefix] = row[3]
+      self._map.update(self.parse(row))
     self.max_len = max([len(v) for v in self._map])
 
   @staticmethod
-  def parse(line):
-    line = line.strip(';').split()
-    prefixes = []
-    for parser in DXCC.__parsers:
-      for pre in line:
-        match = parser.match(pre)
-        if match:
-          prefixes.append(match.group(1))
-    return prefixes
+  def parse(record):
+    dxmap = {}
+    cty = DXCCRecord(*record[:9])
+    dxmap[cty.prefix] = cty
+    extra = record[9]
+    for tag in extra.replace(';', '').split():
+      match = DXCC.__parser.match(tag)
+      if match:
+        _cty = copy(cty)
+        for key, val in match.groupdict().items():
+          if not val:
+            continue
+          setattr(_cty, key, val)
+          dxmap[_cty.prefix] = _cty
+      else:
+        LOG.error('No match for %s', tag)
+
+
+    return dxmap
 
   def lookup(self, call):
     prefixes = {call[:c] for c in range(self.max_len, 0, -1)}
     for prefix in sorted(prefixes, reverse=True):
       if prefix in self._map:
         return self._map[prefix]
-    LOG.warning('DXCC lookup error for "%s"', call)
-    return ''
+    raise KeyError(f"{call} not found")
+
+  def __str__(self):
+    return f"{self.__class__} {id(self)} ({len(self._map)} records)"
+
+  def __repr__(self):
+    return str(self)
+
 
 class Record(namedtuple('UserRecord', FIELDS)):
   def __new__(cls, items):
-    _items = [x.strip() for x in items]
-    _items[1] = float(_items[1])
+    _items = items
     _items.append(get_band(_items[1]))
     _items.append(datetime.utcnow())
     return tuple.__new__(cls, _items)
+
 
 def get_band(freq):
   # Quick and dirty way to convert frequencies to bands.
@@ -140,37 +185,58 @@ def login(call, cnx):
   cnx.write(b'Set Dx Filter\n')
   cnx.expect(['DX filter.*\n'.encode()])
 
+def decode(line):
+  #
+  # DX de DO4DXA-#:  14025.0  GB22GE       CW 10 dB 25 WPM CQ             1516Z
+  # 0.........1.........2.........3.........4.........5.........6.........7.........8
+  #           0         0         0         0         0         0         0         0
+  if not hasattr(decode, 'dxcc'):
+    decode.dxcc = DXCC()
+  if not line.startswith('DX de'):
+    return None
+  pos = line.index(':')
+  try:
+    fields = [
+      line[6:pos].replace('-#','').strip(),
+      float(line[pos+1:26].lstrip()),
+      line[26:39].rstrip(),
+      line[39:70].rstrip(),
+    ]
+    call_de = decode.dxcc.lookup(fields[0])
+    call_to = decode.dxcc.lookup(fields[2])
+    fields.extend([
+      call_de.continent,
+      call_to.continent,
+      call_de.ituzone,
+      call_to.ituzone,
+      call_de.cqzone,
+      call_to.cqzone,
+    ])
+  except (KeyError, ValueError) as err:
+    LOG.error(err)
+    return None
+  return Record(fields)
+
 def read_stream(cdb, cnx):
-  dxcc = DXCC()
-  regex = re.compile(
-    r'^DX de\s(\w+)(?:|.*):\s+(\d+.\d+)\s+(\w+)(?:|\S+)\s+(.*)(?:\d{4}Z).*'
-  )
+  expect_exp = [b'DX.*\n', b'WWV de .*\n']
   current = time.time()
   while True:
-    code, _, buffer = cnx.expect([b'DX.*\n', b'WWV de .*\n'], timeout=5)
+    code, _, buffer = cnx.expect(expect_exp, timeout=TELNET_TIMEOUT)
     if code == 0:         # timeout
       current = time.time()
       buffer = buffer.decode('UTF-8')
-      match = regex.match(buffer)
-      if not match:
-        LOG.error("Error: %s", buffer)
+      rec = decode(buffer)
+      if not rec:
         continue
 
-      fields = list(match.groups())
-      fields.append(dxcc.lookup(fields[0]))
-      fields.append(dxcc.lookup(fields[2]))
-      try:
-        rec = Record(fields)
-      except ValueError as err:
-        LOG.warning("%s - %s", err, buffer)
-        continue
       LOG.debug(rec)
       try:
         with cdb:
           curs = cdb.cursor()
-          curs.execute("INSERT INTO dxspot VALUES (?,?,?,?,?,?,?,?)", (
+          curs.execute("INSERT INTO dxspot VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", (
             rec.DE, rec.FREQUENCY, rec.DX, rec.MESSAGE,
-            rec.CONT_DE, rec.CONT_DX, rec.BAND, rec.DX_TIME,
+            rec.DE_CONT, rec.TO_CONT, rec.DE_ITUZONE, rec.TO_ITUZONE,
+            rec.DE_CQZONE, rec.TO_CQZONE, rec.BAND, rec.DX_TIME,
           ))
       except sqlite3.OperationalError as err:
         LOG.error(err)
@@ -179,43 +245,42 @@ def read_stream(cdb, cnx):
       LOG.info(buffer)
     elif code == -1:
       LOG.warning('Timeout - sleeping for a few seconds [%s]', cnx.host)
-      time.sleep(15)
-
+      time.sleep(5)
     if current < time.time() - 120:
       break
 
 
 def main():
-  config = Config()
+  global LOG                    # pylint: disable=global-statement
 
-  formatter = logging.Formatter("%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s")
-  file_handler = logging.FileHandler(config['dxcluster.log_file'], 'a')
-  file_handler.setLevel(logging.DEBUG)
-  file_handler.setFormatter(formatter)
+  _config = Config()
+  config = _config.get('dxcluster')
 
-  console_handler = logging.StreamHandler()
-  console_handler.setLevel(logging.INFO)
-  console_handler.setFormatter(formatter)
-
-  loglevel = logging.getLevelName(os.getenv('LOGLEVEL', 'INFO'))
+  loglevel = logging.getLevelName(
+    os.getenv('LOGLEVEL', config.get('log_level', 'INFO'))
+  )
   if loglevel not in logging._levelToName: # pylint: disable=protected-access
     loglevel = logging.INFO
-  LOG.setLevel(loglevel)
-  LOG.addHandler(file_handler)
-  LOG.addHandler(console_handler)
 
-  con = sqlite3.connect(
-    config['dxcluster.db_name'],
-    timeout=config['dxcluster.db_timeout'],
+  logging.basicConfig(
+    format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s',
+    datefmt='%H:%M:%S', level=loglevel
+  )
+  LOG = logging.getLogger(__name__)
+
+  clusters = []
+  for server in config['servers']:
+    clusters.append(server.split(':'))
+
+  conn = sqlite3.connect(
+    config['db_name'],
+    timeout=config['db_timeout'],
     detect_types=DETECT_TYPES,
     isolation_level=None
   )
-  clusters = []
-  for server in config['dxcluster.servers']:
-    clusters.append(server.split(':'))
 
-  with con:
-    curs = con.cursor()
+  with conn:
+    curs = conn.cursor()
     curs.executescript(SQL_TABLE)
 
   random.shuffle(clusters)
@@ -223,9 +288,9 @@ def main():
     try:
       telnet = Telnet(*cluster, timeout=300)
       LOG.info("Connection to %s open", telnet.host)
-      login(config['dxcluster.call'], telnet)
-      LOG.info("%s identified", config['dxcluster.call'])
-      read_stream(con, telnet)
+      login(config['call'], telnet)
+      LOG.info("%s identified", config['call'])
+      read_stream(conn, telnet)
     except OSError as err:
       LOG.error(err)
 

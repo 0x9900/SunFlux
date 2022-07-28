@@ -14,17 +14,14 @@ import numpy as np
 from adapters import adapt_datetime, convert_datetime
 from config import Config
 
-sqlite3.register_adapter(datetime, adapt_datetime)
-sqlite3.register_converter('timestamp', convert_datetime)
-
 CONTINENTS = ['AF', 'AS', 'EU', 'NA', 'OC', 'SA']
 BANDS = [6, 10, 12, 15, 17, 20, 30, 40, 60, 80, 160]
 
 REQUEST = """
-SELECT band, cont_de, cont_dx, COUNT(*)
+SELECT band, de_cont, to_cont, COUNT(*)
 FROM dxspot
-WHERE band >= 6 AND cont_de == ? AND cont_dx != '' AND time > ?
-GROUP BY band, cont_dx;
+WHERE band >= 6 AND de_cont == ? AND to_cont != '' AND time > ?
+GROUP BY band, to_cont;
 """
 
 def get_dxcc(config, continent, filename):
