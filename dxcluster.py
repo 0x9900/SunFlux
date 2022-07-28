@@ -256,17 +256,17 @@ def main():
   _config = Config()
   config = _config.get('dxcluster')
 
-  loglevel = logging.getLevelName(
-    os.getenv('LOGLEVEL', config.get('log_level', 'INFO'))
-  )
-  if loglevel not in logging._levelToName: # pylint: disable=protected-access
-    loglevel = logging.INFO
-
   logging.basicConfig(
     format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s',
-    datefmt='%H:%M:%S', level=loglevel
+    datefmt='%H:%M:%S'
   )
   LOG = logging.getLogger(__name__)
+
+  loglevel = os.getenv('LOGLEVEL', config.get('log_level', 'INFO'))
+  if loglevel not in logging._nameToLevel: # pylint: disable=protected-access
+    LOG.error('Log level "%s" does not exist, defaulting to INFO', loglevel)
+    loglevel = logging.INFO
+  LOG.setLevel(loglevel)
 
   clusters = []
   for server in config['servers']:
