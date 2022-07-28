@@ -16,9 +16,6 @@ logging.basicConfig(
   level=logging.INFO
 )
 
-sqlite3.register_adapter(datetime, adapters.adapt_datetime)
-sqlite3.register_converter('timestamp', adapters.convert_datetime)
-
 def purge(conn, purge_time):
   logging.info("Purge entries from before: %s", purge_time.isoformat())
 
