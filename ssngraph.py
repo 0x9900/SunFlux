@@ -1,6 +1,5 @@
 #!/usr/bin/env python3.9
 #
-import csv
 import logging
 import os
 import pickle
@@ -32,16 +31,17 @@ class SSN:
 
   @staticmethod
   def read_url(url, current_data):
-    resp = urlopen(NOAA_URL)
-    if resp.status != 200:
-      return current_data
-    charset = resp.info().get_content_charset('utf-8')
-    data = current_data
-    for line in resp:
-      line = line.decode(charset).strip()
-      if not line or line[0] in ('#', ':'):
-        continue
-      data.append(SSN.convert(line))
+    with urlopen(url) as resp:
+      if resp.status != 200:
+        return current_data
+      charset = resp.info().get_content_charset('utf-8')
+      data = current_data
+      for line in resp:
+        line = line.decode(charset).strip()
+        if not line or line[0] in ('#', ':'):
+          continue
+        data.append(SSN.convert(line))
+
     # de-dup
     _data = {v[0]: v for v in data}
     return sorted(_data.values())[-90:]
@@ -86,21 +86,21 @@ class SSN:
       return None
 
     x = np.array([d[0] for d in self.data])
-    y = np.array([x[2] for x in self.data])
-    f = np.array([x[1] for x in self.data])
+    ssn = np.array([x[2] for x in self.data])
+    flux = np.array([x[1] for x in self.data])
 
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M')
     fig = plt.figure(figsize=(12, 5))
     fig.suptitle('Sunspot Number (SSN)', fontsize=14)
     fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
     axgc = plt.gca()
-    axgc.plot(x, y, marker='d', markersize=7, color="darkolivegreen", linewidth=1)
-    axgc.plot(x, f, linestyle='-', color="cornflowerblue", linewidth=.75)
+    axgc.plot(x, ssn, marker='d', markersize=7, color="darkolivegreen", linewidth=1)
+    axgc.plot(x, flux, linestyle='-', color="cornflowerblue", linewidth=.75)
     loc = mdates.DayLocator(interval=5)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_tick_params(labelsize=10)
-    axgc.set_ylim(y.min() * 0.2, y.max()*1.2)
+    axgc.set_ylim(np.min([ssn, flux])*0.2, np.max([ssn, flux])*1.2)
     axgc.legend(['Sun spot', '10.7cm Flux'])
     axgc.grid(color='darkgray', linestyle='-.', linewidth=.5)
     axgc.margins(.01)
