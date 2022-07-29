@@ -18,7 +18,7 @@ from config import Config
 
 plt.style.use(['classic', 'seaborn-talk'])
 
-SIDC_URL = 'https://www.sidc.be/silso/DATA/EISN/EISN_current.csv'
+NOAA_URL = 'https://services.swpc.noaa.gov/text/daily-solar-indices.txt'
 
 class SSN:
   def __init__(self, cache_file, cache_time=43200):
@@ -26,36 +26,35 @@ class SSN:
     self.data = SSN.read_cache(cache_file)
 
     if SSN.is_expired(cache_file, cache_time):
-      self.log.info('Downloading data from SIDC')
-      self.data = SSN.read_url(SIDC_URL, self.data)
+      self.log.info('Downloading data from NOAA')
+      self.data = SSN.read_url(NOAA_URL, self.data)
       SSN.write_cache(cache_file, self.data)
 
   @staticmethod
   def read_url(url, current_data):
-    resp = urlopen(SIDC_URL)
+    resp = urlopen(NOAA_URL)
     if resp.status != 200:
       return current_data
     charset = resp.info().get_content_charset('utf-8')
-    csvfd = csv.reader(r.decode(charset) for r in resp)
     data = current_data
-    for fields in csvfd:
-      data.append(SSN.convert(fields))
+    for line in resp:
+      line = line.decode(charset).strip()
+      if not line or line[0] in ('#', ':'):
+        continue
+      data.append(SSN.convert(line))
     # de-dup
     _data = {v[0]: v for v in data}
     return sorted(_data.values())[-90:]
 
   @staticmethod
-  def convert(fields):
-    ftmp = []
-    for field in fields:
-      field = field.strip()
-      if str.isdecimal(field):
-        ftmp.append(int(field))
-      elif '.' in field:
-        ftmp.append(float(field))
-      else:
-        ftmp.append(0)
-    return (date(*ftmp[:3]), *ftmp[3:])
+  def convert(line):
+    #                         Sunspot       Stanford GOES15
+    #           Radio  SESC     Area          Solar  X-Ray  ------ Flares ------
+    #           Flux  Sunspot  10E-6   New     Mean  Bkgd    X-Ray      Optical
+    #  Date     10.7cm Number  Hemis. Regions Field  Flux   C  M  X  S  1  2  3
+    fields = line.split()[:6]
+    fields = [int(f) for f in fields]
+    return (date(*fields[:3]), *fields[3:])
 
   @staticmethod
   def read_cache(cache_file):
@@ -87,31 +86,23 @@ class SSN:
       return None
 
     x = np.array([d[0] for d in self.data])
-    y = np.array([int(x[2]) for x in self.data])
-    error = np.array([float(x[3]) for x in self.data])
-    vdata = np.array([int(x[4]) for x in self.data])
-    cdata = np.array([int(x[5]) for x in self.data])
+    y = np.array([x[2] for x in self.data])
+    f = np.array([x[1] for x in self.data])
 
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M')
     fig = plt.figure(figsize=(12, 5))
-    fig.suptitle('Estimated International Sunspot Number (EISN)', fontsize=14)
+    fig.suptitle('Sunspot Number (SSN)', fontsize=14)
     fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
     axgc = plt.gca()
-    axgc.plot(x, y, color="blue")
-    axgc.plot(x, vdata, '^', linewidth=0, color='orange')
-    axgc.plot(x, cdata, 'v', linewidth=0, color='green')
-    axgc.errorbar(x, y, yerr=error, fmt='o', color='green',
-                  ecolor='darkolivegreen', elinewidth=1.5, capsize=7,
-                  capthick=1)
-    axgc.legend(['EISN', 'Valid Data', 'Entries'], loc='upper left',
-                facecolor="linen")
-    loc = mdates.DayLocator(interval=3)
+    axgc.plot(x, y, marker='d', markersize=7, color="darkolivegreen", linewidth=1)
+    axgc.plot(x, f, linestyle='-', color="cornflowerblue", linewidth=.75)
+    loc = mdates.DayLocator(interval=5)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_tick_params(labelsize=10)
-    axgc.set_ylim(0, y.max()*1.2)
-
-    axgc.grid()
+    axgc.set_ylim(y.min() * 0.2, y.max()*1.2)
+    axgc.legend(['Sun spot', '10.7cm Flux'])
+    axgc.grid(color='darkgray', linestyle='-.', linewidth=.5)
     axgc.margins(.01)
     fig.autofmt_xdate()
     plt.savefig(filename, transparent=False, dpi=100)
