@@ -37,14 +37,10 @@ def main():
     detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES
   )
 
-  for retry in range(1, 5):            # number of retries.
-    try:
-      logging.info('Attempt %d', retry)
-      purge(conn, purge_time)
-    except sqlite3.OperationalError:
-      pass
-    else:
-      break
+  try:
+    purge(conn, purge_time)
+  except sqlite3.OperationalError as err:
+    logging.error(err)
 
 if __name__ == "__main__":
   main()
