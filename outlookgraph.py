@@ -76,7 +76,7 @@ class OutLook:
     ax2 = ax1.twinx()
     ax2.plot(dates, flux, "darkgreen", linewidth=1.5, label='Flux')
     ax2.set_ylim([50, max(flux) * 1.12])
-    ax2.set_ylabel('Flux', fontweight='bold')
+    ax2.set_ylabel('Flux')
     ax2.grid(color='lightgray', linestyle='dashed', linewidth=.5)
     ax2.legend(loc='upper right')
 
