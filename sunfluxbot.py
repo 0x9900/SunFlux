@@ -209,11 +209,12 @@ def help_command(update: Update, context: CallbackContext):
     "> /alerts - NOAA Alerts",
     "> /drap - D Layer Absorption Prediction",
     "> /dxcc - Show dxcc contacts",
+    "> /eisn - Sun Spots Predictions",
     "> /flux - 10cm Flux",
-    "> /muf - Maximum Usable Frequency",
     "> /geost - Geo-Space Time line",
     "> /kpindex - K Index",
     "> /legend - Index information",
+    "> /muf - Maximum Usable Frequency",
     "> /outlook - 27 day Solar Predictions",
     "> /ssn - Sun Spots",
     "> /swx - Solar indices overview",
@@ -333,6 +334,38 @@ def send_ssn(update: Update, context: CallbackContext):
 
   user = update.message.chat.username or "Stranger"
   logger.info(f"Command /ssn by {user}:{chat_id}")
+  return ConversationHandler.END
+
+def send_eisn(update: Update, context: CallbackContext):
+  config = Config()
+  cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
+  now = time.time()
+  image = os.path.join(cache_dir, 'eisn.png')
+  chat_id = update.message.chat_id
+  today = datetime.now().strftime('%a %b %d %Y')
+
+  try:
+    img_st = os.stat(image)
+    if now - img_st.st_mtime > IMG_CACHE_TIME:
+      raise FileNotFoundError
+  except (FileNotFoundError, EOFError):
+    cmd = os.path.join(sys.path[0], "eisngraph")
+    status = subprocess.call([cmd], shell=False)
+    logging.info(f'Call {cmd} returned {status}')
+    if status:
+      logging.error('Error generating the sun spot prediction graph')
+      context.bot.send_message(chat_id, (
+        'The Sun Spot Preditions graph is not available at the moment\n'
+        'Please come back latter.'))
+      return ConversationHandler.END
+
+  context.bot.send_photo(
+    chat_id=chat_id, photo=open(image, 'rb'),
+    caption="Estimated International Sunspot Number: {}".format(today),
+    filename=os.path.basename(image), timeout=100)
+
+  user = update.message.chat.username or "Stranger"
+  logger.info(f"Command /eisn by {user}:{chat_id}")
   return ConversationHandler.END
 
 def send_drap(update: Update, context: CallbackContext):
@@ -617,6 +650,7 @@ def main():
   updater.dispatcher.add_handler(CommandHandler('credits', send_credits))
   updater.dispatcher.add_handler(CommandHandler('drap', send_drap))
   updater.dispatcher.add_handler(CommandHandler('dxcc', dxcc_handler))
+  updater.dispatcher.add_handler(CommandHandler('eisn', send_eisn))
   updater.dispatcher.add_handler(CommandHandler('flux', send_flux))
   updater.dispatcher.add_handler(CommandHandler('geost', send_geost))
   updater.dispatcher.add_handler(CommandHandler('help', help_command))
