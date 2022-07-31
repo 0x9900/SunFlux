@@ -38,6 +38,7 @@ setup(
       'outlookgraph = outlookgraph:main',
       'showdxcc = showdxcc:main',
       'ssngraph = ssngraph:main',
+      'eisngraph = eisngraph:main',
       'sunfluxbot = sunfluxbot:main',
     ]
   },
