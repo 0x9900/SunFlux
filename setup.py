@@ -28,7 +28,7 @@ setup(
   ),
   py_modules=['config', 'adapters', 'dxcluster', 'fluxgraph',
               'kpindexgraph', 'outlookgraph', 'showdxcc',
-              'ssngraph', 'eisngraph', 'sunfluxbot'],
+              'ssngraph', 'eisngraph', 'sunfluxbot', 'purge_cluster'],
   install_requires=['numpy', 'matplotlib', 'python-telegram-bot'],
   entry_points = {
     'console_scripts': [
@@ -40,6 +40,7 @@ setup(
       'ssngraph = ssngraph:main',
       'eisngraph = eisngraph:main',
       'sunfluxbot = sunfluxbot:main',
+      'purge_cluster = purge_cluster:main',
     ]
   },
   package_data={
