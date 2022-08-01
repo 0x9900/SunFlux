@@ -14,6 +14,8 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 
+from matplotlib.dates import DateFormatter, DayLocator
+
 from config import Config
 
 plt.style.use(['classic', 'seaborn-talk'])
@@ -110,9 +112,11 @@ class EISN:
 
     axgc.legend(['EISN', 'Valid Data', 'Entries'], loc='upper left',
                 facecolor="linen")
-    loc = mdates.DayLocator(interval=3)
+
+    loc = mdates.DayLocator(interval=4)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
     axgc.xaxis.set_major_locator(loc)
+    axgc.xaxis.set_minor_locator(DayLocator())
     axgc.set_ylim(0, y.max()*1.2)
 
     axgc.grid()
