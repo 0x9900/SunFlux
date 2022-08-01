@@ -11,7 +11,6 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import numpy as np
 
-from adapters import adapt_datetime, convert_datetime
 from config import Config
 
 CONTINENTS = ['AF', 'AS', 'EU', 'NA', 'OC', 'SA']
@@ -25,15 +24,13 @@ GROUP BY band, to_cont;
 """
 
 def get_dxcc(config, continent, filename):
-  db_cluster = config['showdxcc.db_name']
-  inter = config.get('showdxcc.interleave', 'gaussian')
+  # pylint: disable=too-many-locals
   color_map = config.get('showdxcc.color_map', 'PRGn')
   dxcc = CONTINENTS
-  bands = BANDS
   now = datetime.utcnow()
   time_span = now - timedelta(hours=1, minutes=0)
   conn = sqlite3.connect(
-    db_cluster,
+    config['showdxcc.db_name'],
     timeout=5,
     detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES
   )
@@ -42,22 +39,24 @@ def get_dxcc(config, continent, filename):
     curs = conn.cursor()
     results = curs.execute(REQUEST, (continent, time_span,)).fetchall()
 
-  data = np.zeros((len(dxcc), len(bands)), dtype=int)
+  data = np.zeros((len(dxcc), len(BANDS)), dtype=int)
   for band, _, to_continent, count in results:
     x = dxcc.index(to_continent)
-    y = bands.index(band)
+    y = BANDS.index(band)
     data[x, y] = count
 
   facecolor = 'white' if 6 < now.hour <= 18 else 'gray'
   fig, axgc = plt.subplots(figsize=(12,8), facecolor=facecolor)
 
   # Show all ticks and label them with the respective list entries
-  plt.xticks(np.arange(len(bands)), labels=bands, fontsize=14)
+  plt.xticks(np.arange(len(BANDS)), labels=BANDS, fontsize=14)
   plt.xlabel("Bands", fontsize=14)
   plt.yticks(np.arange(len(dxcc)), labels=dxcc, fontsize=14)
   plt.ylabel("DX Continent", fontsize=14)
 
-  image = axgc.imshow(data, cmap=color_map, interpolation=inter)
+  image = axgc.imshow(
+    data, cmap=color_map, interpolation=config.get('showdxcc.interleave', 'gaussian')
+  )
   axgc.set_aspect(aspect=1)
   axgc.tick_params(top=True, bottom=True, labeltop=True, labelbottom=True)
 
@@ -68,13 +67,13 @@ def get_dxcc(config, continent, filename):
   # Loop over data dimensions and create text annotations.
   threshold = np.percentile(data, 96)
   for i in range(len(dxcc)):
-    for j in range(len(bands)):
+    for j in range(len(BANDS)):
       if data[i, j] < 1:
         continue
       color = 'firebrick' if data[i, j] > threshold else 'lime'
       axgc.text(j, i, data[i, j], ha="center", va="center", color=color)
 
-  axgc.set_title(f"DX Spots From {continent}", fontsize=22)
+  axgc.set_title(f"DX Spots From {continent}", fontsize=14, fontweight='bold')
   fig.text(0.01, 0.02, 'SunFluxBot By W6BSD {}'.format(now.strftime('%Y:%m:%d %H:%M')))
   fig.tight_layout()
   fig.savefig(filename, transparent=False, dpi=100)

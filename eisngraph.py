@@ -14,8 +14,6 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 
-from matplotlib.dates import DateFormatter, DayLocator
-
 from config import Config
 
 plt.style.use(['classic', 'seaborn-talk'])
@@ -97,7 +95,7 @@ class EISN:
 
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M')
     fig = plt.figure(figsize=(12, 5))
-    fig.suptitle('Estimated International Sunspot Number (EISN)', fontsize=14)
+    fig.suptitle('Estimated International Sunspot Number (EISN)', fontsize=14, fontweight='bold')
     fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
     axgc = plt.gca()
     axgc.tick_params(labelsize=10)
@@ -116,7 +114,7 @@ class EISN:
     loc = mdates.DayLocator(interval=4)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
     axgc.xaxis.set_major_locator(loc)
-    axgc.xaxis.set_minor_locator(DayLocator())
+    axgc.xaxis.set_minor_locator(mdates.DayLocator())
     axgc.set_ylim(0, y.max()*1.2)
 
     axgc.grid(color="gray", linestyle="dotted", linewidth=.5)

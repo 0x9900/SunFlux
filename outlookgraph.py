@@ -60,7 +60,7 @@ class OutLook:
     now = datetime.utcnow().strftime('%Y/%m/%d %H:%M')
 
     fig, ax1 = plt.subplots(figsize=(12, 5))
-    fig.suptitle('27 day Solar Predictions', fontsize=16, fontweight='bold')
+    fig.suptitle('27 day Solar Predictions', fontsize=14, fontweight='bold')
     plt.tick_params(labelsize=10)
     fig.autofmt_xdate(rotation=10, ha="center")
 

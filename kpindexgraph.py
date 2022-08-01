@@ -58,7 +58,7 @@ class KPIndex:
 
     date = datetime.utcnow().strftime('%Y:%m:%d %H:%M')
     fig = plt.figure()
-    fig.suptitle('Planetary KPIndex (Boulder)', fontsize=14)
+    fig.suptitle('Planetary KPIndex (Boulder)', fontsize=14, fontweight='bold')
     axgc = plt.gca()
     axgc.plot(x, y, color='navy')
 

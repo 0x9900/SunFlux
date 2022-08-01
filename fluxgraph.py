@@ -14,8 +14,6 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 
-from matplotlib.dates import DateFormatter, DayLocator
-
 from config import Config
 
 plt.style.use(['classic', 'seaborn-talk'])
@@ -51,7 +49,7 @@ class Flux:
 
     date = datetime.utcnow().strftime('%Y/%m/%d %H:%M')
     fig = plt.figure(figsize=(12, 5))
-    fig.suptitle('Daily 10cm Flux Index', fontsize=14)
+    fig.suptitle('Daily 10cm Flux Index', fontsize=14, fontweight='bold')
     axgc = plt.gca()
     axgc.plot(x, y)
     axgc.tick_params(labelsize=10)
@@ -59,7 +57,7 @@ class Flux:
     loc = mdates.DayLocator(interval=4)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
     axgc.xaxis.set_major_locator(loc)
-    axgc.xaxis.set_minor_locator(DayLocator())
+    axgc.xaxis.set_minor_locator(mdates.DayLocator())
 
     ticks = np.arange(40, int(y.max() * 1.25), 20)
     axgc.set_yticks(ticks)

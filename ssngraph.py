@@ -13,9 +13,6 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 
-from matplotlib.dates import DateFormatter, DayLocator
-from matplotlib.ticker import AutoMinorLocator
-
 from config import Config
 
 plt.style.use(['classic', 'seaborn-talk'])
@@ -94,7 +91,7 @@ class SSN:
 
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M')
     fig = plt.figure(figsize=(12, 5))
-    fig.suptitle('Sunspot Number (SSN)', fontsize=14)
+    fig.suptitle('Sunspot Number (SSN)', fontsize=14, fontweight='bold')
     fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
     axgc = plt.gca()
     axgc.tick_params(labelsize=10)
@@ -103,7 +100,7 @@ class SSN:
     loc = mdates.DayLocator(interval=5)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
     axgc.xaxis.set_major_locator(loc)
-    axgc.xaxis.set_minor_locator(DayLocator())
+    axgc.xaxis.set_minor_locator(mdates.DayLocator())
 
     axgc.set_ylim(np.min([ssn, flux])*0.2, np.max([ssn, flux])*1.2)
 
