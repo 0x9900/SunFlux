@@ -13,6 +13,9 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 
+from matplotlib.dates import DateFormatter, DayLocator
+from matplotlib.ticker import AutoMinorLocator
+
 from config import Config
 
 plt.style.use(['classic', 'seaborn-talk'])
@@ -94,17 +97,22 @@ class SSN:
     fig.suptitle('Sunspot Number (SSN)', fontsize=14)
     fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
     axgc = plt.gca()
-    axgc.plot(x, ssn, marker='d', markersize=7, color="darkolivegreen", linewidth=1)
-    axgc.plot(x, flux, linestyle='-', color="cornflowerblue", linewidth=.75)
+    axgc.plot(x, ssn, marker='o', markersize=7, color="darkolivegreen", linewidth=2)
+    axgc.plot(x, flux, linestyle='--', color="cornflowerblue", linewidth=1)
     loc = mdates.DayLocator(interval=5)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_tick_params(labelsize=10)
+    axgc.xaxis.set_minor_locator(DayLocator())
+
     axgc.set_ylim(np.min([ssn, flux])*0.2, np.max([ssn, flux])*1.2)
-    axgc.legend(['Sun spot', '10.7cm Flux'])
+    axgc.yaxis.set_tick_params(labelsize=10)
+
+    axgc.legend(['Sun spot', '10.7cm Flux'], facecolor="linen")
     axgc.grid(color='darkgray', linestyle='-.', linewidth=.5)
+
     axgc.margins(.01)
-    fig.autofmt_xdate()
+    fig.autofmt_xdate(rotation=10)
     plt.savefig(filename, transparent=False, dpi=100)
     plt.close()
     self.log.info('Graph "%s" saved', filename)
