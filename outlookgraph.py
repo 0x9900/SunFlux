@@ -76,7 +76,7 @@ class OutLook:
     # second axis
     ax2 = ax1.twinx()
     ax2.plot(dates, flux, "darkgreen", linewidth=1.5, label='Flux')
-    ax2.set_ylim([50, max(flux) * 1.12])
+    ax2.set_ylim([min(flux) * 0.95, max(flux) * 1.05])
     ax2.set_ylabel('Flux')
     ax2.grid(color="green", linestyle="dotted", linewidth=.5)
     ax2.legend(loc='upper right')
