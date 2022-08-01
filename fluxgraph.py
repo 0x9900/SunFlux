@@ -14,6 +14,8 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 
+from matplotlib.dates import DateFormatter, DayLocator
+
 from config import Config
 
 plt.style.use(['classic', 'seaborn-talk'])
@@ -54,9 +56,12 @@ class Flux:
     axgc.plot(x, y)
     axgc.tick_params(labelsize=10)
 
-    ticks = np.arange(40, int(y.max() * 1.25), 20)
+    loc = mdates.DayLocator(interval=4)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
-    axgc.xaxis.set_major_locator(mdates.DayLocator(interval=3))
+    axgc.xaxis.set_major_locator(loc)
+    axgc.xaxis.set_minor_locator(DayLocator())
+
+    ticks = np.arange(40, int(y.max() * 1.25), 20)
     axgc.set_yticks(ticks)
 
     axgc.axhspan(90, ticks.max(), facecolor='green', alpha=0.4, label='Good')
@@ -64,7 +69,7 @@ class Flux:
     axgc.axhspan(40, 70, facecolor='red', alpha=0.4, label='Bad')
     axgc.legend(fontsize=10, loc="upper left")
 
-    axgc.grid()
+    axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
     fig.autofmt_xdate(rotation=10, ha="center")
     plt.figtext(0.02, 0.02, f'SunFluxBot By W6BSD {date}')
     plt.savefig(filename, transparent=False, dpi=100)

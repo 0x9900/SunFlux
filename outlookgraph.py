@@ -70,7 +70,7 @@ class OutLook:
     ax1.set_ylim([0, aindex.max() * 1.15])
     ax1.set_ylabel('Index')
     ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y %b %d'))
-    ax1.grid(color='gray', linestyle='dotted', linewidth=.5)
+    ax1.grid(color="gray", linestyle="dotted", linewidth=.5)
     ax1.legend(loc='upper left')
 
     # second axis
@@ -78,7 +78,7 @@ class OutLook:
     ax2.plot(dates, flux, "darkgreen", linewidth=1.5, label='Flux')
     ax2.set_ylim([50, max(flux) * 1.12])
     ax2.set_ylabel('Flux')
-    ax2.grid(color='lightgray', linestyle='dashed', linewidth=.5)
+    ax2.grid(color="green", linestyle="dotted", linewidth=.5)
     ax2.legend(loc='upper right')
 
     plt.subplots_adjust(bottom=0.20)

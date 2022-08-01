@@ -109,7 +109,7 @@ class SSN:
 
 
     axgc.legend(['Sun spot', '10.7cm Flux'], facecolor="linen")
-    axgc.grid(color='darkgray', linestyle='-.', linewidth=.5)
+    axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
 
     axgc.margins(.01)
     fig.autofmt_xdate(rotation=10, ha="center")

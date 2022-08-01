@@ -119,7 +119,7 @@ class EISN:
     axgc.xaxis.set_minor_locator(DayLocator())
     axgc.set_ylim(0, y.max()*1.2)
 
-    axgc.grid()
+    axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
     axgc.margins(.01)
     fig.autofmt_xdate(rotation=10, ha="center")
     plt.savefig(filename, transparent=False, dpi=100)

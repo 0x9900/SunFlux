@@ -72,7 +72,7 @@ class KPIndex:
     axgc.axhspan(0, 3, facecolor='green', alpha=0.4, label="Good")
     axgc.legend(loc="upper left")
 
-    axgc.grid()
+    axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
     fig.autofmt_xdate()
     plt.figtext(0.02, 0.02, f'SunFluxBot By W6BSD {date}')
     plt.savefig(filename, transparent=False, dpi=100)
