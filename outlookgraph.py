@@ -61,6 +61,8 @@ class OutLook:
 
     fig, ax1 = plt.subplots(figsize=(12, 5))
     fig.suptitle('27 day Solar Predictions', fontsize=16, fontweight='bold')
+    plt.tick_params(labelsize=10)
+    fig.autofmt_xdate(rotation=10, ha="center")
 
     # first axis
     ax1.plot(dates, aindex, ":b", linewidth=1.5, label='A-index')
@@ -68,7 +70,6 @@ class OutLook:
     ax1.set_ylim([0, aindex.max() * 1.15])
     ax1.set_ylabel('Index')
     ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y %b %d'))
-    ax1.xaxis.set_tick_params(rotation=25, labelsize=12)
     ax1.grid(color='gray', linestyle='dotted', linewidth=.5)
     ax1.legend(loc='upper left')
 

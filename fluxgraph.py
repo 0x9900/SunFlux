@@ -52,12 +52,11 @@ class Flux:
     fig.suptitle('Daily 10cm Flux Index', fontsize=14)
     axgc = plt.gca()
     axgc.plot(x, y)
+    axgc.tick_params(labelsize=10)
 
-    loc = mdates.DayLocator(interval=3)
     ticks = np.arange(40, int(y.max() * 1.25), 20)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
-    axgc.xaxis.set_major_locator(loc)
-    axgc.xaxis.set_tick_params(labelsize=10)
+    axgc.xaxis.set_major_locator(mdates.DayLocator(interval=3))
     axgc.set_yticks(ticks)
 
     axgc.axhspan(90, ticks.max(), facecolor='green', alpha=0.4, label='Good')
@@ -66,7 +65,7 @@ class Flux:
     axgc.legend(fontsize=10, loc="upper left")
 
     axgc.grid()
-    fig.autofmt_xdate()
+    fig.autofmt_xdate(rotation=10, ha="center")
     plt.figtext(0.02, 0.02, f'SunFluxBot By W6BSD {date}')
     plt.savefig(filename, transparent=False, dpi=100)
     plt.close()
