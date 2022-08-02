@@ -128,7 +128,6 @@ class DXCC:
       else:
         LOG.error('No match for %s', tag)
 
-
     return dxmap
 
   def lookup(self, call):
@@ -227,6 +226,7 @@ def parse_spot(line):
       call_to.cqzone,
     ])
   except (KeyError, ValueError) as err:
+    LOG.warning(line)
     LOG.warning(err)
     return None
   return Record(fields)
