@@ -207,27 +207,47 @@ def parse_spot(line):
     parse_spot.dxcc = DXCC()
 
   line = line.decode('UTF-8')
-  pos = line.index(':')
+  elem = line.split()
+
   try:
     fields = [
-      line[6:pos].replace('-#','').strip(),
-      float(line[pos+1:26].strip()),
-      line[26:39].strip(),
-      line[39:70].strip(),
+      elem[2].strip('-#:'),
+      float(elem[3]),
+      elem[4],
+      ' '.join(elem[5:len(elem) - 1]),
     ]
-    call_de = parse_spot.dxcc.lookup(fields[0])
-    call_to = parse_spot.dxcc.lookup(fields[2])
-    fields.extend([
-      call_de.continent,
-      call_to.continent,
-      call_de.ituzone,
-      call_to.ituzone,
-      call_de.cqzone,
-      call_to.cqzone,
-    ])
-  except (KeyError, ValueError) as err:
+  except ValueError:
     LOG.warning("%s | %s", err, line.rstrip())
     return None
+
+  for c_code in fields[0].split('/', 1):
+    try:
+      call_de = parse_spot.dxcc.lookup(c_code)
+      break
+    except KeyError:
+      pass
+  else:
+    LOG.warning("%s Not found | %s", fields[0], line.rstrip())
+    return None
+
+  for c_code  in fields[2].split('/', 1):
+    try:
+      call_to = parse_spot.dxcc.lookup(c_code)
+      break
+    except KeyError:
+      pass
+  else:
+    LOG.warning("%s Not found | %s", fields[2], line.rstrip())
+    return None
+
+  fields.extend([
+    call_de.continent,
+    call_to.continent,
+    call_de.ituzone,
+    call_to.ituzone,
+    call_de.cqzone,
+    call_to.cqzone,
+  ])
   return Record(fields)
 
 
@@ -337,7 +357,8 @@ def main():
       LOG.info("%s identified", config['call'])
       read_stream(conn, telnet)
     except OSError as err:
-      LOG.error(err)
+      LOG.error("%s - %s - Sleeping 10 seconds before retrying", err, cluster)
+      time.sleep(10)
 
 if __name__ == "__main__":
   main()
