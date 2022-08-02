@@ -226,8 +226,7 @@ def parse_spot(line):
       call_to.cqzone,
     ])
   except (KeyError, ValueError) as err:
-    LOG.warning(line)
-    LOG.warning(err)
+    LOG.warning("%s | %s", err, line.rstrip())
     return None
   return Record(fields)
 
