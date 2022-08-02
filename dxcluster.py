@@ -211,9 +211,9 @@ def parse_spot(line):
   try:
     fields = [
       line[6:pos].replace('-#','').strip(),
-      float(line[pos+1:26].lstrip()),
-      line[26:39].rstrip(),
-      line[39:70].rstrip(),
+      float(line[pos+1:26].strip()),
+      line[26:39].strip(),
+      line[39:70].strip(),
     ]
     call_de = parse_spot.dxcc.lookup(fields[0])
     call_to = parse_spot.dxcc.lookup(fields[2])
