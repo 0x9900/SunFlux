@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-
+import argparse
 import logging
 import os
 import sqlite3
@@ -11,8 +11,8 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import numpy as np
 
-import adapters
-
+import adapters                 # pylint: disable=unused-import
+                                # pylint is lyging
 from config import Config
 
 CONTINENTS = ['AF', 'AS', 'EU', 'NA', 'OC', 'SA']
@@ -21,64 +21,87 @@ BANDS = [6, 10, 12, 15, 17, 20, 30, 40, 60, 80, 160]
 REQUEST = """
 SELECT band, de_cont, to_cont, COUNT(*)
 FROM dxspot
-WHERE band >= 6 AND de_cont == ? AND to_cont != '' AND time > ?
+WHERE band >= 6 AND de_cont == ? AND time > ? AND time <= ?
 GROUP BY band, to_cont;
 """
 
-def get_dxcc(config, continent, filename):
-  # pylint: disable=too-many-locals
-  color_map = config.get('showdxcc.color_map', 'PRGn')
-  dxcc = CONTINENTS
-  now = datetime.utcnow()
-  time_span = now - timedelta(hours=1, minutes=0)
-  conn = sqlite3.connect(
-    config['showdxcc.db_name'],
-    timeout=5,
-    detect_types=sqlite3.PARSE_DECLTYPES
-  )
+class ShowDXCC:
 
-  with conn:
-    curs = conn.cursor()
-    results = curs.execute(REQUEST, (continent, time_span,)).fetchall()
+  def __init__(self, config, continent, date=None):
+    self.config = config
+    self.continent = continent
+    self.date = date if date else datetime.utcnow()
+    self.data = None
 
-  data = np.zeros((len(dxcc), len(BANDS)), dtype=int)
-  for band, _, to_continent, count in results:
-    x = dxcc.index(to_continent)
-    y = BANDS.index(band)
-    data[x, y] = count
+  def get_dxcc(self):
+    # pylint: disable=too-many-locals
+    start_date = self.date - timedelta(hours=1, minutes=0)
+    end_date = self.date
 
-  facecolor = 'white' if 6 < now.hour <= 18 else 'gray'
-  fig, axgc = plt.subplots(figsize=(12,8), facecolor=facecolor)
+    conn = sqlite3.connect(
+      self.config['showdxcc.db_name'],
+      timeout=5,
+      detect_types=sqlite3.PARSE_DECLTYPES
+    )
+    with conn:
+      curs = conn.cursor()
+      results = curs.execute(REQUEST, (self.continent, start_date, end_date)).fetchall()
 
-  # Show all ticks and label them with the respective list entries
-  plt.xticks(np.arange(len(BANDS)), labels=BANDS, fontsize=14)
-  plt.xlabel("Bands", fontsize=14)
-  plt.yticks(np.arange(len(dxcc)), labels=dxcc, fontsize=14)
-  plt.ylabel("DX Continent", fontsize=14)
+    self.data = np.zeros((len(CONTINENTS), len(BANDS)), dtype=int)
+    for band, _, to_continent, count in results:
+      x = CONTINENTS.index(to_continent)
+      y = BANDS.index(band)
+      self.data[x, y] = count
 
-  image = axgc.imshow(
-    data, cmap=color_map, interpolation=config.get('showdxcc.interleave', 'gaussian')
-  )
-  axgc.set_aspect(aspect=1)
-  axgc.tick_params(top=True, bottom=True, labeltop=True, labelbottom=True)
+  def graph(self, filename):
+    color_map = self.config.get('showdxcc.color_map', 'PRGn')
+    facecolor = 'white' if 6 < self.date.hour <= 18 else 'gray'
 
-  cbar = axgc.figure.colorbar(image, ax=axgc)
-  cbar.ax.set_ylabel("Number of contacts for the last hour",
-                     rotation=-90, va="bottom")
+    fig, axgc = plt.subplots(figsize=(12,8), facecolor=facecolor)
 
-  # Loop over data dimensions and create text annotations.
-  threshold = np.percentile(data, 96)
-  for i in range(len(dxcc)):
-    for j in range(len(BANDS)):
-      if data[i, j] < 1:
-        continue
-      color = 'firebrick' if data[i, j] > threshold else 'lime'
-      axgc.text(j, i, data[i, j], ha="center", va="center", color=color)
+    # Show all ticks and label them with the respective list entries
+    plt.xticks(np.arange(len(BANDS)), labels=BANDS, fontsize=14)
+    plt.xlabel("Bands", fontsize=14)
+    plt.yticks(np.arange(len(CONTINENTS)), labels=CONTINENTS, fontsize=14)
+    plt.ylabel("DX Continent", fontsize=14)
 
-  axgc.set_title(f"DX Spots From {continent}", fontsize=14, fontweight='bold')
-  fig.text(0.01, 0.02, 'SunFluxBot By W6BSD {}'.format(now.strftime('%Y:%m:%d %H:%M')))
-  fig.tight_layout()
-  fig.savefig(filename, transparent=False, dpi=100)
+    image = axgc.imshow(
+      self.data, cmap=color_map,
+      interpolation=self.config.get('showdxcc.interleave', 'gaussian')
+    )
+    axgc.set_aspect(aspect=1)
+    axgc.tick_params(top=True, bottom=True, labeltop=True, labelbottom=True)
+
+    cbar = axgc.figure.colorbar(image, ax=axgc)
+    cbar.ax.set_ylabel("Number of contacts for the last hour",
+                       rotation=-90, va="bottom")
+
+    # Loop over data dimensions and create text annotations.
+    threshold = np.percentile(self.data, 96)
+    for i in range(len(CONTINENTS)):
+      for j in range(len(BANDS)):
+        if self.data[i, j] < 1:
+          continue
+        color = 'firebrick' if self.data[i, j] > threshold else 'lime'
+        axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
+
+    axgc.set_title(f"DX Spots From {self.continent}", fontsize=14, fontweight='bold')
+    fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {self.date.strftime("%Y:%m:%d %H:%M")}')
+    fig.tight_layout()
+    fig.savefig(filename, transparent=False, dpi=100)
+
+
+def type_date(parg):
+  if parg == 'now':
+    date = datetime.utcnow()
+    date = date.replace(second=0, microsecond=0)
+    return date
+
+  try:
+    date = datetime.strptime(parg, '%Y%m%d%H%M')
+  except ValueError:
+    raise argparse.ArgumentTypeError from None
+  return date
 
 def main():
   config = Config()
@@ -87,25 +110,26 @@ def main():
     format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%H:%M:%S',
     level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
   )
-  if len(sys.argv) < 2:
-    logging.error("showdxcc [%s]", '|'.join(CONTINENTS))
-    sys.exit(os.EX_USAGE)
 
-  continent = sys.argv[1].upper()
-  if continent not in CONTINENTS:
-    logging.error("showdxcc [%s]", '|'.join(CONTINENTS))
-    sys.exit(os.EX_USAGE)
+  parser = argparse.ArgumentParser(description="Graph dxcc trafic")
+  parser.add_argument("-d", "--date", type=type_date, default='now', help="Graph date")
+  parser.add_argument('continent', choices=CONTINENTS)
+  parser.add_argument('args', nargs="*")
+  opts = parser.parse_args()
 
-  if len(sys.argv) == 3:
-    filename = os.path.join('/tmp', sys.argv[2])
+  if opts.args:
+    filename = opts.args[0]
   else:
     tmpdir = config.get('showdxcc.target_dir', '/var/tmp/dxcc')
-    target_dir = os.path.join(tmpdir, continent)
+    target_dir = os.path.join(tmpdir, opts.continent)
     os.makedirs(target_dir, exist_ok=True)
-    now = datetime.utcnow().strftime('%Y%m%d%H%M')
-    filename = os.path.join(target_dir, f'dxcc-{continent}-{now}.png')
+    now = opts.date.strftime('%Y%m%d%H%M')
+    filename = os.path.join(target_dir, f'dxcc-{opts.continent}-{now}.png')
 
-  get_dxcc(config, continent, filename)
+  showdxcc = ShowDXCC(config, opts.continent, opts.date)
+  showdxcc.get_dxcc()
+  showdxcc.graph(filename)
+
   logging.info('Save %s', filename)
   sys.exit(os.EX_OK)
 
