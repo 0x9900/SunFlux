@@ -216,6 +216,7 @@ def help_command(update: Update, context: CallbackContext):
     "> /legend - Index information",
     "> /muf - Maximum Usable Frequency",
     "> /outlook - 27 day Solar Predictions",
+    "> /eisn - Estimated International Sunspot Number",
     "> /ssn - Sun Spots",
     "> /swx - Solar indices overview",
     "> /warning - Warning time lines",
