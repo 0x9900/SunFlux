@@ -11,6 +11,8 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import numpy as np
 
+import adapters
+
 from config import Config
 
 CONTINENTS = ['AF', 'AS', 'EU', 'NA', 'OC', 'SA']
@@ -32,7 +34,7 @@ def get_dxcc(config, continent, filename):
   conn = sqlite3.connect(
     config['showdxcc.db_name'],
     timeout=5,
-    detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES
+    detect_types=sqlite3.PARSE_DECLTYPES
   )
 
   with conn:

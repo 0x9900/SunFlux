@@ -216,7 +216,7 @@ def parse_spot(line):
       elem[4],
       ' '.join(elem[5:len(elem) - 1]),
     ]
-  except ValueError:
+  except ValueError as err:
     LOG.warning("%s | %s", err, line.rstrip())
     return None
 
