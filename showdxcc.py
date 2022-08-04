@@ -11,8 +11,8 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import numpy as np
 
-import adapters                 # pylint: disable=unused-import
-                                # pylint is lyging
+import adapters
+
 from config import Config
 
 CONTINENTS = ['AF', 'AS', 'EU', 'NA', 'OC', 'SA']
@@ -104,6 +104,7 @@ def type_date(parg):
   return date
 
 def main():
+  adapters.install_adapers()
   config = Config()
 
   logging.basicConfig(

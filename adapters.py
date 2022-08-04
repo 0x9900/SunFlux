@@ -14,5 +14,6 @@ def convert_datetime(t_stamp):
   except ValueError:
     return None
 
-sqlite3.register_adapter(datetime, adapt_datetime)
-sqlite3.register_converter('timestamp', convert_datetime)
+def install_adapers():
+  sqlite3.register_adapter(datetime, adapt_datetime)
+  sqlite3.register_converter('timestamp', convert_datetime)

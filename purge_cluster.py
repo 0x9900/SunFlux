@@ -25,6 +25,7 @@ def purge(conn, purge_time):
     logging.info('%d record deleted', curs.rowcount)
 
 def main():
+  adapters.install_adapers()
   config = Config()
   delta = timedelta(hours=config.get('dxcluster.purge_time', 12))
   cnx_timeout = int(config['dxcluster.db_timeout']/3) or 1

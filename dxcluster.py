@@ -68,9 +68,6 @@ CREATE INDEX IF NOT EXISTS wwv_idx_time on wwv (time DESC);
 TELNET_TIMEOUT = 37
 DETECT_TYPES = sqlite3.PARSE_DECLTYPES
 
-sqlite3.register_adapter(datetime, adapters.adapt_datetime)
-sqlite3.register_converter('timestamp', adapters.convert_datetime)
-
 LOG = logging.getLogger(__name__)
 
 class DXCCRecord:
@@ -317,8 +314,11 @@ def read_stream(cdb, cnx):
 def main():
   global LOG                    # pylint: disable=global-statement
 
+  adapters.install_adapers()
+
   _config = Config()
   config = _config.get('dxcluster')
+  del _config
 
   logging.basicConfig(
     format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s',
