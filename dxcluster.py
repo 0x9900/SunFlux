@@ -206,18 +206,21 @@ def parse_spot(line):
   if not hasattr(parse_spot, 'dxcc'):
     parse_spot.dxcc = DXCC()
 
-  line = line.decode('UTF-8')
-  elem = line.split()
+  if not hasattr(parse_spot, 'splitter'):
+    parse_spot.splitter = re.compile(r'[:\s]+').split
+
+  line = line.decode('UTF-8').rstrip()
+  elem = parse_spot.splitter(line)[2:]
 
   try:
     fields = [
-      elem[2].strip('-#:'),
-      float(elem[3]),
-      elem[4],
-      ' '.join(elem[5:len(elem) - 1]),
+      elem[0].strip('-#'),
+      float(elem[1]),
+      elem[2],
+      ' '.join(elem[3:len(elem) - 1]),
     ]
   except ValueError as err:
-    LOG.warning("%s | %s", err, line.rstrip())
+    LOG.warning("%s | %s", err, line)
     return None
 
   for c_code in fields[0].split('/', 1):
@@ -227,7 +230,7 @@ def parse_spot(line):
     except KeyError:
       pass
   else:
-    LOG.warning("%s Not found | %s", fields[0], line.rstrip())
+    LOG.warning("%s Not found | %s", fields[0], line)
     return None
 
   for c_code  in fields[2].split('/', 1):
@@ -237,7 +240,7 @@ def parse_spot(line):
     except KeyError:
       pass
   else:
-    LOG.warning("%s Not found | %s", fields[2], line.rstrip())
+    LOG.warning("%s Not found | %s", fields[2], line)
     return None
 
   fields.extend([
