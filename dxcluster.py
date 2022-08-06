@@ -334,14 +334,15 @@ def main():
 
   clusters = []
   for server in config['servers']:
-    clusters.append(server.split(':'))
+    host, port = server.split(':')
+    clusters.append((host, int(port)))
 
   try:
     conn = sqlite3.connect(
       config['db_name'],
       timeout=config['db_timeout'],
       detect_types=DETECT_TYPES,
-    isolation_level=None
+      isolation_level=None
     )
   except sqlite3.OperationalError as err:
     LOG.error("Database: %s - %s", config['db_name'], err)
@@ -355,7 +356,7 @@ def main():
   for cluster in cycle(clusters):
     try:
       telnet = Telnet(*cluster, timeout=300)
-      LOG.info("Connection to %s open", telnet.host)
+      LOG.info("Connection to %s:%d open", telnet.host, telnet.port)
       login(config['call'], telnet)
       LOG.info("%s identified", config['call'])
       read_stream(conn, telnet)
