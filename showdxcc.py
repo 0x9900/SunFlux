@@ -21,17 +21,26 @@ BANDS = [6, 10, 12, 15, 17, 20, 30, 40, 60, 80, 160]
 REQUEST = """
 SELECT band, de_cont, to_cont, COUNT(*)
 FROM dxspot
-WHERE band >= 6 AND de_cont == ? AND time > ? AND time <= ?
+WHERE band >= 6 AND {} == ? AND time > ? AND time <= ?
 GROUP BY band, to_cont;
 """
 
 class ShowDXCC:
 
-  def __init__(self, config, continent, date=None):
+  def __init__(self, config, zone_name, zone, date=None):
     self.config = config
-    self.continent = continent
     self.date = date if date else datetime.utcnow()
     self.data = None
+    self.zone_name = zone_name
+    self.zone = zone
+    if zone_name == 'continent':
+      self.zone_label = 'de_cont'
+    elif zone_name == 'ituzone':
+      self.zone_label = 'de_ituzone'
+    elif zone_name == 'cqzone':
+      self.zone_label = 'de_ituzone'
+    else:
+      raise SystemError(f'Zone {zone_name} error')
 
   def get_dxcc(self):
     # pylint: disable=too-many-locals
@@ -45,7 +54,7 @@ class ShowDXCC:
     )
     with conn:
       curs = conn.cursor()
-      results = curs.execute(REQUEST, (self.continent, start_date, end_date)).fetchall()
+      results = curs.execute(REQUEST.format(self.zone_label), (self.zone, start_date, end_date)).fetchall()
 
     self.data = np.zeros((len(CONTINENTS), len(BANDS)), dtype=int)
     for band, _, to_continent, count in results:
@@ -85,7 +94,7 @@ class ShowDXCC:
         color = 'firebrick' if self.data[i, j] > threshold else 'lime'
         axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
 
-    axgc.set_title(f"DX Spots From {self.continent}", fontsize=14, fontweight='bold')
+    axgc.set_title(f"DX Spots {self.zone_name} = {self.zone}", fontsize=14, fontweight='bold')
     fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {self.date.strftime("%Y:%m:%d %H:%M")}')
     fig.tight_layout()
     fig.savefig(filename, transparent=False, dpi=100)
@@ -114,7 +123,10 @@ def main():
 
   parser = argparse.ArgumentParser(description="Graph dxcc trafic")
   parser.add_argument("-d", "--date", type=type_date, default='now', help="Graph date")
-  parser.add_argument('continent', choices=CONTINENTS)
+  z_group = parser.add_mutually_exclusive_group(required=True)
+  z_group.add_argument("-c", "--continent", choices=CONTINENTS, help="Continent")
+  z_group.add_argument("-i", "--ituzone", type=int, help="itu zone")
+  z_group.add_argument("-C", "--cqzone", type=int, help="cq zone")
   parser.add_argument('args', nargs="*")
   opts = parser.parse_args()
 
@@ -127,7 +139,12 @@ def main():
     now = opts.date.strftime('%Y%m%d%H%M')
     filename = os.path.join(target_dir, f'dxcc-{opts.continent}-{now}.png')
 
-  showdxcc = ShowDXCC(config, opts.continent, opts.date)
+  for zone_name in ('continent', 'ituzone', 'cqzone'):
+    zone = getattr(opts, zone_name)
+    if zone:
+      break
+
+  showdxcc = ShowDXCC(config, zone_name, zone, opts.date)
   showdxcc.get_dxcc()
   showdxcc.graph(filename)
 
