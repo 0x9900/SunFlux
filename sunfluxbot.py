@@ -567,7 +567,7 @@ def send_dxcc(update: Update, context: CallbackContext):
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(sys.path[0], "showdxcc")
-    status = subprocess.call([cmd, query, image], shell=False)
+    status = subprocess.call([cmd, '-c', query, image], shell=False)
     logging.info(f'Call "{cmd} {query} {image}" returned {status}')
     if status:
       logging.error('Error generating the dxcc graph')
