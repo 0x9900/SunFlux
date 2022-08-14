@@ -27,7 +27,7 @@ def purge(conn, purge_time):
 def main():
   adapters.install_adapers()
   config = Config()
-  delta = timedelta(hours=config.get('dxcluster.purge_time', 12))
+  delta = timedelta(hours=config.get('dxcluster.purge_time', 192))
   cnx_timeout = int(config['dxcluster.db_timeout']/3) or 1
   purge_time = datetime.utcnow() - delta
 
