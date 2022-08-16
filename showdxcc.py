@@ -64,9 +64,7 @@ class ShowDXCC:
 
   def graph(self, filename):
     color_map = self.config.get('showdxcc.color_map', 'PRGn')
-    facecolor = 'white' if 6 < self.date.hour <= 18 else 'gray'
-
-    fig, axgc = plt.subplots(figsize=(12,8), facecolor=facecolor)
+    fig, axgc = plt.subplots(figsize=(12,8), facecolor='white')
 
     # Show all ticks and label them with the respective list entries
     plt.xticks(np.arange(len(BANDS)), labels=BANDS, fontsize=14)
@@ -81,9 +79,9 @@ class ShowDXCC:
     axgc.set_aspect(aspect=1)
     axgc.tick_params(top=True, bottom=True, labeltop=True, labelbottom=True)
 
-    cbar = axgc.figure.colorbar(image, ax=axgc)
-    cbar.ax.set_ylabel("Number of contacts for the last hour",
-                       rotation=-90, va="bottom")
+    cbar = axgc.figure.colorbar(image, ax=axgc, shrink=0.66, format="%5.0f")
+    cbar.ax.tick_params(labelsize=10)
+    # cbar.ax.set_ylabel("Contacts / Hour", rotation=-90, fontsize=12)
 
     # Loop over data dimensions and create text annotations.
     threshold = np.percentile(self.data, 96)
@@ -95,7 +93,7 @@ class ShowDXCC:
         axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
 
     axgc.set_title(f"DX Spots {self.zone_name} = {self.zone}", fontsize=14, fontweight='bold')
-    fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {self.date.strftime("%Y:%m:%d %H:%M")}')
+    fig.text(0.02, 0.03, f'SunFluxBot By W6BSD {self.date.strftime("%Y:%m:%d - %H:%M")}', fontsize=14)
     fig.tight_layout()
     fig.savefig(filename, transparent=False, dpi=100)
 
