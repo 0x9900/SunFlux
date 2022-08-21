@@ -5,7 +5,7 @@ import sys
 from setuptools import setup, find_namespace_packages
 
 __author__ = "Fred C. (W6BSD)"
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __license__ = 'BSD'
 
 py_version = sys.version_info[:2]
@@ -26,21 +26,33 @@ setup(
     where=".",
     exclude=["build*", "misc*", "dist*"]
   ),
-  py_modules=['config', 'adapters', 'dxcluster', 'fluxgraph',
-              'kpindexgraph', 'outlookgraph', 'showdxcc',
-              'ssngraph', 'eisngraph', 'sunfluxbot', 'purge_cluster'],
+  py_modules=[
+    'adapters',
+    'aindex',
+    'config',
+    'dxcluster',
+    'eisngraph',
+    'fluxgraph',
+    'kpindexgraph',
+    'outlookgraph',
+    'purge_cluster'
+    'showdxcc',
+    'ssngraph',
+    'sunfluxbot',
+  ],
   install_requires=['numpy', 'matplotlib', 'python-telegram-bot'],
   entry_points = {
     'console_scripts': [
+      'aindex = aindex:main',
       'dxcluster = dxcluster:main',
+      'eisngraph = eisngraph:main',
       'fluxgraph = fluxgraph:main',
       'kpindexgraph = kpindexgraph:main',
       'outlookgraph = outlookgraph:main',
+      'purge_cluster = purge_cluster:main',
       'showdxcc = showdxcc:main',
       'ssngraph = ssngraph:main',
-      'eisngraph = eisngraph:main',
       'sunfluxbot = sunfluxbot:main',
-      'purge_cluster = purge_cluster:main',
     ]
   },
   package_data={
