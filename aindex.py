@@ -54,7 +54,7 @@ def graph(data, filename):
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('A-Index', fontsize=14, fontweight='bold')
   fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
-  fig.text(0.15, 0.8, "Forecast: " + data[-1][2], fontsize=8,
+  fig.text(0.15, 0.8, "Forecast: " + data[-1][2], fontsize=12,
            bbox=dict(boxstyle='round', facecolor='grey', alpha=0.25, pad=.8))
 
   axgc = plt.gca()

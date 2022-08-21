@@ -421,21 +421,35 @@ def send_geost(update: Update, context: CallbackContext):
   return ConversationHandler.END
 
 def send_aindex(update: Update, context: CallbackContext):
-  try:
-    filename = noaa_download('ai')
-  except Exception as exp:
-    logger.error(exp)
-    update.message.reply_text(f'Error: {exp}')
-    return ConversationHandler.END
-
+  config = Config()
+  cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
+  now = time.time()
+  image = os.path.join(cache_dir, 'aindex.png')
   chat_id = update.message.chat_id
-  context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
-                         caption='A Index',
-                         filename=os.path.basename(filename), timeout=100)
+  today = datetime.now().strftime('%a %b %d %Y')
+  try:
+    img_st = os.stat(image)
+    if now - img_st.st_mtime > IMG_CACHE_TIME:
+      raise FileNotFoundError
+  except (FileNotFoundError, EOFError):
+    cmd = os.path.join(sys.path[0], "aindex")
+    status = subprocess.call([cmd], shell=False)
+    logging.info(f'Call {cmd} returned {status}')
+    if status:
+      logging.error('Error generating the aindex graph')
+      context.bot.send_message(chat_id, (
+        'The aindex graph is not available at the moment\n'
+        'Please come back latter.'))
+      return ConversationHandler.END
+
+  context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
+                         caption="A-Index for: {}".format(today),
+                         filename=os.path.basename(image), timeout=100)
 
   user = update.message.chat.username or "Stranger"
   logger.info(f"Command /aindex by {user}:{chat_id}")
   return ConversationHandler.END
+
 
 def send_kpindex(update: Update, context: CallbackContext):
   config = Config()
