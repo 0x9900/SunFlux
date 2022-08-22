@@ -65,13 +65,13 @@ def graph(data, filename):
 
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
-  axgc.bar(datetm, aindex, linewidth=0.75, color=colors)
+  axgc.bar(datetm, aindex, linewidth=0.75, zorder=2, color=colors)
 
-  axgc.axhline(y=20, linewidth=1, color='green', linestyle="dashed")
-  axgc.axhline(y=30, linewidth=1, color='darkorange', linestyle="dashed")
-  axgc.axhline(y=40, linewidth=1, color='red', linestyle="dashed")
-  axgc.axhline(y=50, linewidth=1, color='darkred', linestyle="dashed")
-  axgc.axhline(y=100, linewidth=1, color='darkmagenta', linestyle="dashed")
+  axgc.axhline(y=20, linewidth=1, zorder=1, color='green', linestyle="dashed")
+  axgc.axhline(y=30, linewidth=1, zorder=1, color='darkorange', linestyle="dashed")
+  axgc.axhline(y=40, linewidth=1, zorder=1, color='red', linestyle="dashed")
+  axgc.axhline(y=50, linewidth=1, zorder=1, color='darkred', linestyle="dashed")
+  axgc.axhline(y=100, linewidth=1, zorder=1, color='darkmagenta', linestyle="dashed")
 
   loc = mdates.DayLocator(interval=4)
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
