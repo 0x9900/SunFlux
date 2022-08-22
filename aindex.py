@@ -5,29 +5,36 @@ import os
 import sqlite3
 import sys
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 
+import adapters
+
 from config import Config
 
 plt.style.use(['classic', 'seaborn-talk'])
 
+NB_DAYS = 90
+
 WWV_REQUEST = """
-SELECT MAX(A), conditions, DATE(DATETIME(wwv.time, "unixepoch")) AS dt
-FROM wwv GROUP BY dt
+SELECT MAX(wwv.A), wwv.conditions, DATE(DATETIME(wwv.time, "unixepoch")) AS dt
+FROM wwv
+WHERE wwv.time > ?
+GROUP BY dt
 """
 
-def get_wwv(config):
+def get_wwv(config, days):
+  start_date = datetime.utcnow() - timedelta(days=days)
   conn = sqlite3.connect(
     config['showdxcc.db_name'], timeout=5,
     detect_types=sqlite3.PARSE_DECLTYPES
   )
   with conn:
     curs = conn.cursor()
-    results = curs.execute(WWV_REQUEST).fetchall()
+    results = curs.execute(WWV_REQUEST, (start_date,)).fetchall()
 
   data = []
   for res in results:
@@ -78,6 +85,7 @@ def graph(data, filename):
   return filename
 
 def main():
+  adapters.install_adapers()
   logging.basicConfig(
     format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%H:%M:%S',
     level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
@@ -88,7 +96,7 @@ def main():
   except IndexError:
     name = '/tmp/aindex.png'
 
-  data = get_wwv(config)
+  data = get_wwv(config, NB_DAYS)
   if data:
     graph(data, name)
   else:
