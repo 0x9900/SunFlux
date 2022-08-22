@@ -27,6 +27,7 @@ GROUP BY dt
 """
 
 def get_wwv(config, days):
+  data = []
   start_date = datetime.utcnow() - timedelta(days=days)
   conn = sqlite3.connect(
     config['showdxcc.db_name'], timeout=5,
@@ -34,12 +35,10 @@ def get_wwv(config, days):
   )
   with conn:
     curs = conn.cursor()
-    results = curs.execute(WWV_REQUEST, (start_date,)).fetchall()
-
-  data = []
-  for res in results:
-    dte = datetime.strptime(res[2], '%Y-%m-%d')
-    data.append((dte, res[0], res[1]))
+    results = curs.execute(WWV_REQUEST, (start_date,))
+    for res in results:
+      dte = datetime.strptime(res[2], '%Y-%m-%d')
+      data.append((dte, res[0], res[1]))
   return data
 
 def graph(data, filename):
@@ -68,12 +67,18 @@ def graph(data, filename):
   axgc.tick_params(labelsize=10)
   axgc.bar(datetm, aindex, linewidth=0.75, color=colors)
 
+  axgc.axhline(y=20, linewidth=1, color='green', linestyle="dashed")
+  axgc.axhline(y=30, linewidth=1, color='darkorange', linestyle="dashed")
+  axgc.axhline(y=40, linewidth=1, color='red', linestyle="dashed")
+  axgc.axhline(y=50, linewidth=1, color='darkred', linestyle="dashed")
+  axgc.axhline(y=100, linewidth=1, color='darkmagenta', linestyle="dashed")
+
   loc = mdates.DayLocator(interval=4)
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
   axgc.xaxis.set_major_locator(loc)
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
 
-  axgc.set_ylim(0, max(aindex) * 2)
+  axgc.set_ylim(0, max(aindex) * (2 if max(aindex) < 50 else 1.25))
   axgc.set_ylabel('A-Index')
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
