@@ -39,10 +39,10 @@ def graph(data, filename):
 
   datetm = np.array([d[0] for d in data])
   aindex = np.array([d[1] for d in data])
-  colors = ['green'] * len(aindex)
+  colors = ['limegreen'] * len(aindex)
   for pos, val in enumerate(aindex):
     if 20 < val < 30:
-      colors[pos] = 'orange'
+      colors[pos] = 'darkorange'
     elif 30 < val < 50:
       colors[pos] = 'red'
     elif 50 < val < 100:
