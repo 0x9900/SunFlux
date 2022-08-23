@@ -95,15 +95,18 @@ class SSN:
     fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
     axgc = plt.gca()
     axgc.tick_params(labelsize=10)
-    axgc.plot(x, ssn, marker='o', markersize=7, color="darkolivegreen", linewidth=2)
+    points = axgc.plot(x, ssn, marker='o', markersize=7, color="darkolivegreen", linewidth=2)
     axgc.plot(x, flux, linestyle='--', color="cornflowerblue", linewidth=1)
     loc = mdates.DayLocator(interval=5)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.DayLocator())
-
     axgc.set_ylim(np.min([ssn, flux])*0.2, np.max([ssn, flux])*1.2)
 
+    for x, y in zip(x, ssn):
+      plt.annotate(f"{y:d}", (x, y), textcoords="offset points", xytext=(0,10),
+                   ha='center', fontsize=8,
+                   arrowprops=dict(arrowstyle="->", color='green'))
 
     axgc.legend(['Sun spot', '10.7cm Flux'], facecolor="linen")
     axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
