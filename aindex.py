@@ -109,7 +109,6 @@ def main():
   except IndexError:
     name = '/tmp/aindex.png'
 
-  import ipdb; ipdb.set_trace()
   data = get_wwv(config, NB_DAYS)
   condition = get_conditions(config)
   if data:
