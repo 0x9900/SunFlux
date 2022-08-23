@@ -61,7 +61,7 @@ def graph(data, condition, filename):
 
   datetm = np.array([d[0] for d in data])
   aindex = np.array([d[1] for d in data])
-  colors = ['limegreen'] * len(aindex)
+  colors = ['lightgreen'] * len(aindex)
   for pos, val in enumerate(aindex):
     if 20 < val < 30:
       colors[pos] = 'darkorange'
@@ -84,7 +84,7 @@ def graph(data, condition, filename):
   bars = axgc.bar(datetm, aindex, linewidth=0.75, zorder=2, color=colors)
   autolabel(axgc, bars)
 
-  axgc.axhline(y=20, linewidth=1, zorder=1, color='green', linestyle="dashed")
+  axgc.axhline(y=20, linewidth=1, zorder=1, color='lightgreen', linestyle="dashed")
   axgc.axhline(y=30, linewidth=1, zorder=1, color='darkorange', linestyle="dashed")
   axgc.axhline(y=40, linewidth=1, zorder=1, color='red', linestyle="dashed")
   axgc.axhline(y=50, linewidth=1, zorder=1, color='darkred', linestyle="dashed")
