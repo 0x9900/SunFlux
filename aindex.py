@@ -20,28 +20,36 @@ plt.style.use(['classic', 'seaborn-talk'])
 NB_DAYS = 90
 
 WWV_REQUEST = """
-SELECT MAX(wwv.A), wwv.conditions, DATE(DATETIME(wwv.time, "unixepoch")) AS dt
+SELECT MAX(wwv.A), DATE(DATETIME(wwv.time, "unixepoch")) AS dt
 FROM wwv
 WHERE wwv.time > ?
 GROUP BY dt
 """
 
+WWV_CONDITIONS = "SELECT conditions FROM wwv ORDER BY time DESC LIMIT 1"
+
+def get_conditions(config):
+  conn = sqlite3.connect(config['showdxcc.db_name'], timeout=5,
+                         detect_types=sqlite3.PARSE_DECLTYPES)
+  with conn:
+    curs = conn.cursor()
+    result = curs.execute(WWV_CONDITIONS).fetchone()
+  return result[0]
+
 def get_wwv(config, days):
   data = []
   start_date = datetime.utcnow() - timedelta(days=days)
-  conn = sqlite3.connect(
-    config['showdxcc.db_name'], timeout=5,
-    detect_types=sqlite3.PARSE_DECLTYPES
-  )
+  conn = sqlite3.connect(config['showdxcc.db_name'], timeout=5,
+                         detect_types=sqlite3.PARSE_DECLTYPES)
   with conn:
     curs = conn.cursor()
     results = curs.execute(WWV_REQUEST, (start_date,))
     for res in results:
-      dte = datetime.strptime(res[2], '%Y-%m-%d')
-      data.append((dte, res[0], res[1]))
+      dte = datetime.strptime(res[1], '%Y-%m-%d')
+      data.append((dte, res[0]))
   return data
 
-def graph(data, filename):
+def graph(data, condition, filename):
 
   datetm = np.array([d[0] for d in data])
   aindex = np.array([d[1] for d in data])
@@ -60,7 +68,7 @@ def graph(data, filename):
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('A-Index', fontsize=14, fontweight='bold')
   fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
-  fig.text(0.15, 0.8, "Forecast: " + data[-1][2], fontsize=12,
+  fig.text(0.15, 0.8, "Forecast: " + condition, fontsize=12,
            bbox=dict(boxstyle='round', facecolor='grey', alpha=0.25, pad=.8))
 
   axgc = plt.gca()
@@ -101,11 +109,14 @@ def main():
   except IndexError:
     name = '/tmp/aindex.png'
 
+  import ipdb; ipdb.set_trace()
   data = get_wwv(config, NB_DAYS)
+  condition = get_conditions(config)
   if data:
-    graph(data, name)
+    graph(data, condition, name)
   else:
     logging.warning('No data collected')
+
 
 if __name__ == "__main__":
   sys.exit(main())
