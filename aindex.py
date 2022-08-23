@@ -49,6 +49,14 @@ def get_wwv(config, days):
       data.append((dte, res[0]))
   return data
 
+def autolabel(ax, rects):
+  """Attach a text label above each bar displaying its height"""
+  for rect in rects:
+    height = rect.get_height()
+    ax.text(rect.get_x() + rect.get_width() / 2., 3, '%d' % int(height),
+            color="navy", fontsize="6", ha='center',
+            bbox={"facecolor": 'white', "alpha": .9})
+
 def graph(data, condition, filename):
 
   datetm = np.array([d[0] for d in data])
@@ -73,7 +81,8 @@ def graph(data, condition, filename):
 
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
-  axgc.bar(datetm, aindex, linewidth=0.75, zorder=2, color=colors)
+  bars = axgc.bar(datetm, aindex, linewidth=0.75, zorder=2, color=colors)
+  autolabel(axgc, bars)
 
   axgc.axhline(y=20, linewidth=1, zorder=1, color='green', linestyle="dashed")
   axgc.axhline(y=30, linewidth=1, zorder=1, color='darkorange', linestyle="dashed")
