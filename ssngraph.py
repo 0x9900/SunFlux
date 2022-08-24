@@ -97,7 +97,7 @@ class SSN:
     axgc.tick_params(labelsize=10)
     points = axgc.plot(x, ssn, marker='o', markersize=7, color="darkolivegreen", linewidth=2)
     axgc.plot(x, flux, linestyle='--', color="cornflowerblue", linewidth=1)
-    loc = mdates.DayLocator(interval=5)
+    loc = mdates.DayLocator(interval=int(1+len(x)/11))
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.DayLocator())

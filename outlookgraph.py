@@ -69,7 +69,11 @@ class OutLook:
     ax1.plot(dates, kindex, "--m", linewidth=1.5, label='KP-index')
     ax1.set_ylim([0, aindex.max() * 1.15])
     ax1.set_ylabel('Index')
-    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y %b %d'))
+    loc = mdates.DayLocator(interval=int(1+len(aindex)/11))
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
+    ax1.xaxis.set_major_locator(loc)
+    ax1.xaxis.set_minor_locator(mdates.DayLocator())
+
     ax1.grid(color="gray", linestyle="dotted", linewidth=.5)
     ax1.legend(loc='upper left')
 

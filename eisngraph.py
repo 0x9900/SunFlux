@@ -111,7 +111,7 @@ class EISN:
     axgc.legend(['EISN', 'Valid Data', 'Entries'], loc='upper left',
                 facecolor="linen")
 
-    loc = mdates.DayLocator(interval=5)
+    loc = mdates.DayLocator(interval=int(1+len(x)/11))
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.DayLocator())
