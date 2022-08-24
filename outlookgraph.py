@@ -83,7 +83,7 @@ class OutLook:
 
     plt.subplots_adjust(bottom=0.20)
 
-    plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {now}', rotation=90)
+    plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {now}')
     plt.savefig(filename, transparent=False, dpi=100)
     plt.close()
     self.log.info('Graph "%s" saved', filename)
