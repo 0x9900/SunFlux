@@ -67,6 +67,11 @@ class Flux:
     axgc.axhspan(40, 70, facecolor='red', alpha=0.4, label='Bad')
     axgc.legend(fontsize=10, loc="upper left")
 
+    for idx, (_x, _y) in enumerate(zip(x, y)):
+      plt.annotate(f"{_y:d}", (_x, _y), textcoords="offset points", xytext=(0,-20),
+                   ha='center', fontsize=8,
+                   arrowprops=dict(arrowstyle="wedge", color='green'))
+
     axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
     fig.autofmt_xdate(rotation=10, ha="center")
     plt.figtext(0.02, 0.02, f'SunFluxBot By W6BSD {date}')
