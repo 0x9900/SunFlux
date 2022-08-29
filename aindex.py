@@ -20,7 +20,7 @@ plt.style.use(['classic', 'seaborn-talk'])
 NB_DAYS = 90
 
 WWV_REQUEST = """
-SELECT MAX(wwv.A), DATE(DATETIME(wwv.time, "unixepoch")) AS dt
+SELECT MAX(wwv.A), AVG(wwv.A), MIN(wwv.A), DATE(DATETIME(wwv.time, "unixepoch")) AS dt
 FROM wwv
 WHERE wwv.time > ?
 GROUP BY dt
@@ -45,8 +45,8 @@ def get_wwv(config, days):
     curs = conn.cursor()
     results = curs.execute(WWV_REQUEST, (start_date,))
     for res in results:
-      dte = datetime.strptime(res[1], '%Y-%m-%d')
-      data.append((dte, res[0]))
+      dte = datetime.strptime(res[-1], '%Y-%m-%d')
+      data.append((dte, *res[:-1]))
   return data
 
 def autolabel(ax, rects):
@@ -60,9 +60,12 @@ def autolabel(ax, rects):
 def graph(data, condition, filename):
 
   datetm = np.array([d[0] for d in data])
-  aindex = np.array([d[1] for d in data])
-  colors = ['lightgreen'] * len(aindex)
-  for pos, val in enumerate(aindex):
+  amax = np.array([d[1] for d in data])
+  amin = np.array([d[3] for d in data])
+  aavg = np.array([d[2] for d in data])
+
+  colors = ['lightgreen'] * len(aavg)
+  for pos, val in enumerate(aavg):
     if 20 < val < 30:
       colors[pos] = 'darkorange'
     elif 30 < val < 50:
@@ -81,7 +84,9 @@ def graph(data, condition, filename):
 
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
-  bars = axgc.bar(datetm, aindex, linewidth=0.75, zorder=2, color=colors)
+  bars = axgc.bar(datetm, aavg, linewidth=0.75, zorder=2, color=colors)
+  axgc.plot(datetm, amin, marker='^', linewidth=0, color="navy")
+  axgc.plot(datetm, amax, marker='v', linewidth=0, color="steelblue")
   autolabel(axgc, bars)
 
   axgc.axhline(y=20, linewidth=1, zorder=1, color='lightgreen', linestyle="dashed")
@@ -95,7 +100,7 @@ def graph(data, condition, filename):
   axgc.xaxis.set_major_locator(loc)
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
 
-  axgc.set_ylim(0, max(aindex) * (2 if max(aindex) < 50 else 1.25))
+  axgc.set_ylim(0, max(amax) * 1.5)
   axgc.set_ylabel('A-Index')
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
