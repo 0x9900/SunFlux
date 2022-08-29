@@ -100,7 +100,7 @@ def graph(data, condition, filename):
   axgc.xaxis.set_major_locator(loc)
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
 
-  axgc.set_ylim(0, max(amax) * 1.5)
+  axgc.set_ylim(0, max(amax) * 1.33)
   axgc.set_ylabel('A-Index')
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
