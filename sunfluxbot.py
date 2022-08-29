@@ -53,7 +53,7 @@ IMG_SOURCE = {
   'swx':   'images/swx-overview-large.gif',
   'warn':  'images/notifications-timeline.png',
 }
-IMG_CACHE_TIME = (3600 * 4)
+IMG_CACHE_TIME = (3600 * 2)
 
 class SunRecord:
   """Datastructure holding the sun Flux information"""
@@ -460,7 +460,7 @@ def send_kpindex(update: Update, context: CallbackContext):
   today = datetime.now().strftime('%a %b %d %Y')
   try:
     img_st = os.stat(image)
-    if now - img_st.st_mtime > IMG_CACHE_TIME:
+    if now - img_st.st_mtime > 900: # pkindex are published every 5 minutes.
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(sys.path[0], "kpindexgraph")
