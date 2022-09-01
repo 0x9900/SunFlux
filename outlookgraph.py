@@ -75,7 +75,7 @@ class OutLook:
     ax1.xaxis.set_minor_locator(mdates.DayLocator())
 
     ax1.grid(color="gray", linestyle="dotted", linewidth=.5)
-    ax1.legend(loc='upper left')
+    ax1.legend(loc='upper left', fontsize="10")
 
     # second axis
     ax2 = ax1.twinx()
@@ -83,7 +83,7 @@ class OutLook:
     ax2.set_ylim([min(flux) * 0.95, max(flux) * 1.05])
     ax2.set_ylabel('Flux')
     ax2.grid(color="green", linestyle="dotted", linewidth=.5)
-    ax2.legend(loc='upper right')
+    ax2.legend(loc='upper right', fontsize="10")
 
     plt.subplots_adjust(bottom=0.20)
 

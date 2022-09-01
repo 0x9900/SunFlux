@@ -108,7 +108,7 @@ class SSN:
                    ha='center', fontsize=8,
                    arrowprops=dict(arrowstyle="->", color='green'))
 
-    axgc.legend(['Sun spot', '10.7cm Flux'], facecolor="linen")
+    axgc.legend(['Sun spot', '10.7cm Flux'], facecolor="linen", fontsize="10")
     axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
 
     axgc.margins(.01)
