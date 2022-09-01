@@ -102,13 +102,14 @@ class EISN:
     axgc.plot(x, y, color="blue")
     axgc.plot(x, vdata, '^', linewidth=0, color='orange')
     axgc.plot(x, cdata, 'v', linewidth=0, color='green')
+    axgc.axhline(np.mean(y), color='red', linestyle='--', label='Mean')
     axgc.errorbar(x, y, yerr=error, fmt='*', color='green',
                   ecolor='darkolivegreen', elinewidth=.8, capsize=5,
                   capthick=.8)
     axgc.fill_between(x, y-error, y+error, facecolor='plum', alpha=1.0,
                       linewidth=.75, edgecolor='b')
 
-    axgc.legend(['EISN', 'Valid Data', 'Entries'], loc='upper left',
+    axgc.legend(['EISN', 'Valid Data', 'Entries', 'Mean'], loc='upper left',
                 facecolor="linen")
 
     loc = mdates.DayLocator(interval=int(1+len(x)/11))
@@ -116,7 +117,6 @@ class EISN:
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.DayLocator())
     axgc.set_ylim(0, y.max()*1.2)
-
     axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
     axgc.margins(.01)
     fig.autofmt_xdate(rotation=10, ha="center")
