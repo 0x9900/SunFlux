@@ -100,17 +100,17 @@ class EISN:
     axgc = plt.gca()
     axgc.tick_params(labelsize=10)
     axgc.plot(x, y, color="blue")
+    axgc.axhline(np.average(y), color='red', linestyle='--', linewidth=1)
     axgc.plot(x, vdata, '^', linewidth=0, color='orange')
     axgc.plot(x, cdata, 'v', linewidth=0, color='green')
-    axgc.axhline(np.average(y), color='red', linestyle='--', linewidth=1)
     axgc.errorbar(x, y, yerr=error, fmt='*', color='green',
                   ecolor='darkolivegreen', elinewidth=.8, capsize=5,
                   capthick=.8)
     axgc.fill_between(x, y-error, y+error, facecolor='plum', alpha=1.0,
                       linewidth=.75, edgecolor='b')
 
-    axgc.legend(['EISN', 'Valid Data', 'Entries', 'Average'], loc='best',
-                fontsize="10", facecolor="linen", borderaxespad=1)
+    axgc.legend(['EISN', 'Average', 'Valid Data', 'Entries'], loc='best',
+                fontsize="10", facecolor="linen", borderaxespad=1, ncol=2)
 
     loc = mdates.DayLocator(interval=int(1+len(x)/11))
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
