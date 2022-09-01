@@ -102,7 +102,7 @@ class EISN:
     axgc.plot(x, y, color="blue")
     axgc.plot(x, vdata, '^', linewidth=0, color='orange')
     axgc.plot(x, cdata, 'v', linewidth=0, color='green')
-    axgc.axhline(np.mean(y), color='red', linestyle='--', linewidth=.5, label='Mean')
+    axgc.axhline(np.mean(y), color='red', linestyle='--', linewidth=.75, label='Mean')
     axgc.errorbar(x, y, yerr=error, fmt='*', color='green',
                   ecolor='darkolivegreen', elinewidth=.8, capsize=5,
                   capthick=.8)
