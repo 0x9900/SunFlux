@@ -16,18 +16,12 @@ import numpy as np
 
 from config import Config
 
-NOAA_URL = 'https://services.swpc.noaa.gov/json/boulder_k_index_1m.json'
+NOAA_URL = 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'
 
-parameters = {
-  'axes.labelsize': 12,
-  'axes.titlesize': 20,
-  'figure.figsize': [12, 8],
-  'axes.labelcolor': 'gray',
-  'axes.titlecolor': 'gray',
-  'font.size': 12.0,
-}
-plt.rcParams.update(parameters)
 plt.style.use(['classic', 'seaborn-talk'])
+
+def bucket(dtm):
+  return int(6 * int(dtm.hour / 6))
 
 class KPIndex:
   def __init__(self, cache_file, cache_time=21600):
@@ -52,28 +46,34 @@ class KPIndex:
       self.log.warning('No data to graph')
       return None
 
-    x = np.array([datetime.strptime(d['time_tag'], '%Y-%m-%dT%H:%M:%S')
-                  for d in self.data])
-    y = np.array([round(x['k_index'], 2) for x in self.data])
+    xdates = np.array([d[0] for d in self.data])
+    yvalues = np.array([np.average(d[1]) for d in self.data])
+
+    colors = ['lightgreen'] * len(yvalues)
+    for pos, val in enumerate(yvalues):
+      if int(val) == 4:
+        colors[pos] = 'darkorange'
+      elif val > 4:
+        colors[pos] = 'red'
 
     date = datetime.utcnow().strftime('%Y:%m:%d %H:%M')
-    fig = plt.figure()
-    fig.suptitle('Planetary KPIndex (Boulder)', fontsize=14, fontweight='bold')
+    plt.rc('xtick', labelsize=10)
+    plt.rc('ytick', labelsize=10)
+    fig = plt.figure(figsize=(12, 5))
+    fig.suptitle('Planetary K-Index', fontsize=14, fontweight='bold')
     axgc = plt.gca()
-    axgc.plot(x, y, color='navy')
+    axgc.bar(xdates, yvalues, width=.2, linewidth=0.75, zorder=2, color=colors)
+    axgc.axhline(y=4, linewidth=1, zorder=1.5, color='red', linestyle="dashed")
 
-    loc = mdates.HourLocator(interval=2)
-    ticks = np.arange(1, 10 if y.max() < 10 else y.max() + 2, 1, int)
-    axgc.xaxis.set_major_formatter(mdates.DateFormatter('%m-%d %H:%S'))
+    loc = mdates.DayLocator(interval=1)
+    axgc.xaxis.set_major_formatter(mdates.DateFormatter('%y-%m-%d'))
     axgc.xaxis.set_major_locator(loc)
-    axgc.set_yticks(ticks)
-    axgc.axhspan(4, ticks.max(), facecolor='red', alpha=0.4, label="Bad")
-    axgc.axhspan(3, 4, facecolor='orange', alpha=0.4, label="Ok")
-    axgc.axhspan(0, 3, facecolor='green', alpha=0.4, label="Good")
-    axgc.legend(loc="upper left")
+    axgc.xaxis.set_minor_locator(mdates.HourLocator(interval=6))
+    axgc.set_ylim(0, 9)
 
     axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
-    fig.autofmt_xdate()
+    fig.autofmt_xdate(rotation=10, ha="center")
+
     plt.figtext(0.02, 0.02, f'SunFluxBot By W6BSD {date}')
     plt.savefig(filename, transparent=False, dpi=100)
     plt.close()
@@ -85,8 +85,13 @@ class KPIndex:
     res = urllib.request.urlopen(NOAA_URL)
     webdata = res.read()
     encoding = res.info().get_content_charset('utf-8')
-    data = json.loads(webdata.decode(encoding))
-    self.data = data[1:]
+    _data = json.loads(webdata.decode(encoding))
+    data = []
+    for elem in _data[1:]:
+      date = datetime.strptime(elem[0], '%Y-%m-%d %H:%M:%S.%f')
+      date = date.replace(hour=bucket(date), minute=0, second=0, microsecond=0)
+      data.append((date, int(elem[1])))
+    self.data = sorted(data)
 
   def readcache(self):
     """Read data from the cache"""
