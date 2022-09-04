@@ -72,6 +72,7 @@ def graph(data, condition, filename):
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
   axgc.bar(datetm, kindex, width=0.2, linewidth=0.75, zorder=2, color=colors)
+  axgc.axhline(y=4, linewidth=1, zorder=1.5, color='red', linestyle="dashed")
 
   loc = mdates.DayLocator(interval=1)
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%y-%m-%d'))
