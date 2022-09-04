@@ -34,6 +34,7 @@ setup(
     'eisngraph',
     'fluxgraph',
     'kpindexgraph',
+    'kpindexwwv',
     'outlookgraph',
     'purge_cluster'
     'showdxcc',
@@ -48,6 +49,7 @@ setup(
       'eisngraph = eisngraph:main',
       'fluxgraph = fluxgraph:main',
       'kpindexgraph = kpindexgraph:main',
+      'kpindexwwv = kpindexwwv:main',
       'outlookgraph = outlookgraph:main',
       'purge_cluster = purge_cluster:main',
       'showdxcc = showdxcc:main',
