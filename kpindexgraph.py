@@ -72,7 +72,7 @@ class KPIndex:
 
     for rect, label in zip(*(bars, labels)):
       axgc.text(rect.get_x() + rect.get_width() / 2., .3, label,
-                color="navy", fontsize="12", fontweight='bold',  ha='center')
+                color="navy", fontsize="12",  ha='center')
 
     loc = mdates.DayLocator(interval=1)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%y-%m-%d'))
