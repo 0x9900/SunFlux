@@ -8,7 +8,7 @@ import sys
 import time
 import urllib.request
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
@@ -16,12 +16,9 @@ import numpy as np
 
 from config import Config
 
-NOAA_URL = 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'
+NOAA_URL = 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json'
 
 plt.style.use(['classic', 'seaborn-talk'])
-
-def bucket(dtm):
-  return int(6 * int(dtm.hour / 6))
 
 class KPIndex:
   def __init__(self, cache_file, cache_time=21600):
@@ -46,30 +43,46 @@ class KPIndex:
       self.log.warning('No data to graph')
       return None
 
-    xdates = np.array([d[0] for d in self.data])
-    yvalues = np.array([np.average(d[1]) for d in self.data])
+    start_date = datetime.utcnow() - timedelta(days=2)
+    xdates = np.array([d[0] for d in self.data if d[0] > start_date])
+    yvalues = np.array([np.average(d[1]) for d in self.data if d[0] > start_date])
+    observ = [d[2] for d in self.data if d[0] > start_date]
+    labels = [d[3] for d in self.data if d[0] > start_date]
 
-    colors = ['lightgreen'] * len(yvalues)
-    for pos, val in enumerate(yvalues):
-      if int(val) == 4:
-        colors[pos] = 'darkorange'
-      elif val > 4:
-        colors[pos] = 'red'
+    colors = ['lightgreen'] * len(observ)
+    for pos, (obs, val)  in enumerate(zip(observ, yvalues)):
+      if obs == 'observed':
+        if int(val) == 4:
+          colors[pos] = 'darkorange'
+        elif int(val) > 4:
+          colors[pos] = 'red'
+      elif obs == "estimated":
+        colors[pos] = 'lightgrey'
+      elif obs == "predicted":
+        colors[pos] = 'darkgrey'
 
     date = datetime.utcnow().strftime('%Y:%m:%d %H:%M')
     plt.rc('xtick', labelsize=10)
     plt.rc('ytick', labelsize=10)
     fig = plt.figure(figsize=(12, 5))
-    fig.suptitle('Planetary K-Index', fontsize=14, fontweight='bold')
+    fig.suptitle('Planetary K-Index Predictions', fontsize=14, fontweight='bold')
     axgc = plt.gca()
-    axgc.bar(xdates, yvalues, width=.2, linewidth=0.75, zorder=2, color=colors)
+    bars = axgc.bar(xdates, yvalues, width=.1, linewidth=0.75, zorder=2, color=colors)
     axgc.axhline(y=4, linewidth=1, zorder=1.5, color='red', linestyle="dashed")
+
+    for rect, label in zip(*(bars, labels)):
+      axgc.text(rect.get_x() + rect.get_width() / 2., .3, label,
+                color="navy", fontsize="12", fontweight='bold',  ha='center')
 
     loc = mdates.DayLocator(interval=1)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%y-%m-%d'))
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.HourLocator(interval=6))
     axgc.set_ylim(0, 9)
+
+    axgc.axhspan(0, 0, facecolor='lightgrey', alpha=1, label='Estimated')
+    axgc.axhspan(0, 0, facecolor='darkgrey', alpha=1, label='Predicted')
+    axgc.legend(fontsize=10, loc="best", facecolor="linen", borderaxespad=1)
 
     axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
     fig.autofmt_xdate(rotation=10, ha="center")
@@ -88,9 +101,8 @@ class KPIndex:
     _data = json.loads(webdata.decode(encoding))
     data = []
     for elem in _data[1:]:
-      date = datetime.strptime(elem[0], '%Y-%m-%d %H:%M:%S.%f')
-      date = date.replace(hour=bucket(date), minute=0, second=0, microsecond=0)
-      data.append((date, int(elem[1])))
+      date = datetime.strptime(elem[0], '%Y-%m-%d %H:%M:%S')
+      data.append((date, int(elem[1]), *elem[2:]))
     self.data = sorted(data)
 
   def readcache(self):
