@@ -18,7 +18,7 @@ from config import Config
 
 plt.style.use(['classic', 'seaborn-talk'])
 
-NB_DAYS = 8
+NB_DAYS = 10
 
 WWV_REQUEST = "SELECT wwv.time, wwv.K FROM wwv WHERE wwv.time > ?"
 WWV_CONDITIONS = "SELECT conditions FROM wwv ORDER BY time DESC LIMIT 1"
