@@ -66,7 +66,7 @@ def graph(data, condition, filename):
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('KP-Index', fontsize=14, fontweight='bold')
   fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
-  fig.text(0.15, 0.8, "Forecast: " + condition, fontsize=12, zindex=4,
+  fig.text(0.15, 0.8, "Forecast: " + condition, fontsize=12, zorder=4,
            bbox=dict(boxstyle='round', linewidth=1, facecolor='gainsboro', alpha=1, pad=.8))
 
   axgc = plt.gca()
