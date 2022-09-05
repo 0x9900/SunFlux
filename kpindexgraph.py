@@ -43,11 +43,12 @@ class KPIndex:
       self.log.warning('No data to graph')
       return None
 
-    start_date = datetime.utcnow() - timedelta(days=2)
-    xdates = np.array([d[0] for d in self.data if d[0] > start_date])
-    yvalues = np.array([np.average(d[1]) for d in self.data if d[0] > start_date])
-    observ = [d[2] for d in self.data if d[0] > start_date]
-    labels = [d[3] for d in self.data if d[0] > start_date]
+    start_date = datetime.utcnow() - timedelta(days=3, hours=4)
+    end_date = datetime.utcnow() + timedelta(days=1, hours=6)
+    xdates = np.array([d[0] for d in self.data if start_date < d[0] < end_date])
+    yvalues = np.array([np.average(d[1]) for d in self.data if start_date < d[0] < end_date])
+    observ = [d[2] for d in self.data if start_date < d[0] < end_date]
+    labels = [d[3] for d in self.data if start_date < d[0] < end_date]
 
     colors = ['lightgreen'] * len(observ)
     for pos, (obs, val)  in enumerate(zip(observ, yvalues)):
