@@ -463,7 +463,7 @@ def send_kpindex(update: Update, context: CallbackContext):
     if now - img_st.st_mtime > 900: # pkindex are published every 5 minutes.
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
-    cmd = os.path.join(sys.path[0], "kpindexgraph")
+    cmd = os.path.join(sys.path[0], "kpiwwv")
     status = subprocess.call([cmd], shell=False)
     logging.info(f'Call {cmd} returned {status}')
     if status:
@@ -668,7 +668,6 @@ def main():
   updater.dispatcher.add_handler(CommandHandler('flux', send_flux))
   updater.dispatcher.add_handler(CommandHandler('geost', send_geost))
   updater.dispatcher.add_handler(CommandHandler('help', help_command))
-  updater.dispatcher.add_handler(CommandHandler('kpi', send_kpindex))
   updater.dispatcher.add_handler(CommandHandler('kpindex', send_kpindex))
   updater.dispatcher.add_handler(CommandHandler('legend', send_legend))
   updater.dispatcher.add_handler(CommandHandler('muf', send_muf))

@@ -20,9 +20,9 @@ NOAA_URL = 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forec
 
 plt.style.use(['classic', 'seaborn-talk'])
 
-class KPIndex:
+class KPIForecast:
   def __init__(self, cache_file, cache_time=21600):
-    self.log = logging.getLogger('KPIndex')
+    self.log = logging.getLogger('KPIForecast')
     self.cachefile = cache_file
     self.data = None
 
@@ -134,12 +134,12 @@ def main():
   try:
     name = sys.argv[1]
   except IndexError:
-    name = '/tmp/kpindex.png'
+    name = '/tmp/kpiforecast.png'
 
-  cache_file = config.get('kpindexgraph.cache_file', '/tmp/kpindex.pkl')
-  cache_time = config.get('kpindexgraph.cache_time', 21600)
-  kpindex = KPIndex(cache_file, cache_time)
-  if not kpindex.graph(name):
+  cache_file = config.get('kpiforecast.cache_file', '/tmp/kpiforecast.pkl')
+  cache_time = config.get('kpiforecast.cache_time', 21600)
+  kpi = KPIForecast(cache_file, cache_time)
+  if not kpi.graph(name):
     return os.EX_DATAERR
 
   return os.EX_OK

@@ -24,8 +24,8 @@ fluxgraph:
   cache_file: /tmp/flux.pkl
   cache_time: 43200
 
-pkindexgraph:
-  cache_file: /tmp/kpindex.pkl
+pkiforecast:
+  cache_file: /tmp/kpiforecast.pkl
   cache_time: 21600
 
 showdxcc:
