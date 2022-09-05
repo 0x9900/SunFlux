@@ -70,9 +70,12 @@ class KPIndex:
     bars = axgc.bar(xdates, yvalues, width=.1, linewidth=0.75, zorder=2, color=colors)
     axgc.axhline(y=4, linewidth=1, zorder=1.5, color='red', linestyle="dashed")
 
-    for rect, label in zip(*(bars, labels)):
-      axgc.text(rect.get_x() + rect.get_width() / 2., .3, label,
-                color="navy", fontsize="12",  ha='center')
+    for rect, obs, label in zip(*(bars, observ, labels)):
+      if not label:
+        continue
+      color = 'white' if obs == 'observed' else 'black'
+      axgc.text(rect.get_x() + rect.get_width() / 2., .3, label, alpha=1,
+                color=color, fontweight="bold", fontsize="12", ha='center')
 
     loc = mdates.DayLocator(interval=1)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%y-%m-%d'))
