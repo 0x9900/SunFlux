@@ -62,7 +62,7 @@ class KPIForecast:
       elif obs == "predicted":
         colors[pos] = 'darkgrey'
 
-    date = datetime.utcnow().strftime('%Y:%m:%d %H:%M')
+    date = datetime.utcnow().strftime('%Y:%m:%d %H:%M UTC')
     plt.rc('xtick', labelsize=10)
     plt.rc('ytick', labelsize=10)
     fig = plt.figure(figsize=(12, 5))
@@ -79,7 +79,7 @@ class KPIForecast:
                 color=color, fontweight="bold", fontsize="12", ha='center')
 
     loc = mdates.DayLocator(interval=1)
-    axgc.xaxis.set_major_formatter(mdates.DateFormatter('%y-%m-%d'))
+    axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.HourLocator(interval=6))
     axgc.set_ylim(0, 9)

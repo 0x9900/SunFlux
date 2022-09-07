@@ -75,7 +75,7 @@ def graph(data, condition, filename):
     elif val >= 100:
       colors[pos] = 'darkmagenta'
 
-  today = datetime.utcnow().strftime('%Y/%m/%d %H:%M')
+  today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('A-Index', fontsize=14, fontweight='bold')
   fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
@@ -96,7 +96,7 @@ def graph(data, condition, filename):
   axgc.axhline(y=100, linewidth=1, zorder=1, color='darkmagenta', linestyle="dashed")
 
   loc = mdates.DayLocator(interval=4)
-  axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
+  axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
   axgc.xaxis.set_major_locator(loc)
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
 

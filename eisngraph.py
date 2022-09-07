@@ -93,7 +93,7 @@ class EISN:
     vdata = np.array([int(x[4]) for x in self.data])
     cdata = np.array([int(x[5]) for x in self.data])
 
-    today = datetime.utcnow().strftime('%Y/%m/%d %H:%M')
+    today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
     fig = plt.figure(figsize=(12, 5))
     fig.suptitle('Estimated International Sunspot Number (EISN)', fontsize=14, fontweight='bold')
     fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
@@ -113,7 +113,7 @@ class EISN:
                 fontsize="10", facecolor="linen", borderaxespad=1, ncol=2)
 
     loc = mdates.DayLocator(interval=int(1+len(x)/11))
-    axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
+    axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.DayLocator())
     axgc.set_ylim(0, y.max()*1.2)

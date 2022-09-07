@@ -47,7 +47,7 @@ class Flux:
                   for d in self.data])
     y = np.array([int(x[1]) for x in self.data])
 
-    date = datetime.utcnow().strftime('%Y/%m/%d %H:%M')
+    date = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
     fig = plt.figure(figsize=(12, 5))
     fig.suptitle('Daily 10cm Flux Index', fontsize=14, fontweight='bold')
     axgc = plt.gca()
@@ -55,7 +55,7 @@ class Flux:
     axgc.tick_params(labelsize=10)
 
     loc = mdates.DayLocator(interval=4)
-    axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
+    axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.DayLocator())
 

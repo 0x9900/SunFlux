@@ -57,7 +57,7 @@ class OutLook:
     flux = np.array([int(x[1]) for x in self.data])
     aindex = np.array([int(x[2]) for x in self.data])
     kindex = np.array([int(x[3]) for x in self.data])
-    now = datetime.utcnow().strftime('%Y/%m/%d %H:%M')
+    now = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
 
     plt.rc('ytick', labelsize=12)
     fig, ax1 = plt.subplots(figsize=(12, 5))
@@ -71,7 +71,7 @@ class OutLook:
     ax1.set_ylim([0, aindex.max() * 1.15])
     ax1.set_ylabel('Index')
     loc = mdates.DayLocator(interval=int(1+len(aindex)/11))
-    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
+    ax1.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
     ax1.xaxis.set_major_locator(loc)
     ax1.xaxis.set_minor_locator(mdates.DayLocator())
 
