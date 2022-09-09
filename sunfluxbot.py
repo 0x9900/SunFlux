@@ -455,7 +455,7 @@ def send_kpindex(update: Update, context: CallbackContext):
   config = Config()
   cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
   now = time.time()
-  image = os.path.join(cache_dir, 'kpindex.png')
+  image = os.path.join(cache_dir, 'kpi.png')
   chat_id = update.message.chat_id
   today = datetime.now().strftime('%a %b %d %Y')
   try:
