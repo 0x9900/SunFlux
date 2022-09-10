@@ -120,7 +120,7 @@ def main():
   )
 
   parser = argparse.ArgumentParser(description="Graph dxcc trafic")
-  parser.add_argument("-d", "--date", type=type_date, default='now', help="Graph date")
+  parser.add_argument("-d", "--date", type=type_date, default='now', help="Graph date [YYYYMMDDHHMM]")
   z_group = parser.add_mutually_exclusive_group(required=True)
   z_group.add_argument("-c", "--continent", choices=CONTINENTS, help="Continent")
   z_group.add_argument("-i", "--ituzone", type=int, help="itu zone")
