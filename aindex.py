@@ -17,7 +17,7 @@ from config import Config
 
 plt.style.use(['classic', 'seaborn-talk'])
 
-NB_DAYS = 90
+NB_DAYS = 34
 
 WWV_REQUEST = """
 SELECT MAX(wwv.A), AVG(wwv.A), MIN(wwv.A), DATE(DATETIME(wwv.time, "unixepoch")) AS dt
