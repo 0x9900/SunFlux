@@ -103,8 +103,9 @@ class SSN:
     axgc.xaxis.set_minor_locator(mdates.DayLocator())
     axgc.set_ylim(np.min([ssn, flux])*0.2, np.max([ssn, flux])*1.2)
 
+    sign = [1, -1] * len(x)
     for x, y in zip(x, ssn):
-      plt.annotate(f"{y:d}", (x, y), textcoords="offset points", xytext=(0,10),
+      plt.annotate(f"{y:d}", (x, y), textcoords="offset points", xytext=(0, (20*sign.pop())),
                    ha='center', fontsize=8,
                    arrowprops=dict(arrowstyle="->", color='green'))
 
