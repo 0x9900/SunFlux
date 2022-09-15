@@ -80,7 +80,7 @@ def graph(data, condition, filename):
   fig.suptitle('A-Index', fontsize=14, fontweight='bold')
   fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
   fig.text(0.15, 0.8, "Forecast: " + condition, fontsize=12, zorder=4,
-           bbox=dict(boxstyle='round', linewidth=1, facecolor='gainsboro', alpha=1, pad=.8))
+           bbox=dict(boxstyle='round', linewidth=1, facecolor='linen', alpha=1, pad=.8))
 
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
@@ -104,6 +104,9 @@ def graph(data, condition, filename):
   axgc.set_ylabel('A-Index')
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
+
+  axgc.legend(['Min', 'Max'], loc='upper right', fontsize='10',
+              facecolor='linen', borderaxespad=1)
 
   fig.autofmt_xdate(rotation=10, ha="center")
   plt.savefig(filename, transparent=False, dpi=100)

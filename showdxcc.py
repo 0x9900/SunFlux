@@ -30,7 +30,7 @@ class ShowDXCC:
   def __init__(self, config, zone_name, zone, date=None):
     self.config = config
     self.date = date if date else datetime.utcnow()
-    self.data = None
+    self.data = []
     self.zone_name = zone_name
     self.zone = zone
     if zone_name == 'continent':
@@ -42,8 +42,10 @@ class ShowDXCC:
     else:
       raise SystemError(f'Zone {zone_name} error')
 
+  def is_data(self):
+    return np.any(self.data)
+
   def get_dxcc(self):
-    # pylint: disable=too-many-locals
     start_date = self.date - timedelta(hours=1, minutes=0)
     end_date = self.date
 
@@ -54,7 +56,8 @@ class ShowDXCC:
     )
     with conn:
       curs = conn.cursor()
-      results = curs.execute(REQUEST.format(self.zone_label), (self.zone, start_date, end_date)).fetchall()
+      results = curs.execute(REQUEST.format(self.zone_label),
+                             (self.zone, start_date, end_date)).fetchall()
 
     self.data = np.zeros((len(CONTINENTS), len(BANDS)), dtype=int)
     for band, _, to_continent, count in results:
@@ -93,7 +96,8 @@ class ShowDXCC:
         axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
 
     axgc.set_title(f"DX Spots {self.zone_name} = {self.zone}", fontsize=14, fontweight='bold')
-    fig.text(0.02, 0.03, f'SunFluxBot By W6BSD {self.date.strftime("%Y:%m:%d - %H:%M")}', fontsize=14)
+    fig.text(0.02, 0.03, f'SunFluxBot By W6BSD {self.date.strftime("%Y:%m:%d - %H:%M")}',
+             fontsize=14)
     fig.tight_layout()
     fig.savefig(filename, transparent=False, dpi=100)
 
@@ -120,33 +124,41 @@ def main():
   )
 
   parser = argparse.ArgumentParser(description="Graph dxcc trafic")
-  parser.add_argument("-d", "--date", type=type_date, default='now', help="Graph date [YYYYMMDDHHMM]")
+  parser.add_argument("-d", "--date", type=type_date, default='now',
+                      help="Graph date [YYYYMMDDHHMM]")
   z_group = parser.add_mutually_exclusive_group(required=True)
   z_group.add_argument("-c", "--continent", choices=CONTINENTS, help="Continent")
-  z_group.add_argument("-i", "--ituzone", type=int, help="itu zone")
+  z_group.add_argument("-I", "--ituzone", type=int, help="itu zone")
   z_group.add_argument("-C", "--cqzone", type=int, help="cq zone")
   parser.add_argument('args', nargs="*")
   opts = parser.parse_args()
-
-  if opts.args:
-    filename = opts.args[0]
-  else:
-    tmpdir = config.get('showdxcc.target_dir', '/var/tmp/dxcc')
-    target_dir = os.path.join(tmpdir, opts.continent)
-    os.makedirs(target_dir, exist_ok=True)
-    now = opts.date.strftime('%Y%m%d%H%M')
-    filename = os.path.join(target_dir, f'dxcc-{opts.continent}-{now}.png')
 
   for zone_name in ('continent', 'ituzone', 'cqzone'):
     zone = getattr(opts, zone_name)
     if zone:
       break
 
+  if opts.args:
+    filename = opts.args[0]
+  else:
+    now = opts.date.strftime('%Y%m%d%H%M')
+    tmpdir = config.get('showdxcc.target_dir', '/var/tmp/dxcc')
+    if opts.continent:
+      target_dir = os.path.join(tmpdir, opts.continent)
+      filename = os.path.join(target_dir, f'dxcc-{opts.continent}-{now}.png')
+      os.makedirs(target_dir, exist_ok=True)
+    else:
+      filename = os.path.join(tmpdir, f'dxcc-{zone_name}{zone}-{now}.png')
+
+
   showdxcc = ShowDXCC(config, zone_name, zone, opts.date)
   showdxcc.get_dxcc()
-  showdxcc.graph(filename)
+  if showdxcc.is_data():
+    showdxcc.graph(filename)
+    logging.info('Save %s', filename)
+  else:
+    logging.info('No data to show')
 
-  logging.info('Save %s', filename)
   sys.exit(os.EX_OK)
 
 if __name__ == "__main__":
