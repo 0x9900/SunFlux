@@ -73,6 +73,8 @@ class Flux:
                    arrowprops=dict(arrowstyle="wedge", color='green'))
 
     axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
+    axgc.margins(x=.015)
+
     fig.autofmt_xdate(rotation=10, ha="center")
     plt.figtext(0.02, 0.02, f'SunFluxBot By W6BSD {date}')
     plt.savefig(filename, transparent=False, dpi=100)

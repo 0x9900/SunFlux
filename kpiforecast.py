@@ -89,6 +89,8 @@ class KPIForecast:
     axgc.legend(fontsize=10, loc="best", facecolor="linen", borderaxespad=1)
 
     axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
+    axgc.margins(x=.01)
+
     fig.autofmt_xdate(rotation=10, ha="center")
 
     plt.figtext(0.02, 0.02, f'SunFluxBot By W6BSD {date}')
