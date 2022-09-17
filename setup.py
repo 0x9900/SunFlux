@@ -36,7 +36,7 @@ setup(
     'kpiforecast',
     'kpiwwv',
     'outlookgraph',
-    'purge_cluster'
+    'purge_cluster',
     'showdxcc',
     'ssngraph',
     'sunfluxbot',
