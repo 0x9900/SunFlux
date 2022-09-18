@@ -111,7 +111,6 @@ def graph(data, condition, filename):
   fig.autofmt_xdate(rotation=10, ha="center")
   plt.savefig(filename, transparent=False, dpi=100)
   plt.close()
-  logging.info('Graph "%s" saved', filename)
   return filename
 
 def main():
@@ -120,6 +119,7 @@ def main():
     format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%H:%M:%S',
     level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
   )
+  logger = logging.getLogger('aindex')
   config = Config()
   try:
     name = sys.argv[1]
@@ -130,8 +130,9 @@ def main():
   condition = get_conditions(config)
   if data:
     graph(data, condition, name)
+    logger.info('Graph "%s" saved', name)
   else:
-    logging.warning('No data collected')
+    logger.warning('No data collected')
 
 
 if __name__ == "__main__":
