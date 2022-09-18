@@ -59,12 +59,13 @@ class Flux:
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.DayLocator())
 
-    ticks = np.arange(40, int(y.max() * 1.25), 20)
+    ticks = np.array([50, 70])
+    ticks = np.append(ticks, np.arange(90, int(y.max() * 1.15), 25))
     axgc.set_yticks(ticks)
 
-    axgc.axhspan(90, ticks.max(), facecolor='green', alpha=0.4, label='Good')
-    axgc.axhspan(70, 90, facecolor='orange', alpha=0.4, label='Ok')
-    axgc.axhspan(40, 70, facecolor='red', alpha=0.4, label='Bad')
+    axgc.axhspan(90, ticks.max(), facecolor='lightgreen', alpha=0.3, label='Good')
+    axgc.axhspan(70, 90, facecolor='orange', alpha=0.3, label='Ok')
+    axgc.axhspan(40, 70, facecolor='red', alpha=0.3, label='Bad')
     axgc.legend(fontsize=10, loc="upper left")
 
     for idx, (_x, _y) in enumerate(zip(x, y)):
