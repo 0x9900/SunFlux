@@ -68,7 +68,7 @@ CREATE INDEX IF NOT EXISTS wwv_idx_time on wwv (time DESC);
 TELNET_TIMEOUT = 37
 DETECT_TYPES = sqlite3.PARSE_DECLTYPES
 
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger('dxcluster')
 
 class DXCCRecord:
   __slots__ = ['prefix', 'country', 'ctn', 'continent', 'cqzone',
@@ -324,7 +324,6 @@ def main():
     format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s',
     datefmt='%H:%M:%S'
   )
-  LOG = logging.getLogger(__name__)
 
   loglevel = os.getenv('LOGLEVEL', config.get('log_level', 'INFO'))
   if loglevel not in logging._nameToLevel: # pylint: disable=protected-access
@@ -344,6 +343,7 @@ def main():
       detect_types=DETECT_TYPES,
       isolation_level=None
     )
+    LOG.info("Database: %s", config['db_name'])
   except sqlite3.OperationalError as err:
     LOG.error("Database: %s - %s", config['db_name'], err)
     return
