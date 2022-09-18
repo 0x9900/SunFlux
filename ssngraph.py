@@ -36,6 +36,8 @@ class SSN:
       self.data = SSN.read_url(NOAA_URL, self.data)
       SSN.write_cache(cache_file, self.data)
 
+    self.data = self.data[-90:]
+
   @staticmethod
   def read_url(url, current_data):
     with urlopen(url) as resp:
@@ -51,7 +53,7 @@ class SSN:
 
     # de-dup
     _data = {v[0]: v for v in data}
-    return sorted(_data.values())[-90:]
+    return sorted(_data.values())
 
   @staticmethod
   def convert(line):
