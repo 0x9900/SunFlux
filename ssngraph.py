@@ -19,6 +19,13 @@ plt.style.use(['classic', 'seaborn-talk'])
 
 NOAA_URL = 'https://services.swpc.noaa.gov/text/daily-solar-indices.txt'
 
+
+def moving_average(data, window=5):
+  average = np.convolve(data, np.ones(window), 'valid') / window
+  for _ in range(window - 1):
+    average = np.insert(average, 0, np.nan)
+  return average
+
 class SSN:
   def __init__(self, cache_file, cache_time=43200):
     self.log = logging.getLogger('SSN')
@@ -88,6 +95,7 @@ class SSN:
     x = np.array([d[0] for d in self.data])
     ssn = np.array([x[2] for x in self.data])
     flux = np.array([x[1] for x in self.data])
+    avg = moving_average(ssn)
 
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
     fig = plt.figure(figsize=(12, 5))
@@ -95,7 +103,8 @@ class SSN:
     fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
     axgc = plt.gca()
     axgc.tick_params(labelsize=10)
-    points = axgc.plot(x, ssn, marker='o', markersize=7, color="darkolivegreen", linewidth=2)
+    points = axgc.plot(x, ssn, marker='o', markersize=7, color="darkolivegreen", linewidth=1)
+    axgc.plot(x, avg, color="blue", linewidth=2, zorder=5)
     axgc.plot(x, flux, linestyle='--', color="cornflowerblue", linewidth=1)
     loc = mdates.DayLocator(interval=int(1+len(x)/11))
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
@@ -109,7 +118,7 @@ class SSN:
                    ha='center', fontsize=8,
                    arrowprops=dict(arrowstyle="->", color='green'))
 
-    axgc.legend(['Sun spot', '10.7cm Flux'], facecolor="linen", fontsize="10")
+    axgc.legend(['Sun spot', '5day average', '10.7cm Flux'], facecolor="linen", fontsize="10")
     axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
 
     axgc.margins(.01)
