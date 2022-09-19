@@ -52,7 +52,7 @@ def graph(data, filename):
   fig.suptitle('Daily 10cm Flux Index', fontsize=14, fontweight='bold')
   axgc = plt.gca()
   axgc.plot(x, y)
-  axgc.plot(x, p(x), ":r")
+  axgc.plot(x, p(x), "--r")
   axgc.tick_params(labelsize=10)
 
   plt.annotate(f"{y[-1]:d}", (x[-1], y[-1]), textcoords="offset points", xytext=(-10, 30),
