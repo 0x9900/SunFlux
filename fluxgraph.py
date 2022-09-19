@@ -1,129 +1,108 @@
 #!/usr/bin/env python3.9
 #
-import json
 import logging
 import os
-import pickle
+import sqlite3
 import sys
-import time
-import urllib.request
 
-from datetime import datetime
+from collections import defaultdict
+from datetime import datetime, timedelta
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 
+import adapters
+
 from config import Config
 
 plt.style.use(['classic', 'seaborn-talk'])
 
-NOAA_URL = 'https://services.swpc.noaa.gov/products/10cm-flux-30-day.json'
+NB_DAYS = 90
 
-class Flux:
-  def __init__(self, cache_file, cache_time=43200):
-    self.log = logging.getLogger('Flux')
-    self.cachefile = cache_file
-    self.data = None
+WWV_REQUEST = "SELECT wwv.time, wwv.SFI FROM wwv WHERE wwv.time > ?"
 
-    now = time.time()
-    try:
-      filest = os.stat(self.cachefile)
-      if now - filest.st_mtime > cache_time: # 12 hours
-        raise FileNotFoundError
-    except FileNotFoundError:
-      self.download_flux()
-      if self.data:
-        self.writecache()
-    finally:
-      self.readcache()
 
-  def graph(self, filename):
-    if not self.data:
-      self.log.warning('No data to graph')
-      return None
+def bucket(dtm, size=8):
+  return int(size * int(dtm.hour / size))
 
-    x = np.array([datetime.strptime(d[0], '%Y-%m-%d %H:%M:%S.%f')
-                  for d in self.data])
-    y = np.array([int(x[1]) for x in self.data])
+def get_flux(config, days=NB_DAYS):
+  data = defaultdict(list)
+  start_date = datetime.utcnow() - timedelta(days=days)
+  conn = sqlite3.connect(config['showdxcc.db_name'], timeout=5,
+                         detect_types=sqlite3.PARSE_DECLTYPES)
+  with conn:
+    curs = conn.cursor()
+    results = curs.execute(WWV_REQUEST, (start_date,))
+    for elem in results:
+      date = elem[0]
+      date = date.replace(hour=bucket(date), minute=0, second=0, microsecond=0)
+      data[date].append(elem[1])
 
-    date = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
-    fig = plt.figure(figsize=(12, 5))
-    fig.suptitle('Daily 10cm Flux Index', fontsize=14, fontweight='bold')
-    axgc = plt.gca()
-    axgc.plot(x, y)
-    axgc.tick_params(labelsize=10)
+  return sorted(data.items())
 
-    loc = mdates.DayLocator(interval=4)
-    axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
-    axgc.xaxis.set_major_locator(loc)
-    axgc.xaxis.set_minor_locator(mdates.DayLocator())
+def graph(data, filename):
+  # pylint: disable=invalid-name
+  x = np.array([mdates.date2num(d[0]) for d in data])
+  y = np.array([round(np.mean(d[1])) for d in data])
+  p = np.poly1d(np.polyfit(x, y, 2))
 
-    ticks = np.array([50, 70])
-    ticks = np.append(ticks, np.arange(90, int(y.max() * 1.15), 25))
-    axgc.set_yticks(ticks)
+  date = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
+  fig = plt.figure(figsize=(12, 5))
+  fig.suptitle('Daily 10cm Flux Index', fontsize=14, fontweight='bold')
+  axgc = plt.gca()
+  axgc.plot(x, y)
+  axgc.plot(x, p(x), ":r")
+  axgc.tick_params(labelsize=10)
 
-    axgc.axhspan(90, ticks.max(), facecolor='lightgreen', alpha=0.3, label='Good')
-    axgc.axhspan(70, 90, facecolor='orange', alpha=0.3, label='Ok')
-    axgc.axhspan(40, 70, facecolor='red', alpha=0.3, label='Bad')
-    axgc.legend(fontsize=10, loc="upper left")
+  plt.annotate(f"{y[-1]:d}", (x[-1], y[-1]), textcoords="offset points", xytext=(-10, 30),
+               ha='center', fontsize=10,
+               arrowprops=dict(arrowstyle="->", color='green'))
 
-    for idx, (_x, _y) in enumerate(zip(x, y)):
-      plt.annotate(f"{_y:d}", (_x, _y), textcoords="offset points", xytext=(0,-20),
-                   ha='center', fontsize=8,
-                   arrowprops=dict(arrowstyle="wedge", color='green'))
+  loc = mdates.DayLocator(interval=7)
+  axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
+  axgc.xaxis.set_major_locator(loc)
+  axgc.xaxis.set_minor_locator(mdates.DayLocator())
 
-    axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
-    axgc.margins(x=.015)
+  ticks = np.array([50, 70])
+  ticks = np.append(ticks, np.arange(90, int(y.max() * 1.15), 25))
+  axgc.set_yticks(ticks)
 
-    fig.autofmt_xdate(rotation=10, ha="center")
-    plt.figtext(0.02, 0.02, f'SunFluxBot By W6BSD {date}')
-    plt.savefig(filename, transparent=False, dpi=100)
-    plt.close()
-    self.log.info('Graph "%s" saved', filename)
-    return filename
+  axgc.axhspan(90, ticks.max(), facecolor='lightgreen', alpha=0.3, label='Good')
+  axgc.axhspan(70, 90, facecolor='orange', alpha=0.3, label='Ok')
+  axgc.axhspan(40, 70, facecolor='red', alpha=0.3, label='Bad')
+  axgc.legend(fontsize=10, loc="upper left")
 
-  def download_flux(self):
-    self.log.info('Downloading data from NOAA')
-    res = urllib.request.urlopen(NOAA_URL)
-    webdata = res.read()
-    encoding = res.info().get_content_charset('utf-8')
-    data = json.loads(webdata.decode(encoding))
-    self.data = data[1:]
+  axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
+  axgc.margins(x=.015)
 
-  def readcache(self):
-    """Read data from the cache"""
-    self.log.debug('Read from cache "%s"', self.cachefile)
-    try:
-      with open(self.cachefile, 'rb') as fd_cache:
-        data = pickle.load(fd_cache)
-    except (FileNotFoundError, EOFError):
-      data = None
-    self.data = data
+  fig.autofmt_xdate(rotation=10, ha="center")
+  plt.figtext(0.02, 0.02, f'SunFluxBot By W6BSD {date}')
+  plt.savefig(filename, transparent=False, dpi=100)
+  plt.close()
+  return filename
 
-  def writecache(self):
-    """Write data into the cachefile"""
-    self.log.debug('Write cache "%s"', self.cachefile)
-    with open(self.cachefile, 'wb') as fd_cache:
-      pickle.dump(self.data, fd_cache)
 
 def main():
+  adapters.install_adapers()
   logging.basicConfig(
     format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%H:%M:%S',
     level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
   )
+  logger = logging.getLogger('fluxgraph')
   config = Config()
   try:
     name = sys.argv[1]
   except IndexError:
     name = '/tmp/flux.png'
 
-  cache_file = config.get('fluxgraph.cache_file', '/tmp/flux.pkl')
-  cache_time = config.get('fluxgraphb.cache_time', 43200)
-  flux = Flux(cache_file, cache_time)
-  if not flux.graph(name):
+  data = get_flux(config)
+  if not data:
+    logger.warning('No data collected')
     return os.EX_DATAERR
 
+  graph(data, name)
+  logger.info('Graph "%s" saved', name)
   return os.EX_OK
 
 if __name__ == "__main__":
