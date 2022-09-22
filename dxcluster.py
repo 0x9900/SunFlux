@@ -15,13 +15,16 @@ import os
 import random
 import re
 import socket
+import sys
 import time
 
 from collections import namedtuple
 from copy import copy
 from datetime import datetime
 from itertools import cycle
+from queue import Queue
 from telnetlib import Telnet
+from threading import Thread
 
 import sqlite3
 
@@ -68,7 +71,51 @@ CREATE INDEX IF NOT EXISTS wwv_idx_time on wwv (time DESC);
 TELNET_TIMEOUT = 37
 DETECT_TYPES = sqlite3.PARSE_DECLTYPES
 
-LOG = logging.getLogger('dxcluster')
+LOG = logging.root
+
+def create_db(config):
+  try:
+    conn = sqlite3.connect(config['db_name'], timeout=config['db_timeout'],
+                           detect_types=DETECT_TYPES, isolation_level=None)
+    LOG.info("Database: %s", config['db_name'])
+  except sqlite3.OperationalError as err:
+    LOG.error("Database: %s - %s", config['db_name'], err)
+    sys.exit(os.EX_IOERR)
+
+  with conn:
+    curs = conn.cursor()
+    curs.executescript(SQL_TABLE)
+
+
+class DBInsert(Thread):
+  def __init__(self, config, queue):
+    super().__init__()
+    self.config = config
+    self.queue = queue
+
+  def run(self):
+    try:
+      conn = sqlite3.connect(
+        self.config['db_name'], timeout=self.config['db_timeout'],
+        detect_types=DETECT_TYPES, isolation_level=None
+      )
+      LOG.info("Database: %s", self.config['db_name'])
+    except sqlite3.OperationalError as err:
+      LOG.error("Database: %s - %s", self.config['db_name'], err)
+      sys.exit(os.EX_IOERR)
+
+    while True:
+      while self.queue.empty():
+        time.sleep(.25)
+      LOG.debug('Queue len: %d', self.queue.qsize())
+      request = self.queue.get()
+      try:
+        with conn:
+          curs = conn.cursor()
+          curs.execute(*request)
+      except sqlite3.OperationalError as err:
+        LOG.error(err)
+
 
 class DXCCRecord:
   __slots__ = ['prefix', 'country', 'ctn', 'continent', 'cqzone',
@@ -105,7 +152,7 @@ class DXCC:
     csvfd = csv.reader(io.StringIO(cty))
     for row in csvfd:
       self._map.update(self.parse(row))
-    self.max_len = max([len(v) for v in self._map])
+    self.max_len = max(len(v) for v in self._map)
 
   @staticmethod
   def parse(record):
@@ -269,7 +316,7 @@ def parse_wwv(line):
   return fields
 
 
-def read_stream(cdb, cnx):
+def read_stream(queue, cnx):
   expect_exp = [b'DX.*\n', b'WWV de .*\n']
   current = time.time()
   while True:
@@ -280,30 +327,18 @@ def read_stream(cdb, cnx):
       if not rec:
         continue
       LOG.debug(rec)
-      try:
-        with cdb:
-          curs = cdb.cursor()
-          curs.execute("INSERT INTO dxspot VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", (
-            rec.DE, rec.FREQUENCY, rec.DX, rec.MESSAGE,
-            rec.DE_CONT, rec.TO_CONT, rec.DE_ITUZONE, rec.TO_ITUZONE,
-            rec.DE_CQZONE, rec.TO_CQZONE, rec.BAND, rec.DX_TIME,
-          ))
-      except sqlite3.OperationalError as err:
-        LOG.error(err)
+      queue.put(["INSERT INTO dxspot VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", (
+        rec.DE, rec.FREQUENCY, rec.DX, rec.MESSAGE, rec.DE_CONT, rec.TO_CONT,
+        rec.DE_ITUZONE, rec.TO_ITUZONE, rec.DE_CQZONE, rec.TO_CQZONE, rec.BAND,
+        rec.DX_TIME)])
     elif code == 1:
       fields = parse_wwv(buffer)
       LOG.info("WWV Fields %s", repr(fields))
       if not fields:
         continue
-      try:
-        with cdb:
-          curs = cdb.cursor()
-          curs.execute("INSERT INTO wwv VALUES (?,?,?,?,?)", (
-            fields['SFI'], fields['A'], fields['K'], fields['conditions'],
-            fields['time']
-          ))
-      except sqlite3.OperationalError as err:
-        LOG.error(err)
+      queue.put(["INSERT INTO wwv VALUES (?,?,?,?,?)", (
+        fields['SFI'], fields['A'], fields['K'], fields['conditions'],
+        fields['time'])])
     elif code == -1:            # timeout
       if current < time.time() - 120:
         break
@@ -321,10 +356,10 @@ def main():
   del _config
 
   logging.basicConfig(
-    format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s',
+    format='%(asctime)s %(name)s[%(thread)s]:%(lineno)d %(levelname)s - %(message)s',
     datefmt='%H:%M:%S'
   )
-
+  LOG = logging.getLogger('dxcluster')
   loglevel = os.getenv('LOGLEVEL', config.get('log_level', 'INFO'))
   if loglevel not in logging._nameToLevel: # pylint: disable=protected-access
     LOG.error('Log level "%s" does not exist, defaulting to INFO', loglevel)
@@ -336,21 +371,12 @@ def main():
     host, port = server.split(':')
     clusters.append((host, int(port)))
 
-  try:
-    conn = sqlite3.connect(
-      config['db_name'],
-      timeout=config['db_timeout'],
-      detect_types=DETECT_TYPES,
-      isolation_level=None
-    )
-    LOG.info("Database: %s", config['db_name'])
-  except sqlite3.OperationalError as err:
-    LOG.error("Database: %s - %s", config['db_name'], err)
-    return
+  create_db(config)
 
-  with conn:
-    curs = conn.cursor()
-    curs.executescript(SQL_TABLE)
+  queue = Queue()
+  db_thread = DBInsert(config, queue)
+  db_thread.setDaemon(True)
+  db_thread.start()
 
   random.shuffle(clusters)
   for cluster in cycle(clusters):
@@ -359,7 +385,7 @@ def main():
       LOG.info("Connection to %s:%d open", telnet.host, telnet.port)
       login(config['call'], telnet)
       LOG.info("%s identified", config['call'])
-      read_stream(conn, telnet)
+      read_stream(queue, telnet)
     except OSError as err:
       LOG.error("%s - %s - Sleeping 10 seconds before retrying", err, cluster)
       time.sleep(10)
