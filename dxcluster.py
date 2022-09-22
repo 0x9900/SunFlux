@@ -105,17 +105,21 @@ class DBInsert(Thread):
       sys.exit(os.EX_IOERR)
 
     while True:
+      # waiting for something in the queue
       while self.queue.empty():
         time.sleep(.25)
+
       LOG.debug('Queue len: %d', self.queue.qsize())
       request = self.queue.get()
-      try:
-        with conn:
-          curs = conn.cursor()
-          curs.execute(*request)
-      except sqlite3.OperationalError as err:
-        LOG.error(err)
-
+      while True:
+        try:
+          with conn:
+            curs = conn.cursor()
+            curs.execute(*request)
+        except sqlite3.OperationalError as err:
+          LOG.error(err)
+        else:
+          break
 
 class DXCCRecord:
   __slots__ = ['prefix', 'country', 'ctn', 'continent', 'cqzone',
