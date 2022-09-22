@@ -117,7 +117,7 @@ class DBInsert(Thread):
             curs = conn.cursor()
             curs.execute(*request)
         except sqlite3.OperationalError as err:
-          LOG.error(err)
+          LOG.error("Queue len: %d - Error: %s", self.queue.qsize(), err)
         else:
           break
 
