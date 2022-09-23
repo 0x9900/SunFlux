@@ -377,7 +377,7 @@ def main():
 
   create_db(config)
 
-  queue = Queue()
+  queue = Queue(config.get('queue_len', 0))
   db_thread = DBInsert(config, queue)
   db_thread.setDaemon(True)
   db_thread.start()
