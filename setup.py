@@ -5,7 +5,7 @@ import sys
 from setuptools import setup, find_namespace_packages
 
 __author__ = "Fred C. (W6BSD)"
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 __license__ = 'BSD'
 
 py_version = sys.version_info[:2]

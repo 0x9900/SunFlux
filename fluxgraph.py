@@ -26,6 +26,7 @@ WWV_REQUEST = "SELECT wwv.time, wwv.SFI FROM wwv WHERE wwv.time > ?"
 def bucket(dtm, size=8):
   return int(size * int(dtm.hour / size))
 
+
 def get_flux(config, days=NB_DAYS):
   data = defaultdict(list)
   start_date = datetime.utcnow() - timedelta(days=days)
@@ -40,6 +41,7 @@ def get_flux(config, days=NB_DAYS):
       data[date].append(elem[1])
 
   return sorted(data.items())
+
 
 def graph(data, filename):
   # pylint: disable=invalid-name
