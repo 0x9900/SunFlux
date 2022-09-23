@@ -109,7 +109,6 @@ class DBInsert(Thread):
       while self.queue.empty():
         time.sleep(0.25)
 
-      LOG.debug('Queue len: %d', self.queue.qsize())
       while self.queue.qsize():
         request = self.queue.get()
         # Loop as long as the database is unlocked
@@ -121,6 +120,7 @@ class DBInsert(Thread):
             LOG.error("Queue len: %d - Error: %s", self.queue.qsize(), err)
             time.sleep(1)
           else:
+            LOG.debug('Queue len: %d', self.queue.qsize())
             break
 
 class DXCCRecord:
