@@ -105,21 +105,23 @@ class DBInsert(Thread):
       sys.exit(os.EX_IOERR)
 
     while True:
-      # waiting for something in the queue
+      # waiting for something to show up in the queue
       while self.queue.empty():
-        time.sleep(.25)
+        time.sleep(0.25)
 
       LOG.debug('Queue len: %d', self.queue.qsize())
-      request = self.queue.get()
-      while True:
-        try:
-          with conn:
+      while self.queue.qsize():
+        request = self.queue.get()
+        # Loop as long as the database is unlocked
+        while True:
+          try:
             curs = conn.cursor()
             curs.execute(*request)
-        except sqlite3.OperationalError as err:
-          LOG.error("Queue len: %d - Error: %s", self.queue.qsize(), err)
-        else:
-          break
+          except sqlite3.OperationalError as err:
+            LOG.error("Queue len: %d - Error: %s", self.queue.qsize(), err)
+            time.sleep(1)
+          else:
+            break
 
 class DXCCRecord:
   __slots__ = ['prefix', 'country', 'ctn', 'continent', 'cqzone',
@@ -232,18 +234,18 @@ def get_band(freq):
   return 0
 
 
-def login(call, cnx):
+def login(call, telnet):
   try:
-    cnx.expect([b'Please enter your call.*\n'])
+    telnet.expect([b'Please enter your call.*\n'])
   except socket.timeout:
     raise OSError('Connection timeout') from None
   except EOFError as err:
     raise OSError(err) from None
-  cnx.write(str.encode(f'{call}\n'))
-  cnx.expect([str.encode(f'{call} de .*\n')])
-  # cnx.write(b'Set Dx Filter SpotterCont=NA\n')
-  cnx.write(b'Set Dx Filter\n')
-  cnx.expect(['DX filter.*\n'.encode()])
+  telnet.write(str.encode(f'{call}\n'))
+  telnet.expect([str.encode(f'{call} de .*\n')])
+  # telnet.write(b'Set Dx Filter SpotterCont=NA\n')
+  telnet.write(b'Set Dx Filter\n')
+  telnet.expect(['DX filter.*\n'.encode()])
 
 
 def parse_spot(line):
@@ -320,17 +322,16 @@ def parse_wwv(line):
   return fields
 
 
-def read_stream(queue, cnx):
+def read_stream(queue, telnet):
   expect_exp = [b'DX.*\n', b'WWV de .*\n']
   current = time.time()
   while True:
-    code, _, buffer = cnx.expect(expect_exp, timeout=TELNET_TIMEOUT)
+    code, _, buffer = telnet.expect(expect_exp, timeout=TELNET_TIMEOUT)
     if code == 0:
       current = time.time()
       rec = parse_spot(buffer)
       if not rec:
         continue
-      LOG.debug(rec)
       queue.put(["INSERT INTO dxspot VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", (
         rec.DE, rec.FREQUENCY, rec.DX, rec.MESSAGE, rec.DE_CONT, rec.TO_CONT,
         rec.DE_ITUZONE, rec.TO_ITUZONE, rec.DE_CQZONE, rec.TO_CQZONE, rec.BAND,
@@ -346,7 +347,7 @@ def read_stream(queue, cnx):
     elif code == -1:            # timeout
       if current < time.time() - 120:
         break
-      LOG.warning('Timeout - sleeping for a few seconds [%s]', cnx.host)
+      LOG.warning('Timeout - sleeping for a few seconds [%s]', telnet.host)
       time.sleep(5)
 
 
