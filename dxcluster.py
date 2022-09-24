@@ -14,6 +14,7 @@ import logging.handlers
 import os
 import random
 import re
+import signal
 import socket
 import sys
 import time
@@ -109,6 +110,7 @@ class DBInsert(Thread):
       while self.queue.empty():
         time.sleep(0.25)
 
+      LOG.debug('DBInsert queue size: %d', self.queue.qsize())
       while self.queue.qsize():
         request = self.queue.get()
         # Loop as long as the database is unlocked
@@ -331,6 +333,7 @@ def read_stream(queue, telnet):
       rec = parse_spot(buffer)
       if not rec:
         continue
+      LOG.debug("DX %r", rec)
       queue.put(["INSERT INTO dxspot VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", (
         rec.DE, rec.FREQUENCY, rec.DX, rec.MESSAGE, rec.DE_CONT, rec.TO_CONT,
         rec.DE_ITUZONE, rec.TO_ITUZONE, rec.DE_CQZONE, rec.TO_CQZONE, rec.BAND,
@@ -349,6 +352,12 @@ def read_stream(queue, telnet):
       LOG.warning('Timeout - sleeping for a few seconds [%s]', telnet.host)
       time.sleep(5)
 
+def sig_handler(signum, frame):
+  if LOG.level == logging.DEBUG:
+    LOG.setLevel(logging.INFO)
+  else:
+    LOG.setLevel(logging.DEBUG)
+
 
 def main():
   global LOG                    # pylint: disable=global-statement
@@ -360,7 +369,7 @@ def main():
   del _config
 
   logging.basicConfig(
-    format='%(asctime)s %(name)s[%(thread)s]:%(lineno)d %(levelname)s - %(message)s',
+    format='%(asctime)s %(name)s[%(process)d]:%(lineno)d %(levelname)s - %(message)s',
     datefmt='%H:%M:%S'
   )
   LOG = logging.getLogger('dxcluster')
@@ -381,6 +390,8 @@ def main():
   db_thread = DBInsert(config, queue)
   db_thread.setDaemon(True)
   db_thread.start()
+
+  signal.signal(signal.SIGHUP, sig_handler)
 
   random.shuffle(clusters)
   for cluster in cycle(clusters):
