@@ -352,13 +352,6 @@ def read_stream(queue, telnet):
       LOG.warning('Timeout - sleeping for a few seconds [%s]', telnet.host)
       time.sleep(5)
 
-def sig_handler(signum, frame):
-  if LOG.level == logging.DEBUG:
-    LOG.setLevel(logging.INFO)
-  else:
-    LOG.setLevel(logging.DEBUG)
-
-
 def main():
   global LOG                    # pylint: disable=global-statement
 
@@ -390,6 +383,9 @@ def main():
   db_thread = DBInsert(config, queue)
   db_thread.setDaemon(True)
   db_thread.start()
+
+  def sig_handler(signum, frame):
+    LOG.setLevel(logging.INFO if LOG.level == logging.DEBUG else logging.DEBUG)
 
   signal.signal(signal.SIGHUP, sig_handler)
 
