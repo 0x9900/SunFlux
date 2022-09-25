@@ -23,7 +23,7 @@ from collections import namedtuple
 from copy import copy
 from datetime import datetime
 from itertools import cycle
-from queue import Queue
+from queue import Queue, Empty
 from telnetlib import Telnet
 from threading import Thread
 
@@ -105,24 +105,26 @@ class DBInsert(Thread):
       LOG.error("Database: %s - %s", self.config['db_name'], err)
       sys.exit(os.EX_IOERR)
 
+    queue_timeout = 30
     while True:
-      # waiting for something to show up in the queue
-      while self.queue.empty():
-        time.sleep(0.25)
+      try:
+        request = self.queue.get(timeout=queue_timeout)
+      except Empty:
+        LOG.warning('The queue had been empty for %d seconds', queue_timeout)
+        continue
 
-      LOG.debug('DBInsert queue size: %d', self.queue.qsize())
-      while self.queue.qsize():
-        request = self.queue.get()
-        # Loop as long as the database is unlocked
-        while True:
-          try:
-            curs = conn.cursor()
-            curs.execute(*request)
-          except sqlite3.OperationalError as err:
-            time.sleep(1)
-            LOG.warning("Queue len: %d - Error: %s", self.queue.qsize(), err)
-          else:
-            break
+      LOG.debug('Queue size: **** %d ****', self.queue.qsize())
+      # Loop until the database is unlocked
+      while True:
+        try:
+          curs = conn.cursor()
+          curs.execute(*request)
+        except sqlite3.OperationalError as err:
+          time.sleep(1)         # short pause
+          LOG.warning("Queue len: %d - Error: %s", self.queue.qsize(), err)
+        else:
+          break
+
 
 class DXCCRecord:
   __slots__ = ['prefix', 'country', 'ctn', 'continent', 'cqzone',
