@@ -74,7 +74,7 @@ DETECT_TYPES = sqlite3.PARSE_DECLTYPES
 
 LOG = logging.root
 
-def create_db(config):
+def connect_db(config):
   try:
     conn = sqlite3.connect(config['db_name'], timeout=config['db_timeout'],
                            detect_types=DETECT_TYPES, isolation_level=None)
@@ -82,8 +82,10 @@ def create_db(config):
   except sqlite3.OperationalError as err:
     LOG.error("Database: %s - %s", config['db_name'], err)
     sys.exit(os.EX_IOERR)
+  return conn
 
-  with conn:
+def create_db(config):
+  with connect_db(config) as conn:
     curs = conn.cursor()
     curs.executescript(SQL_TABLE)
 
@@ -95,30 +97,23 @@ class DBInsert(Thread):
     self.queue = queue
 
   def run(self):
-    try:
-      conn = sqlite3.connect(
-        self.config['db_name'], timeout=self.config['db_timeout'],
-        detect_types=DETECT_TYPES, isolation_level=None
-      )
-      LOG.info("Database: %s", self.config['db_name'])
-    except sqlite3.OperationalError as err:
-      LOG.error("Database: %s - %s", self.config['db_name'], err)
-      sys.exit(os.EX_IOERR)
-
     queue_timeout = 30
+    conn = connect_db(self.config)
+    # Run forever and consume the queue
     while True:
       try:
         request = self.queue.get(timeout=queue_timeout)
       except Empty:
-        LOG.warning('The queue had been empty for %d seconds', queue_timeout)
+        LOG.warning('The queue has been empty for %d seconds', queue_timeout)
         continue
 
       LOG.debug('Queue size: **** %d ****', self.queue.qsize())
       # Loop until the database is unlocked
       while True:
         try:
-          curs = conn.cursor()
-          curs.execute(*request)
+          with conn:
+            curs = conn.cursor()
+            curs.execute(*request)
         except sqlite3.OperationalError as err:
           time.sleep(1)         # short pause
           LOG.warning("Queue len: %d - Error: %s", self.queue.qsize(), err)
