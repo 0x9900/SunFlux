@@ -399,4 +399,8 @@ def main():
       time.sleep(10)
 
 if __name__ == "__main__":
-  main()
+  try:
+    main()
+  except KeyboardInterrupt:
+    LOG.critical('The ^C key has been pressed')
+    sys.exit(os.EX_IOERR)
