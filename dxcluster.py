@@ -330,7 +330,7 @@ def read_stream(queue, telnet):
       rec = parse_spot(buffer)
       if not rec:
         continue
-      LOG.debug("DX %r", rec)
+      LOG.debug("%s - DX %r", telnet.host, rec)
       queue.put(["INSERT INTO dxspot VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", (
         rec.DE, rec.FREQUENCY, rec.DX, rec.MESSAGE, rec.DE_CONT, rec.TO_CONT,
         rec.DE_ITUZONE, rec.TO_ITUZONE, rec.DE_CQZONE, rec.TO_CQZONE, rec.BAND,
