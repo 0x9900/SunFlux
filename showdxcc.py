@@ -96,7 +96,7 @@ class ShowDXCC:
         axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
 
     axgc.set_title(f"DX Spots {self.zone_name} = {self.zone}", fontsize=14, fontweight='bold')
-    fig.text(0.02, 0.03, f'SunFluxBot By W6BSD {self.date.strftime("%Y:%m:%d - %H:%M")}',
+    fig.text(0.02, 0.03, f'SunFluxBot By W6BSD - {self.date.strftime("%A %B %d %Y - %H:%M")}',
              fontsize=14)
     fig.tight_layout()
     fig.savefig(filename, transparent=False, dpi=100)
