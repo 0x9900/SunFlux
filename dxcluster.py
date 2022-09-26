@@ -370,6 +370,10 @@ def main():
   LOG.setLevel(loglevel)
 
   clusters = []
+  if not config['servers']:
+    LOG.error('No servers defined in the configuration file')
+    sys.exit(os.EX_IOERR)
+
   for server in config['servers']:
     host, port = server.split(':')
     clusters.append((host, int(port)))
