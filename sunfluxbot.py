@@ -354,7 +354,7 @@ def send_eisn(update: Update, context: CallbackContext):
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(sys.path[0], "eisngraph")
     status = subprocess.call([cmd], shell=False)
-    logger.info('Call {cmd} returned {status}')
+    logger.info('Call %s returned %d', cmd, status)
     if status:
       logger.error('Error generating the sun spot prediction graph')
       context.bot.send_message(chat_id, (
