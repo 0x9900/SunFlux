@@ -67,7 +67,7 @@ class SunRecord:
     self.data['kp_index'] = int(args[5])
 
   def __repr__(self):
-    info = ' '.join('%s: %s' % (k, v) for k, v  in self.data.items())
+    info = ' '.join(f"{k}: {v}" for k, v  in self.data.items())
     return '{} [{}]'.format(self.__class__, info)
 
   def __str__(self):
@@ -115,7 +115,7 @@ def download_short_alert():
     encoding = req.info().get_content_charset('utf-8')
     webdata = webdata.decode(encoding)
   except urllib.request.URLError as err:
-    logging.error('Connection error: %s we will try later', err)
+    logger.error('Connection error: %s we will try later', err)
     return ""
 
   lines = []
@@ -138,14 +138,14 @@ def download_alert():
     encoding = req.info().get_content_charset('utf-8')
     webdata = webdata.decode(encoding)
   except urllib.request.URLError as err:
-    logging.error('Connection error: %s we will try later', err)
+    logger.error('Connection error: %s we will try later', err)
     return ""
 
   if req.status != 200:
     return ""
 
   data = json.loads(webdata)
-  alerts = dict()
+  alerts = {}
   for record  in data:
     issue_date = datetime.strptime(
       record['issue_datetime'], '%Y-%m-%d %H:%M:%S.%f'
@@ -169,7 +169,7 @@ def noaa_download(image, cache_time=IMG_CACHE_TIME):
   config = Config()
   cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
   if image not in IMG_SOURCE:
-    logging.error(f"Image {image} not available")
+    logger.error("Image %s not available", image)
     return
 
   url = NOAA_URL + IMG_SOURCE[image]
@@ -203,7 +203,7 @@ def error_callback(update, context):
                  update, context.error)
 
 def help_command(update: Update, context: CallbackContext):
-  help = [
+  _help = [
     "*Use the following commands:*",
     "> /aindex - A Index",
     "> /alerts - NOAA Alerts",
@@ -220,16 +220,17 @@ def help_command(update: Update, context: CallbackContext):
     "> /swx - Solar indices overview",
     "> /warning - Warning time lines",
     "",
-    "\n_For more information or contact see /credits_"
+    "\n_For more information or contact see /credits_",
+    "More solar activity graphs at https://bsdworld.org/",
   ]
-  update.message.reply_text("\n".join(help), parse_mode='Markdown')
+  update.message.reply_text("\n".join(_help), parse_mode='Markdown')
   user = update.message.chat.username or "Stranger"
   chat_id = update.message.chat.id
-  logger.info(f"Command /help by {user}:{chat_id}")
+  logger.info("Command /help by %s:%d", user, chat_id)
   return ConversationHandler.END
 
 def send_credits(update: Update, context: CallbackContext):
-  credits = [
+  _credits = [
     "The solar data courtesy of NOAA",
     "> https://swpc.noaa.gov",
     "The DXCC heatmap data courtesy of the following clusters:",
@@ -238,10 +239,12 @@ def send_credits(update: Update, context: CallbackContext):
     "> dxc.nc7j.com",
     "> n8dxe.dxengineering.com",
     "> w3lpl.net",
+    "More solar information at:",
+    "https://bsdworld.org",
     "The SunFluxBot (beta) is developed by Fred (W6BSD)",
     "To send suggestions or to report a bug send a message at https://t.me/w6bsd",
   ]
-  update.message.reply_text("\n".join(credits), parse_mode='Markdown')
+  update.message.reply_text("\n".join(_credits), parse_mode='Markdown')
   return ConversationHandler.END
 
 def send_outlook(update: Update, context: CallbackContext):
@@ -258,9 +261,9 @@ def send_outlook(update: Update, context: CallbackContext):
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(sys.path[0], "outlookgraph")
     status = subprocess.call([cmd], shell=False)
-    logging.info(f'Call {cmd} returned {status}')
+    logger.info('Call %s returned %d', cmd, status)
     if status:
-      logging.error('Error generating the outlook graph')
+      logger.error('Error generating the outlook graph')
       context.bot.send_message(chat_id, (
         'The outlook graph is not available at the moment\n'
         'Please come back latter.'))
@@ -270,7 +273,7 @@ def send_outlook(update: Update, context: CallbackContext):
                          caption="27 day Solar Predictions",
                          filename=os.path.basename(image), timeout=100)
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /outlook by {user}:{chat_id}")
+  logger.info("Command /outlook by %s:%d", user, chat_id)
   return ConversationHandler.END
 
 
@@ -289,19 +292,19 @@ def send_flux(update: Update, context: CallbackContext):
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(sys.path[0], "fluxgraph")
     status = subprocess.call([cmd], shell=False)
-    logging.info(f'Call {cmd} returned {status}')
+    logger.info('Call %s returned %d', cmd, status)
     if status:
-      logging.error('Error generating the flux graph')
+      logger.error('Error generating the flux graph')
       context.bot.send_message(chat_id, (
         'The flux graph is not available at the moment\n'
         'Please come back latter.'))
       return ConversationHandler.END
 
   context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
-                         caption="10cm flux for: {}".format(today),
+                         caption=f"10cm flux for: {today}",
                          filename=os.path.basename(image), timeout=100)
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /flux by {user}:{chat_id}")
+  logger.info("Command /flux by %s:%d", user, chat_id)
   return ConversationHandler.END
 
 def send_ssn(update: Update, context: CallbackContext):
@@ -319,9 +322,9 @@ def send_ssn(update: Update, context: CallbackContext):
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(sys.path[0], "ssngraph")
     status = subprocess.call([cmd], shell=False)
-    logging.info(f'Call {cmd} returned {status}')
+    logger.info('Call %s returned %d', cmd, status)
     if status:
-      logging.error('Error generating the sun spot graph')
+      logger.error('Error generating the sun spot graph')
       context.bot.send_message(chat_id, (
         'The Sun Spot graph is not available at the moment\n'
         'Please come back latter.'))
@@ -329,11 +332,11 @@ def send_ssn(update: Update, context: CallbackContext):
 
   context.bot.send_photo(
     chat_id=chat_id, photo=open(image, 'rb'),
-    caption="Estimated International Sunspot Number: {}".format(today),
+    caption=f"Estimated International Sunspot Number: {today}",
     filename=os.path.basename(image), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /ssn by {user}:{chat_id}")
+  logger.info("Command /ssn by %s:%d", user, chat_id)
   return ConversationHandler.END
 
 def send_eisn(update: Update, context: CallbackContext):
@@ -351,9 +354,9 @@ def send_eisn(update: Update, context: CallbackContext):
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(sys.path[0], "eisngraph")
     status = subprocess.call([cmd], shell=False)
-    logging.info(f'Call {cmd} returned {status}')
+    logger.info('Call {cmd} returned {status}')
     if status:
-      logging.error('Error generating the sun spot prediction graph')
+      logger.error('Error generating the sun spot prediction graph')
       context.bot.send_message(chat_id, (
         'The Sun Spot Preditions graph is not available at the moment\n'
         'Please come back latter.'))
@@ -361,11 +364,11 @@ def send_eisn(update: Update, context: CallbackContext):
 
   context.bot.send_photo(
     chat_id=chat_id, photo=open(image, 'rb'),
-    caption="Estimated International Sunspot Number: {}".format(today),
+    caption=f"Estimated International Sunspot Number: {today}",
     filename=os.path.basename(image), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /eisn by {user}:{chat_id}")
+  logger.info("Command /eisn by %s:%d", user, chat_id)
   return ConversationHandler.END
 
 def send_drap(update: Update, context: CallbackContext):
@@ -382,7 +385,7 @@ def send_drap(update: Update, context: CallbackContext):
                          filename=os.path.basename(filename), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /drap by {user}:{chat_id}")
+  logger.info("Command /drap by %s:%d", user, chat_id)
   return ConversationHandler.END
 
 def send_muf(update: Update, context: CallbackContext):
@@ -400,7 +403,7 @@ def send_muf(update: Update, context: CallbackContext):
                          filename=os.path.basename(filename), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /muf by {user}:{chat_id}")
+  logger.info("Command /muf by %s:%d", user, chat_id)
   return ConversationHandler.END
 
 def send_geost(update: Update, context: CallbackContext):
@@ -417,7 +420,7 @@ def send_geost(update: Update, context: CallbackContext):
                          filename=os.path.basename(filename), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /geost by {user}:{chat_id}")
+  logger.info("Command /geost by %s:%d", user, chat_id)
   return ConversationHandler.END
 
 def send_aindex(update: Update, context: CallbackContext):
@@ -434,20 +437,20 @@ def send_aindex(update: Update, context: CallbackContext):
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(sys.path[0], "aindex")
     status = subprocess.call([cmd], shell=False)
-    logging.info(f'Call {cmd} returned {status}')
+    logger.info('Call %s returned %d', cmd, status)
     if status:
-      logging.error('Error generating the aindex graph')
+      logger.error('Error generating the aindex graph')
       context.bot.send_message(chat_id, (
         'The aindex graph is not available at the moment\n'
         'Please come back latter.'))
       return ConversationHandler.END
 
   context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
-                         caption="A-Index for: {}".format(today),
+                         caption=f"A-Index for: {today}",
                          filename=os.path.basename(image), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /aindex by {user}:{chat_id}")
+  logger.info("Command /aindex by %s:%d", user, chat_id)
   return ConversationHandler.END
 
 
@@ -465,20 +468,20 @@ def send_kpindex(update: Update, context: CallbackContext):
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(sys.path[0], "kpiwwv")
     status = subprocess.call([cmd], shell=False)
-    logging.info(f'Call {cmd} returned {status}')
+    logger.info('Call %s returned %d', cmd, status)
     if status:
-      logging.error('Error generating the kpindex graph')
+      logger.error('Error generating the kpindex graph')
       context.bot.send_message(chat_id, (
         'The kpindex graph is not available at the moment\n'
         'Please come back latter.'))
       return ConversationHandler.END
 
   context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
-                         caption="Planetary KPIndex for: {}".format(today),
+                         caption=f"Planetary KPIndex for: {today}",
                          filename=os.path.basename(image), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /kpindex by {user}:{chat_id}")
+  logger.info("Command /kpindex by %s:%d", user, chat_id)
   return ConversationHandler.END
 
 def send_swx(update: Update, context: CallbackContext):
@@ -495,7 +498,7 @@ def send_swx(update: Update, context: CallbackContext):
                          filename=os.path.basename(filename), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /swx by {user}:{chat_id}")
+  logger.info("Command /swx by %s:%d", user, chat_id)
   return ConversationHandler.END
 
 def send_swo(update: Update, context: CallbackContext):
@@ -512,7 +515,7 @@ def send_swo(update: Update, context: CallbackContext):
                          filename=os.path.basename(filename), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /swo by {user}:{chat_id}")
+  logger.info("Command /swo by %s:%d", user, chat_id)
   return ConversationHandler.END
 
 def send_warn(update: Update, context: CallbackContext):
@@ -529,7 +532,7 @@ def send_warn(update: Update, context: CallbackContext):
                          filename=os.path.basename(filename), timeout=100)
 
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /warn by {user}:{chat_id}")
+  logger.info("Command /warn by %s:%d", user, chat_id)
   return ConversationHandler.END
 
 def send_alerts(update: Update, context: CallbackContext):
@@ -540,7 +543,7 @@ def send_alerts(update: Update, context: CallbackContext):
 
   chat_id = update.message.chat_id
   user = update.message.chat.username or "Stranger"
-  logger.info(f"Command /alerts by {user}:{chat_id}")
+  logger.info("Command /alerts by %s:%d", user, chat_id)
   return ConversationHandler.END
 
 def dxcc_handler(update: Update, context: CallbackContext):
@@ -553,11 +556,11 @@ def dxcc_handler(update: Update, context: CallbackContext):
     send_dxcc(update, context)
 
   except ValueError:
-      keyboard = []
-      for key in CONTINENTS:
-        keyboard.append(InlineKeyboardButton(key, callback_data=key))
-      reply_markup = InlineKeyboardMarkup([keyboard])
-      update.message.reply_text('What is your continent?', reply_markup=reply_markup)
+    keyboard = []
+    for key in CONTINENTS:
+      keyboard.append(InlineKeyboardButton(key, callback_data=key))
+    reply_markup = InlineKeyboardMarkup([keyboard])
+    update.message.reply_text('What is your continent?', reply_markup=reply_markup)
 
 def send_dxcc(update: Update, context: CallbackContext):
   config = Config()
@@ -582,21 +585,21 @@ def send_dxcc(update: Update, context: CallbackContext):
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(sys.path[0], "showdxcc")
     status = subprocess.call([cmd, '-c', query, image], shell=False)
-    logging.info(f'Call "{cmd} {query} {image}" returned {status}')
+    logger.info('Call "%s %s %s" returned %d', cmd, query, image, status)
     if status:
-      logging.error('Error generating the dxcc graph')
+      logger.error('Error generating the dxcc graph')
       context.bot.send_message(chat_id, (
         'The dxcc graph is not available at the moment\n'
         'Please come back latter.'))
       return ConversationHandler.END
   else:
-    logging.info(f'Send {image} from cache')
+    logger.info('Send %s from cache', image)
 
   context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
                          caption=f"DX activity for the last hour on: {today}",
                          filename=os.path.basename(image), timeout=100)
 
-  logger.info(f"Command /dxcc by {user}:{chat_id}:{query}")
+  logger.info("Command /dxcc by %s:%d %s", user, chat_id, query)
   return ConversationHandler.END
 
 def start(update: Update, context: CallbackContext):
@@ -607,13 +610,13 @@ def start(update: Update, context: CallbackContext):
            "This bot is experimental any feedback is welcome",
            "Use '/help' to see the list of commands"]
   update.message.reply_text('\n'.join(lines))
-  logger.info(f"Command /start by {user}:{chat_id}")
+  logger.info("Command /start by %s:%d", user, chat_id)
   return ConversationHandler.END
 
 def text_handler(update: Update, context: CallbackContext):
   user = update.message.chat.username or "Stranger"
   message = update.message.text
-  logging.info(f">>> {user} sent the message \"{message}\"")
+  logger.info(">>> %s sent the message \"%s\"", user, message)
   if not message.startswith('/'):
     update.message.reply_text(
       "Thank you for your words of encouragments, but I am a robot and not "
