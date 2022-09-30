@@ -85,8 +85,8 @@ def graph(data, condition, filename):
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
   bars = axgc.bar(datetm, aavg, linewidth=0.75, zorder=2, color=colors)
-  axgc.plot(datetm, amin, marker='^', linewidth=0, color="navy")
   axgc.plot(datetm, amax, marker='v', linewidth=0, color="steelblue")
+  axgc.plot(datetm, amin, marker='^', linewidth=0, color="navy")
   autolabel(axgc, bars)
 
   axgc.axhline(y=20, linewidth=1, zorder=1, color='lightgreen', linestyle="dashed")
@@ -105,7 +105,7 @@ def graph(data, condition, filename):
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
 
-  axgc.legend(['Min', 'Max'], loc='upper right', fontsize='10',
+  axgc.legend(['Max', 'Min'], loc='upper right', fontsize='10',
               facecolor='linen', borderaxespad=1)
 
   fig.autofmt_xdate(rotation=10, ha="center")
