@@ -60,7 +60,7 @@ class SunRecord:
   __slots__ = ("date", "data")
 
   def __init__(self, args):
-    self.date = datetime.strptime('{} {} {}'.format(*args[0:3]), "%Y %b %d")
+    self.date = datetime.strptime(f'{args[0]} {args[1]} {args[2]}', "%Y %b %d")
     self.data = {}
     self.data['flux'] = int(args[3])
     self.data['a_index'] = int(args[4])
@@ -68,10 +68,10 @@ class SunRecord:
 
   def __repr__(self):
     info = ' '.join(f"{k}: {v}" for k, v  in self.data.items())
-    return '{} [{}]'.format(self.__class__, info)
+    return f'{self.__class__} [{info}]'
 
   def __str__(self):
-    return "{0.date} {0.flux} {0.a_index} {0.kp_index}".format(self)
+    return f"{self.date} {self.flux} {self.a_index} {self.kp_index}"
 
   @property
   def flux(self):
@@ -84,6 +84,14 @@ class SunRecord:
   @property
   def kp_index(self):
     return self.data['kp_index']
+
+def urlretrieve(url, path):
+  try:
+    path, _ = urllib.request.urlretrieve(url, path)
+  except urllib.request.URLError as err:
+    logger.warning(err)
+    return None
+  return path
 
 def get_alert(cache_dir):
   """NOAA space weather alerts"""
@@ -170,7 +178,7 @@ def noaa_download(image, cache_time=IMG_CACHE_TIME):
   cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
   if image not in IMG_SOURCE:
     logger.error("Image %s not available", image)
-    return
+    return None
 
   url = NOAA_URL + IMG_SOURCE[image]
   full_path = os.path.join(cache_dir, image +'.png')
@@ -181,7 +189,7 @@ def noaa_download(image, cache_time=IMG_CACHE_TIME):
     if now - filest.st_mtime > cache_time:
       raise FileNotFoundError
   except FileNotFoundError:
-    urllib.request.urlretrieve(url, full_path)
+    full_path = urlretrieve(url, full_path)
   return full_path
 
 def readcache(cachefile):
@@ -202,7 +210,7 @@ def error_callback(update, context):
   logger.warning('error_callback - Update "%s" error "%s"',
                  update, context.error)
 
-def help_command(update: Update, context: CallbackContext):
+def help_command(update: Update, _context: CallbackContext):
   _help = [
     "*Use the following commands:*",
     "> /aindex - A Index",
@@ -229,7 +237,7 @@ def help_command(update: Update, context: CallbackContext):
   logger.info("Command /help by %s:%d", user, chat_id)
   return ConversationHandler.END
 
-def send_credits(update: Update, context: CallbackContext):
+def send_credits(update: Update, _context: CallbackContext):
   _credits = [
     "The solar data courtesy of NOAA",
     "> https://swpc.noaa.gov",
@@ -372,11 +380,9 @@ def send_eisn(update: Update, context: CallbackContext):
   return ConversationHandler.END
 
 def send_drap(update: Update, context: CallbackContext):
-  try:
-    filename = noaa_download('drap')
-  except Exception as exp:
-    logger.error(exp)
-    update.message.reply_text(f'Error: {exp}')
+  filename = noaa_download('drap')
+  if not filename:
+    update.message.reply_text('The DRAP image cannot be displayed at the moment')
     return ConversationHandler.END
 
   chat_id = update.message.chat_id
@@ -389,11 +395,9 @@ def send_drap(update: Update, context: CallbackContext):
   return ConversationHandler.END
 
 def send_muf(update: Update, context: CallbackContext):
-  try:
-    filename = noaa_download('muf', cache_time=900)
-  except Exception as exp:
-    logger.error(exp)
-    update.message.reply_text(f'Error: {exp}')
+  filename = noaa_download('muf', cache_time=900)
+  if not filename:
+    update.message.reply_text('The MUF image cannot be displayed at the moment')
     return ConversationHandler.END
 
   today = datetime.now().strftime('%a %b %d %Y at %H:%M')
@@ -407,11 +411,9 @@ def send_muf(update: Update, context: CallbackContext):
   return ConversationHandler.END
 
 def send_geost(update: Update, context: CallbackContext):
-  try:
-    filename = noaa_download('geost')
-  except Exception as exp:
-    logger.error(exp)
-    update.message.reply_text(f'Error: {exp}')
+  filename = noaa_download('geost')
+  if not filename:
+    update.message.reply_text('The geost image cannot be displayed at the moment')
     return ConversationHandler.END
 
   chat_id = update.message.chat_id
@@ -485,12 +487,10 @@ def send_kpindex(update: Update, context: CallbackContext):
   return ConversationHandler.END
 
 def send_swx(update: Update, context: CallbackContext):
-  try:
-    filename = noaa_download('swx')
-  except Exception as exp:
-    logger.error(exp)
-    update.message.reply_text(f'Error: {exp}')
-    return
+  filename = noaa_download('swx')
+  if not filename:
+    update.message.reply_text('The SWX image cannot be displayed at the moment')
+    return None
 
   chat_id = update.message.chat_id
   context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
@@ -502,11 +502,9 @@ def send_swx(update: Update, context: CallbackContext):
   return ConversationHandler.END
 
 def send_swo(update: Update, context: CallbackContext):
-  try:
-    filename = noaa_download('swo')
-  except Exception as exp:
-    logger.error(exp)
-    update.message.reply_text(f'Error: {exp}')
+  filename = noaa_download('swo')
+  if not filename:
+    update.message.reply_text('The SWO image cannot be displayed at the moment')
     return ConversationHandler.END
 
   chat_id = update.message.chat_id
@@ -519,11 +517,9 @@ def send_swo(update: Update, context: CallbackContext):
   return ConversationHandler.END
 
 def send_warn(update: Update, context: CallbackContext):
-  try:
-    filename = noaa_download('warn')
-  except Exception as exp:
-    logger.error(exp)
-    update.message.reply_text(f'Error: {exp}')
+  filename = noaa_download('warn')
+  if not filename:
+    update.message.reply_text('The WARN image cannot be displayed at the moment')
     return ConversationHandler.END
 
   chat_id = update.message.chat_id
@@ -535,7 +531,7 @@ def send_warn(update: Update, context: CallbackContext):
   logger.info("Command /warn by %s:%d", user, chat_id)
   return ConversationHandler.END
 
-def send_alerts(update: Update, context: CallbackContext):
+def send_alerts(update: Update, _context: CallbackContext):
   config = Config()
   cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
   alert = get_alert(cache_dir)
@@ -548,7 +544,7 @@ def send_alerts(update: Update, context: CallbackContext):
 
 def dxcc_handler(update: Update, context: CallbackContext):
   try:
-    command, continent = update.message.text.split()
+    _, continent = update.message.text.split()
     continent = continent.upper()
     if continent not in CONTINENTS:
       raise ValueError
@@ -563,9 +559,6 @@ def dxcc_handler(update: Update, context: CallbackContext):
     update.message.reply_text('What is your continent?', reply_markup=reply_markup)
 
 def send_dxcc(update: Update, context: CallbackContext):
-  config = Config()
-  cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
-
   query = update.callback_query.data
   if update.message:
     message = update.message
@@ -602,7 +595,7 @@ def send_dxcc(update: Update, context: CallbackContext):
   logger.info("Command /dxcc by %s:%d %s", user, chat_id, query)
   return ConversationHandler.END
 
-def start(update: Update, context: CallbackContext):
+def start(update: Update, _context: CallbackContext):
   botname = update.message.bot.first_name
   user = update.message.chat.username or "Stranger"
   chat_id = update.message.chat.id
@@ -630,7 +623,7 @@ def text_handler(update: Update, context: CallbackContext):
   help_command(update, context)
   return ConversationHandler.END
 
-def send_legend(update: Update, context: CallbackContext):
+def send_legend(update: Update, _context: CallbackContext):
   legend = (
     "/Aindex *LOW = GOOD*",
     "- 1 to 6 is Best",
