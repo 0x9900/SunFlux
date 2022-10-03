@@ -18,13 +18,13 @@ from config import Config
 
 plt.style.use(['classic', 'seaborn-talk'])
 
-NB_DAYS = 10
+NB_DAYS = 7
 
 WWV_REQUEST = "SELECT wwv.time, wwv.K FROM wwv WHERE wwv.time > ?"
 WWV_CONDITIONS = "SELECT conditions FROM wwv ORDER BY time DESC LIMIT 1"
 
 def bucket(dtm):
-  return int(6 * int(dtm.hour / 6))
+  return int(4 * int(dtm.hour / 4))
 
 def get_conditions(config):
   conn = sqlite3.connect(config['showdxcc.db_name'], timeout=5,
@@ -55,12 +55,18 @@ def graph(data, condition, filename):
   datetm = np.array([d[0] for d in data])
   kindex = np.array([round(np.max(d[1])) for d in data])
 
-  colors = ['lightgreen'] * len(kindex)
+  # I should use mpl.colormaps here
+  # colors #6efa7b #a7bb36 #aa7f28 #8c4d30 #582a2d
+  colors = ['#6efa7b'] * len(kindex)
   for pos, val in enumerate(kindex):
-    if int(val) == 4:
-      colors[pos] = 'darkorange'
-    elif val > 4:
-      colors[pos] = 'red'
+    if int(val) == 5:
+      colors[pos] = '#a7bb36'
+    elif val == 6:
+      colors[pos] = '#aa7f28'
+    elif val == 7:
+      colors[pos] = '#8c4d30'
+    elif val >= 8:
+      colors[pos] = '#582a2d'
 
   today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
   fig = plt.figure(figsize=(12, 5))
@@ -71,7 +77,7 @@ def graph(data, condition, filename):
 
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
-  axgc.bar(datetm, kindex, width=0.2, linewidth=0.75, zorder=2, color=colors)
+  axgc.bar(datetm, kindex, width=0.14, linewidth=0.75, zorder=2, color=colors)
   axgc.axhline(y=4, linewidth=1, zorder=1.5, color='red', linestyle="dashed")
 
   loc = mdates.DayLocator(interval=1)
