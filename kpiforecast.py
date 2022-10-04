@@ -50,13 +50,19 @@ class KPIForecast:
     observ = [d[2] for d in self.data if start_date < d[0] < end_date]
     labels = [d[3] for d in self.data if start_date < d[0] < end_date]
 
-    colors = ['lightgreen'] * len(observ)
+    # colors #6efa7b #a7bb36 #aa7f28 #8c4d30 #582a2d
+    colors = ['#6efa7b'] * len(observ)
+
     for pos, (obs, val)  in enumerate(zip(observ, yvalues)):
       if obs == 'observed':
-        if int(val) == 4:
-          colors[pos] = 'darkorange'
-        elif int(val) > 4:
-          colors[pos] = 'red'
+        if int(val) == 5:
+          colors[pos] = '#a7bb36'
+        elif val == 6:
+          colors[pos] = '#aa7f28'
+        elif val == 7:
+          colors[pos] = '#8c4d30'
+        elif val >= 8:
+          colors[pos] = '#582a2d'
       elif obs == "estimated":
         colors[pos] = 'lightgrey'
       elif obs == "predicted":
@@ -71,10 +77,10 @@ class KPIForecast:
     bars = axgc.bar(xdates, yvalues, width=.1, linewidth=0.75, zorder=2, color=colors)
     axgc.axhline(y=4, linewidth=1, zorder=1.5, color='red', linestyle="dashed")
 
-    for rect, obs, label in zip(*(bars, observ, labels)):
+    for rect, label in zip(*(bars, labels)):
       if not label:
         continue
-      color = 'white' if obs == 'observed' else 'black'
+      color = 'navy' if rect.get_height() < 7 else 'black'
       axgc.text(rect.get_x() + rect.get_width() / 2., .3, label, alpha=1,
                 color=color, fontweight="bold", fontsize="12", ha='center')
 
