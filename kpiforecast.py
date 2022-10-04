@@ -77,12 +77,10 @@ class KPIForecast:
     bars = axgc.bar(xdates, yvalues, width=.1, linewidth=0.75, zorder=2, color=colors)
     axgc.axhline(y=4, linewidth=1, zorder=1.5, color='red', linestyle="dashed")
 
-    for rect, label in zip(*(bars, labels)):
-      if not label:
-        continue
+    for rect, label in ((a, b) for a, b in zip(*(bars, labels)) if labels):
       color = 'navy' if rect.get_height() < 7 else 'black'
       axgc.text(rect.get_x() + rect.get_width() / 2., .3, label, alpha=1,
-                color=color, fontweight="bold", fontsize="12", ha='center')
+                color=color, fontsize="12", ha='center')
 
     loc = mdates.DayLocator(interval=1)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
