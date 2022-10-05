@@ -52,7 +52,6 @@ class KPIForecast:
 
     # colors #6efa7b #a7bb36 #aa7f28 #8c4d30 #582a2d
     colors = ['#6efa7b'] * len(observ)
-
     for pos, (obs, val)  in enumerate(zip(observ, yvalues)):
       if obs == 'observed':
         if int(val) == 5:
