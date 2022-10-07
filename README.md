@@ -7,6 +7,8 @@ This Telegram bot gives ham radio operators information about solar weather, pro
 You can subscribe to this bot through the [Telegram](https://telegram.org) app on your phone, tablet, or computer.
 The bot name is [@SunFluxBot](http://t.me/SunFluxBot).
 
+You can also checkout more Sun and Radio DXC activity on [bsdworld.org](https://bsdworld.org/).
+
 ![Example](misc/example.png)
 
 ## Telegram Bot commands
