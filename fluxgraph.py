@@ -59,7 +59,16 @@ def graph(data, filename):
 
   plt.annotate(f"{y[-1]:d}", (x[-1], y[-1]), textcoords="offset points", xytext=(-10, 30),
                ha='center', fontsize=10,
-               arrowprops=dict(arrowstyle="->", color='green'))
+               arrowprops=dict(arrowstyle="->", color='green'),
+               bbox=dict(boxstyle="square,pad=0.2", fc="white"))
+  for fun in (np.argmax, np.argmin):
+    pos = fun(y)
+    if pos == y.size -1:
+      continue
+    plt.annotate(f"{y[pos]:d}", (x[pos], y[pos]), textcoords="offset points", xytext=(20,-20),
+                 ha='center', fontsize=10,
+                 arrowprops=dict(arrowstyle="->", color='green'),
+                 bbox=dict(boxstyle="square,pad=0.2", fc="white"))
 
   loc = mdates.DayLocator(interval=7)
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
