@@ -54,20 +54,20 @@ def graph(data, filename):
   fig.suptitle('Daily 10cm Flux Index', fontsize=14, fontweight='bold')
   axgc = plt.gca()
   axgc.plot(x, y)
-  axgc.plot(x, p(x), "--r")
+  axgc.plot(x, p(x), linestyle='--', color="red", linewidth=2)
   axgc.tick_params(labelsize=10)
 
-  plt.annotate(f"{y[-1]:d}", (x[-1], y[-1]), textcoords="offset points", xytext=(-10, 30),
+  plt.annotate(f"{y[-1]:d}", (x[-1], y[-1]), textcoords="offset points", xytext=(-20, 30),
                ha='center', fontsize=10,
-               arrowprops=dict(arrowstyle="->", color='green'),
+               arrowprops=dict(arrowstyle="wedge", color='dimgray'),
                bbox=dict(boxstyle="square,pad=0.2", fc="white"))
   for fun in (np.argmax, np.argmin):
     pos = fun(y)
     if pos == y.size -1:
       continue
-    plt.annotate(f"{y[pos]:d}", (x[pos], y[pos]), textcoords="offset points", xytext=(20,-20),
+    plt.annotate(f"{y[pos]:d}", (x[pos], y[pos]), textcoords="offset points", xytext=(30,-20),
                  ha='center', fontsize=10,
-                 arrowprops=dict(arrowstyle="->", color='green'),
+                 arrowprops=dict(arrowstyle="wedge", color='dimgray'),
                  bbox=dict(boxstyle="square,pad=0.2", fc="white"))
 
   loc = mdates.DayLocator(interval=7)
