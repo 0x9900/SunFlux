@@ -47,7 +47,7 @@ def graph(data, filename):
   # pylint: disable=invalid-name
   x = np.array([mdates.date2num(d[0]) for d in data])
   y = np.array([round(np.mean(d[1])) for d in data])
-  p = np.poly1d(np.polyfit(x, y, 2))
+  p = np.poly1d(np.polyfit(x, y, int(y.size/64)))
 
   date = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
   fig = plt.figure(figsize=(12, 5))
