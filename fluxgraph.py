@@ -57,15 +57,10 @@ def graph(data, filename):
   axgc.plot(x, p(x), linestyle='--', color="red", linewidth=2)
   axgc.tick_params(labelsize=10)
 
-  plt.annotate(f"{y[-1]:d}", (x[-1], y[-1]), textcoords="offset points", xytext=(-20, 30),
-               ha='center', fontsize=10,
-               arrowprops=dict(arrowstyle="wedge", color='dimgray'),
-               bbox=dict(boxstyle="square,pad=0.2", fc="white"))
-  for fun in (np.argmax, np.argmin):
-    pos = fun(y)
-    if pos == y.size -1:
-      continue
-    plt.annotate(f"{y[pos]:d}", (x[pos], y[pos]), textcoords="offset points", xytext=(30,-20),
+  for fun in (y.argmax, y.argmin, lambda: x.size - 1):
+    pos = fun()
+    xytext = (-20, 20) if pos == x.size -1 else (20,-20)
+    plt.annotate(f"{y[pos]:d}", (x[pos], y[pos]), textcoords="offset points", xytext=xytext,
                  ha='center', fontsize=10,
                  arrowprops=dict(arrowstyle="wedge", color='dimgray'),
                  bbox=dict(boxstyle="square,pad=0.2", fc="white"))
