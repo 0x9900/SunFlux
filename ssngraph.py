@@ -7,6 +7,7 @@ import sys
 import time
 
 from datetime import datetime, date
+from itertools import cycle
 from urllib.request import urlopen
 
 import matplotlib.dates as mdates
@@ -113,14 +114,16 @@ class SSN:
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.DayLocator())
     axgc.set_ylim(np.min([ssn, flux])*0.2, np.max([ssn, flux])*1.2)
+    axgc.minorticks_on()
 
-    sign = [1, -1] * len(x)
-    for x, y in zip(x, ssn):
-      plt.annotate(f"{y:d}", (x, y), textcoords="offset points", xytext=(0, (20*sign.pop())),
+    sign = cycle([-1, 1])
+    for x, y, s in zip(x, ssn, sign):
+      plt.annotate(f"{y:d}", (x, y), textcoords="offset points", xytext=(0, 20*s),
                    ha='center', fontsize=8,
                    arrowprops=dict(arrowstyle="->", color='green'))
 
-    axgc.legend(['Sun spot', '5day average', '10.7cm Flux'], facecolor="linen", fontsize="10")
+    axgc.legend(['Sun spot', '5day average', '10.7cm Flux'], facecolor="linen", fontsize="10",
+                loc='best')
     axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
 
     axgc.margins(.01)
