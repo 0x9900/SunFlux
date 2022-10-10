@@ -18,7 +18,7 @@ from config import Config
 
 plt.style.use(['classic', 'seaborn-talk'])
 
-NB_DAYS = 90
+NB_DAYS = 180
 
 WWV_REQUEST = "SELECT wwv.time, wwv.SFI FROM wwv WHERE wwv.time > ?"
 
@@ -91,11 +91,10 @@ def graph(data, filename):
 
 def main():
   adapters.install_adapers()
-  logging.basicConfig(
-    format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%H:%M:%S',
-    level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
-  )
+  logging.basicConfig(format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s',
+                      datefmt='%H:%M:%S')
   logger = logging.getLogger('fluxgraph')
+  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config()
   try:
     name = sys.argv[1]
@@ -107,6 +106,7 @@ def main():
     logger.warning('No data collected')
     return os.EX_DATAERR
 
+  logger.debug('Dataset size: %d', len(data))
   graph(data, name)
   logger.info('Graph "%s" saved', name)
   return os.EX_OK

@@ -70,7 +70,7 @@ def graph(data, condition, filename):
 
   today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
   fig = plt.figure(figsize=(12, 5))
-  fig.suptitle('KP-Index', fontsize=14, fontweight='bold')
+  fig.suptitle('Platnetary K-Index', fontsize=14, fontweight='bold')
   fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
   fig.text(0.15, 0.8, "Forecast: " + condition, fontsize=12, zorder=4,
            bbox=dict(boxstyle='round', linewidth=1, facecolor='linen', alpha=1, pad=.8))
@@ -86,7 +86,7 @@ def graph(data, condition, filename):
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
 
   axgc.set_ylim(0, 9)
-  axgc.set_ylabel('A-Index')
+  axgc.set_ylabel('K-Index')
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
 
