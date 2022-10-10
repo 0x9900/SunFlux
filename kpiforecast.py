@@ -86,6 +86,7 @@ class KPIForecast:
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.HourLocator(interval=6))
     axgc.set_ylim(0, 9)
+    axgc.set_ylabel('K-Index')
 
     axgc.axhspan(0, 0, facecolor='lightgrey', alpha=1, label='Estimated')
     axgc.axhspan(0, 0, facecolor='darkgrey', alpha=1, label='Predicted')

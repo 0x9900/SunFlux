@@ -69,6 +69,7 @@ def graph(data, filename):
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
   axgc.xaxis.set_major_locator(loc)
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
+  axgc.set_ylabel('SFU at 2800 MHz', fontsize=12)
 
   ticks = np.array([50, 70])
   ticks = np.append(ticks, np.arange(90, int(y.max() * 1.15), 25))
