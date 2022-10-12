@@ -1,5 +1,6 @@
 #!/usr/bin/env python3.9
 #
+import argparse
 import logging
 import os
 import sqlite3
@@ -97,17 +98,20 @@ def main():
   logger = logging.getLogger('fluxgraph')
   logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config()
-  try:
-    name = sys.argv[1]
-  except IndexError:
-    name = '/tmp/flux.png'
 
-  data = get_flux(config)
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-D', '--days', default=NB_DAYS, type=int,
+                      help='Number of days to graph [Default: %(default)s]')
+  parser.add_argument('name', nargs=1, help='Name of the graph', default=['/tmp/flux.png'])
+  opts = parser.parse_args()
+
+  data = get_flux(config, opts.days)
   if not data:
     logger.warning('No data collected')
     return os.EX_DATAERR
 
   logger.debug('Dataset size: %d', len(data))
+  name = opts.name.pop(0)
   graph(data, name)
   logger.info('Graph "%s" saved', name)
   return os.EX_OK
