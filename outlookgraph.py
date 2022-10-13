@@ -86,6 +86,10 @@ class OutLook:
     ax2.grid(color="green", linestyle="dotted", linewidth=.5)
     ax2.legend(loc='upper right', fontsize="10")
 
+    for day in [t.date() for t in dates[:-1]]:
+      if day.isoweekday() == 6:
+        plt.axvspan(mdates.date2num(day), mdates.date2num(day) + 1, color="skyblue", alpha=0.5)
+
     plt.subplots_adjust(bottom=0.20)
 
     plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {now}')
