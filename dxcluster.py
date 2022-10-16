@@ -399,8 +399,7 @@ def main():
       LOG.info("%s identified", config['call'])
       read_stream(queue, telnet)
     except OSError as err:
-      LOG.error("%s - %s - Sleeping 10 seconds before retrying", err, cluster)
-      time.sleep(10)
+      LOG.error("%s - %s", err, cluster)
 
 if __name__ == "__main__":
   try:
