@@ -102,7 +102,7 @@ def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('-D', '--days', default=NB_DAYS, type=int,
                       help='Number of days to graph [Default: %(default)s]')
-  parser.add_argument('name', nargs=1, help='Name of the graph', default=['/tmp/flux.png'])
+  parser.add_argument('name', help='Name of the graph', nargs="*", default=['/tmp/flux.png'])
   opts = parser.parse_args()
 
   data = get_flux(config, opts.days)
