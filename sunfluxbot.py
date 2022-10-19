@@ -567,13 +567,13 @@ def send_dxcc(update: Update, context: CallbackContext):
 
   chat_id = message.chat.id
   user = message.chat.username or str(chat_id)
-  image = f'/tmp/dxcc-{query}-{user}.png'
+  image = f'/tmp/dxcc-{query}.png'
   now = time.time()
   today = datetime.now().strftime('%a %b %d %Y at %H:%M')
 
   try:
     img_st = os.stat(image)
-    if now - img_st.st_mtime > 300:
+    if now - img_st.st_mtime > 900:
       raise FileNotFoundError
   except (FileNotFoundError, EOFError):
     cmd = os.path.join(sys.path[0], "showdxcc")
