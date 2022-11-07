@@ -19,7 +19,7 @@ from config import Config
 
 plt.style.use(['classic', 'seaborn-talk'])
 
-NB_DAYS = 180
+NB_DAYS = 92
 
 WWV_REQUEST = "SELECT wwv.time, wwv.SFI FROM wwv WHERE wwv.time > ?"
 
