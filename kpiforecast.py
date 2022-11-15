@@ -46,7 +46,7 @@ class KPIForecast:
     start_date = datetime.utcnow() - timedelta(days=3, hours=4)
     end_date = datetime.utcnow() + timedelta(days=1, hours=6)
     xdates = np.array([d[0] for d in self.data if start_date < d[0] < end_date])
-    yvalues = np.array([np.average(d[1]) for d in self.data if start_date < d[0] < end_date])
+    yvalues = np.array([d[1] for d in self.data if start_date < d[0] < end_date])
     observ = [d[2] for d in self.data if start_date < d[0] < end_date]
     labels = [d[3] for d in self.data if start_date < d[0] < end_date]
 
@@ -112,7 +112,7 @@ class KPIForecast:
     data = []
     for elem in _data[1:]:
       date = datetime.strptime(elem[0], '%Y-%m-%d %H:%M:%S')
-      data.append((date, int(elem[1]), *elem[2:]))
+      data.append((date, float(elem[1]), *elem[2:]))
     self.data = sorted(data)
 
   def readcache(self):
