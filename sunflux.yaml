@@ -24,6 +24,10 @@ fluxgraph:
   cache_file: /tmp/flux.pkl
   cache_time: 43200
 
+kpiwwv:
+  cache_file: /tmp/kpiwwv-noaa.json
+  cache_time: 10800
+
 pkiforecast:
   cache_file: /tmp/kpiforecast.pkl
   cache_time: 21600

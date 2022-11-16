@@ -382,10 +382,10 @@ def main():
 
   queue = Queue(config.get('queue_len', 0))
   db_thread = DBInsert(config, queue)
-  db_thread.setDaemon(True)
+  db_thread.daemon = True
   db_thread.start()
 
-  def sig_handler(signum, frame):
+  def sig_handler(_signum, _frame):
     LOG.setLevel(logging.INFO if LOG.level == logging.DEBUG else logging.DEBUG)
 
   signal.signal(signal.SIGHUP, sig_handler)

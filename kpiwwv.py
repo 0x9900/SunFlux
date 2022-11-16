@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 #
+import json
 import logging
 import os
 import sqlite3
 import sys
+import time
 
 from collections import defaultdict
 from datetime import datetime, timedelta
+from urllib.request import urlretrieve
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
@@ -18,13 +21,15 @@ from config import Config
 
 plt.style.use(['classic', 'seaborn-talk'])
 
+NOAA_URL = "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
+
 NB_DAYS = 7
 
 WWV_REQUEST = "SELECT wwv.time, wwv.K FROM wwv WHERE wwv.time > ?"
 WWV_CONDITIONS = "SELECT conditions FROM wwv ORDER BY time DESC LIMIT 1"
 
-def bucket(dtm):
-  return int(4 * int(dtm.hour / 4))
+def bucket(dtm, size=6):
+  return int(size * int(dtm.hour / size))
 
 def get_conditions(config):
   conn = sqlite3.connect(config['showdxcc.db_name'], timeout=5,
@@ -34,9 +39,37 @@ def get_conditions(config):
     result = curs.execute(WWV_CONDITIONS).fetchone()
   return result[0]
 
-def get_wwv(config, days):
+def get_kpindex(config):
   data = defaultdict(list)
+  cache_file = config.get('kpiwwv.cache_file', '/tmp/kpiww-noaa.json')
+  cache_time = config.get('kpiwwv.cache_time', 10800)
+  now = time.time()
+
+  try:
+    filest = os.stat(cache_file)
+    if now - filest.st_mtime > cache_time:
+      raise FileNotFoundError
+  except FileNotFoundError:
+    urlretrieve(NOAA_URL, cache_file)
+
+  with open(cache_file, 'r', encoding='ASCII') as cfd:
+    _data = json.load(cfd)
+
+  for rec in _data:
+    try:
+      date = datetime.strptime(rec[0], '%Y-%m-%d %H:%M:%S.%f')
+      date = date.replace(hour=bucket(date), minute=0, second=0, microsecond=0)
+      data[date].append(float(rec[1]))
+    except ValueError:
+      pass
+
+  return data
+
+def get_wwv(config, days):
+  # data = defaultdict(list)
+  data = get_kpindex(config)
   start_date = datetime.utcnow() - timedelta(days=days)
+
   conn = sqlite3.connect(config['showdxcc.db_name'], timeout=5,
                          detect_types=sqlite3.PARSE_DECLTYPES)
   with conn:
@@ -49,23 +82,22 @@ def get_wwv(config, days):
 
   return sorted(data.items())
 
-
 def graph(data, condition, filename):
-
   datetm = np.array([d[0] for d in data])
-  kindex = np.array([round(np.max(d[1])) for d in data])
-
+  kimax = np.array([np.max(d[1]) for d in data])
+  kimin = np.array([np.min(d[1]) for d in data])
+  kindex = np.array([np.average(d[1]) for d in data])
   # I should use mpl.colormaps here
   # colors #6efa7b #a7bb36 #aa7f28 #8c4d30 #582a2d
   colors = ['#6efa7b'] * len(kindex)
   for pos, val in enumerate(kindex):
     if int(val) == 5:
       colors[pos] = '#a7bb36'
-    elif val == 6:
+    elif int(val) == 6:
       colors[pos] = '#aa7f28'
-    elif val == 7:
+    elif int(val) == 7:
       colors[pos] = '#8c4d30'
-    elif val >= 8:
+    elif int(val) >= 8:
       colors[pos] = '#582a2d'
 
   today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
@@ -77,7 +109,10 @@ def graph(data, condition, filename):
 
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
-  axgc.bar(datetm, kindex, width=0.14, linewidth=0.75, zorder=2, color=colors)
+  axgc.bar(datetm, kindex, width=0.22, linewidth=0.75, zorder=2, color=colors)
+  axgc.plot(datetm, kimax, marker='v', linewidth=0, color="green")
+  axgc.plot(datetm, kimin, marker='^', linewidth=0, color="blue")
+
   axgc.axhline(y=4, linewidth=1, zorder=1.5, color='red', linestyle="dashed")
 
   loc = mdates.DayLocator(interval=1)
@@ -89,6 +124,10 @@ def graph(data, condition, filename):
   axgc.set_ylabel('K-Index')
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
+
+  axgc.legend(['Max', 'Min'], loc='upper right', fontsize='10',
+              facecolor='linen', borderaxespad=1)
+
 
   fig.autofmt_xdate(rotation=10, ha="center")
   plt.savefig(filename, transparent=False, dpi=100)

@@ -45,7 +45,7 @@ def get_flux(config, days=NB_DAYS):
 
 
 def graph(data, filename):
-  # pylint: disable=invalid-name
+  # pylint: disable=invalid-name, too-many-locals
   x = np.array([mdates.date2num(d[0]) for d in data])
   y = np.array([round(np.mean(d[1])) for d in data])
   p = np.poly1d(np.polyfit(x, y, int(y.size/64)))
