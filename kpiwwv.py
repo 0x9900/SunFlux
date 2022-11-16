@@ -128,7 +128,6 @@ def graph(data, condition, filename):
   axgc.legend(['Max', 'Min'], loc='upper right', fontsize='10',
               facecolor='linen', borderaxespad=1)
 
-
   fig.autofmt_xdate(rotation=10, ha="center")
   plt.savefig(filename, transparent=False, dpi=100)
   plt.close()
