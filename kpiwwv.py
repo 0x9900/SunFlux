@@ -91,13 +91,13 @@ def graph(data, condition, filename):
   # colors #6efa7b #a7bb36 #aa7f28 #8c4d30 #582a2d
   colors = ['#6efa7b'] * len(kindex)
   for pos, val in enumerate(kindex):
-    if int(val) == 5:
+    if 5 < val < 6:
       colors[pos] = '#a7bb36'
-    elif int(val) == 6:
+    elif 6 < val < 6:
       colors[pos] = '#aa7f28'
-    elif int(val) == 7:
+    elif 7 < val < 7:
       colors[pos] = '#8c4d30'
-    elif int(val) >= 8:
+    elif val >= 8:
       colors[pos] = '#582a2d'
 
   today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
