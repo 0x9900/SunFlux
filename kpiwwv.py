@@ -109,7 +109,7 @@ def graph(data, condition, filename):
 
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
-  axgc.bar(datetm, kindex, width=0.22, linewidth=0.75, zorder=2, color=colors)
+  axgc.bar(datetm, kindex, width=0.20, linewidth=0.75, zorder=2, color=colors)
   axgc.plot(datetm, kimax, marker='v', linewidth=0, color="green")
   axgc.plot(datetm, kimin, marker='^', linewidth=0, color="blue")
 
