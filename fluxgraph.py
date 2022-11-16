@@ -54,8 +54,8 @@ def graph(data, filename):
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('Daily 10cm Flux Index', fontsize=14, fontweight='bold')
   axgc = plt.gca()
-  axgc.plot(x, y)
-  axgc.plot(x, p(x), linestyle='--', color="red", linewidth=2)
+  axgc.plot(x, y, label='Flux')
+  trend, = axgc.plot(x, p(x), label='Trend', linestyle='--', color="red", linewidth=2)
   axgc.tick_params(labelsize=10)
 
   for fun in (y.argmax, y.argmin, lambda: x.size - 1):
@@ -66,7 +66,7 @@ def graph(data, filename):
                  arrowprops=dict(arrowstyle="wedge", color='dimgray'),
                  bbox=dict(boxstyle="square,pad=0.2", fc="white"))
 
-  loc = mdates.DayLocator(interval=7)
+  loc = mdates.DayLocator(interval=10)
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
   axgc.xaxis.set_major_locator(loc)
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
@@ -76,10 +76,13 @@ def graph(data, filename):
   ticks = np.append(ticks, np.arange(90, int(y.max() * 1.15), 25))
   axgc.set_yticks(ticks)
 
-  axgc.axhspan(90, ticks.max(), facecolor='lightgreen', alpha=0.3, label='Good')
-  axgc.axhspan(70, 90, facecolor='orange', alpha=0.3, label='Ok')
-  axgc.axhspan(40, 70, facecolor='red', alpha=0.3, label='Bad')
-  axgc.legend(fontsize=10, loc="upper left")
+  zone1 = axgc.axhspan(90, ticks.max(), facecolor='lightgreen', alpha=0.3, label='Good')
+  zone2 = axgc.axhspan(70, 90, facecolor='orange', alpha=0.3, label='Ok')
+  zone3 = axgc.axhspan(40, 70, facecolor='red', alpha=0.3, label='Bad')
+
+  trend_legend = axgc.legend(handles=[trend], fontsize=10, loc='upper right')
+  axgc.add_artist(trend_legend)
+  axgc.legend(handles=[zone1, zone2, zone3], fontsize=10, loc="upper left")
 
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(x=.015)
