@@ -111,7 +111,7 @@ def graph(data, condition, filename):
   axgc.tick_params(labelsize=10)
   axgc.bar(datetm, kindex, width=0.20, linewidth=0.75, zorder=2, color=colors)
   axgc.plot(datetm, kimax, marker='v', linewidth=0, color="green")
-  axgc.plot(datetm, kimin, marker='^', linewidth=0, color="blue")
+  axgc.plot(datetm, kimin, marker='^', linewidth=0, color="navy")
 
   axgc.axhline(y=4, linewidth=1, zorder=1.5, color='red', linestyle="dashed")
 

@@ -101,8 +101,8 @@ class EISN:
     axgc.tick_params(labelsize=10)
     axgc.plot(x, y, color="blue")
     axgc.axhline(np.average(y), color='red', linestyle='--', linewidth=1)
-    axgc.plot(x, vdata, '^', linewidth=0, color='orange')
-    axgc.plot(x, cdata, 'v', linewidth=0, color='green')
+    axgc.plot(x, vdata, marker='*', linewidth=0, color='orange')
+    axgc.plot(x, cdata, marker='.', linewidth=0, color='green')
     axgc.errorbar(x, y, yerr=error, fmt='*', color='green',
                   ecolor='darkolivegreen', elinewidth=.8, capsize=5,
                   capthick=.8)
