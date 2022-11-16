@@ -113,7 +113,7 @@ def graph(data, condition, filename):
   axgc.plot(datetm, kimax, marker='v', linewidth=0, color="green")
   axgc.plot(datetm, kimin, marker='^', linewidth=0, color="navy")
 
-  axgc.axhline(y=4, linewidth=1, zorder=1.5, color='red', linestyle="dashed")
+  axgc.axhline(y=5, linewidth=1, zorder=1.5, color='red', linestyle="dashed")
 
   loc = mdates.DayLocator(interval=1)
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
