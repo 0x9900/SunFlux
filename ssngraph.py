@@ -95,7 +95,7 @@ class SSN:
       self.log.warning('No data to graph')
       return None
 
-    x = np.array([d[0] for d in self.data])
+    xtime = np.array([d[0] for d in self.data])
     ssn = np.array([x[2] for x in self.data])
     flux = np.array([x[1] for x in self.data])
     avg = moving_average(ssn)
@@ -106,10 +106,10 @@ class SSN:
     fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
     axgc = plt.gca()
     axgc.tick_params(labelsize=10)
-    points = axgc.plot(x, ssn, marker='o', markersize=7, color="darkolivegreen", linewidth=1)
-    axgc.plot(x, avg, color="blue", linewidth=2, zorder=5)
-    axgc.plot(x, flux, linestyle='--', color="cornflowerblue", linewidth=1)
-    loc = mdates.DayLocator(interval=int(1+len(x)/11))
+    axgc.plot(xtime, ssn, marker='o', markersize=7, color="darkolivegreen", linewidth=1)
+    axgc.plot(xtime, avg, color="blue", linewidth=2, zorder=5)
+    axgc.plot(xtime, flux, linestyle='--', color="cornflowerblue", linewidth=1)
+    loc = mdates.DayLocator(interval=int(1+len(xtime)/11))
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.DayLocator())
@@ -117,8 +117,8 @@ class SSN:
     axgc.minorticks_on()
 
     sign = cycle([-1, 1])
-    for x, y, s in zip(x, ssn, sign):
-      plt.annotate(f"{y:d}", (x, y), textcoords="offset points", xytext=(0, 20*s),
+    for _x, _y, _s in zip(xtime, ssn, sign):
+      plt.annotate(f"{_y:d}", (_x, _y), textcoords="offset points", xytext=(0, 20*_s),
                    ha='center', fontsize=8,
                    arrowprops=dict(arrowstyle="->", color='green'))
 
