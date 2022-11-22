@@ -120,7 +120,7 @@ class KPIForecast:
     for elem in _data[1:]:
       date = datetime.strptime(elem[0], '%Y-%m-%d %H:%M:%S')
       data.append((date, float(elem[1]), *elem[2:]))
-    self.data = sorted(data))
+    self.data = sorted(data)
 
   def readcache(self):
     """Read data from the cache"""
