@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 #
+# BSD 3-Clause License
+#
+# Copyright (c) 2022 Fred W6BSD
+# All rights reserved.
+#
+#
+
 import json
 import logging
 import os

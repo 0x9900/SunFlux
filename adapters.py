@@ -1,4 +1,11 @@
 #
+# BSD 3-Clause License
+#
+# Copyright (c) 2022 Fred W6BSD
+# All rights reserved.
+#
+#
+
 """Save datetime object as timestamp in SQLite"""
 
 import sqlite3
