@@ -65,9 +65,9 @@ class KPIForecast:
           colors[pos] = '#a7bb36'
         elif 5 < val < 6:
           colors[pos] = '#aa7f28'
-        elif 6 < val < 7:
+        elif 7 < val < 8:
           colors[pos] = '#8c4d30'
-        elif val >= 7:
+        elif val >= 8:
           colors[pos] = '#582a2d'
       elif obs == "estimated":
         colors[pos] = 'lightgrey'
