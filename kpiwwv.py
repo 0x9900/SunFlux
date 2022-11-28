@@ -98,11 +98,11 @@ def graph(data, condition, filename):
   # colors #6efa7b #a7bb36 #aa7f28 #8c4d30 #582a2d
   colors = ['#6efa7b'] * len(kindex)
   for pos, val in enumerate(kindex):
-    if 5 < val < 6:
+    if 4 < val < 5:
       colors[pos] = '#a7bb36'
-    elif 6 < val < 6:
+    elif 5 < val < 6:
       colors[pos] = '#aa7f28'
-    elif 7 < val < 7:
+    elif 7 < val < 8:
       colors[pos] = '#8c4d30'
     elif val >= 8:
       colors[pos] = '#582a2d'
@@ -120,7 +120,7 @@ def graph(data, condition, filename):
   axgc.plot(datetm, kimax, marker='v', linewidth=0, color="green")
   axgc.plot(datetm, kimin, marker='^', linewidth=0, color="navy")
 
-  axgc.axhline(y=5, linewidth=1, zorder=1.5, color='red', linestyle="dashed")
+  axgc.axhline(y=4, linewidth=1, zorder=1.5, color='red', linestyle="dashed")
 
   loc = mdates.DayLocator(interval=1)
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
