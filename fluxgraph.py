@@ -61,7 +61,7 @@ def graph(data, filename):
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('Daily 10cm Flux Index', fontsize=14, fontweight='bold')
   axgc = plt.gca()
-  axgc.plot(x, y, label='Flux')
+  axgc.plot(x, y, linewidth=1.5, label='Flux')
   trend, = axgc.plot(x, p(x), label='Trend', linestyle='--', color="red", linewidth=2)
   axgc.tick_params(labelsize=10)
 
@@ -80,7 +80,7 @@ def graph(data, filename):
   axgc.set_ylabel('SFU at 2800 MHz', fontsize=12)
 
   ticks = np.array([50, 70])
-  ticks = np.append(ticks, np.arange(90, int(y.max() * 1.15), 25))
+  ticks = np.append(ticks, np.arange(90, int(y.max() * 1.10), 10))
   axgc.set_yticks(ticks)
 
   zone1 = axgc.axhspan(90, ticks.max(), facecolor='lightgreen', alpha=0.3, label='Good')
