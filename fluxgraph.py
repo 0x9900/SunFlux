@@ -87,7 +87,7 @@ def graph(data, filename):
   zone2 = axgc.axhspan(70, 90, facecolor='orange', alpha=0.3, label='Ok')
   zone3 = axgc.axhspan(40, 70, facecolor='red', alpha=0.3, label='Bad')
 
-  trend_legend = axgc.legend(handles=[trend], fontsize=10, loc='upper right')
+  trend_legend = axgc.legend(handles=[trend], fontsize=10, loc='lower left')
   axgc.add_artist(trend_legend)
   axgc.legend(handles=[zone1, zone2, zone3], fontsize=10, loc="upper left")
 
