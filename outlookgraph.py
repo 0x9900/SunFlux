@@ -76,7 +76,7 @@ class OutLook:
     fig.autofmt_xdate(rotation=10, ha="center")
 
     # first axis
-    ax1.plot(dates, aindex, linewidth=1.5, color="blue", label='A-index')
+    ax1.plot(dates, aindex, linewidth=1.5, color="darkblue", label='A-index')
     ax1.set_ylim([1, aindex.max() * 1.15])
     loc = mdates.DayLocator(interval=int(1+len(aindex)/11))
     ax1.legend(loc='upper right', fontsize="10")
@@ -93,7 +93,7 @@ class OutLook:
     ax2.axhspan(5, ax2.get_yticks().max(), facecolor='red', alpha=ALPHA, label='Bad')
     ax2.grid(color="black", linewidth=.5)
 
-    ax3.plot(dates, flux, "darkgreen", linewidth=1.5, label='Flux')
+    ax3.plot(dates, flux, "brown", linewidth=1.5, label='Flux')
     ax3.set_ylim([min(flux)/1.1, max(flux) * 1.05])
     ax3.legend(loc='upper right', fontsize="10")
     ax3.axhspan(90, ax3.get_yticks().max(), facecolor='lightgreen', alpha=ALPHA, label='Good')
