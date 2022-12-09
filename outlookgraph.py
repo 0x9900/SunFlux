@@ -73,7 +73,7 @@ class OutLook:
     fig.tight_layout()
     fig.suptitle('27 day Solar Predictions', fontsize=14, fontweight='bold')
     plt.tick_params(labelsize=10)
-    fig.autofmt_xdate(rotation=10, ha="center")
+    fig.autofmt_xdate(rotation=5, ha="center")
 
     # first axis
     ax1.plot(dates, aindex, linewidth=1.5, color="darkblue", label='A-index')
@@ -119,7 +119,7 @@ class OutLook:
                 bbox=dict(boxstyle="round", color='red', alpha=ALPHA))
 
 
-    plt.subplots_adjust(top=0.93, bottom=0.17)
+    plt.subplots_adjust(top=0.93, bottom=0.15)
 
     plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {now}')
     plt.savefig(filename, transparent=False, dpi=100)
