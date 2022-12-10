@@ -81,9 +81,10 @@ class OutLook:
     self.draw_flux(ax3, dates, flux)
 
     loc = mdates.DayLocator(interval=int(1+len(aindex)/11))
-    ax3.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
-    ax3.xaxis.set_major_locator(loc)
-    ax3.xaxis.set_minor_locator(mdates.DayLocator())
+    for ax in [ax1, ax2, ax3]:
+      ax.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
+      ax.xaxis.set_major_locator(loc)
+      ax.xaxis.set_minor_locator(mdates.DayLocator())
 
     for day in [t.date() for t in dates[:-1]]:
       if day.isoweekday() != 6:
@@ -108,7 +109,7 @@ class OutLook:
 
   @staticmethod
   def draw_aindex(ax, dates, aindex):
-    bars = ax.bar(dates, aindex, color='springgreen', label='AIndex')
+    bars = ax.bar(dates, aindex, color='springgreen', label='AIndex', zorder=2)
     ax.set_ylim([0, aindex.max() * 1.15])
     ax.legend(loc='upper right', fontsize="10")
     ax.grid(color="gray", linewidth=.5)
@@ -124,7 +125,7 @@ class OutLook:
 
   @staticmethod
   def draw_kindex(ax, dates, kindex):
-    bars = ax.bar(dates, kindex, color="springgreen", label='KP-index')
+    bars = ax.bar(dates, kindex, color="springgreen", label='KP-index', zorder=2)
     ax.set_ylim([0, kindex.max() * 1.25])
     ax.legend(loc='upper right', fontsize="10")
     ax.grid(color="black", linewidth=.5)
