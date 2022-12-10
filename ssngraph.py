@@ -23,7 +23,7 @@ import numpy as np
 
 from config import Config
 
-plt.style.use(['classic', 'seaborn-talk'])
+plt.style.use(['classic', 'fast'])
 
 NOAA_URL = 'https://services.swpc.noaa.gov/text/daily-solar-indices.txt'
 

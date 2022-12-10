@@ -22,7 +22,7 @@ import adapters
 
 from config import Config
 
-plt.style.use(['classic', 'seaborn-talk'])
+plt.style.use(['classic', 'fast'])
 
 NB_DAYS = 34
 

@@ -22,7 +22,7 @@ import numpy as np
 
 from config import Config
 
-plt.style.use(['classic', 'seaborn-talk'])
+plt.style.use(['classic', 'fast'])
 
 NOAA_URL = 'https://services.swpc.noaa.gov/text/27-day-outlook.txt'
 
@@ -86,7 +86,7 @@ class OutLook:
       axe.xaxis.set_major_formatter(mdates.DateFormatter('%b %d'))
       axe.xaxis.set_minor_locator(mdates.DayLocator())
 
-    ax3.xaxis.set_major_formatter(mdates.DateFormatter('%a %m-%d UTC'))
+    ax3.xaxis.set_major_formatter(mdates.DateFormatter('%a %b %d'))
 
     for day in [t.date() for t in dates[:-1]]:
       if day.isoweekday() != 6:
