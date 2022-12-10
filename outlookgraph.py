@@ -26,7 +26,7 @@ plt.style.use(['classic', 'seaborn-talk'])
 
 NOAA_URL = 'https://services.swpc.noaa.gov/text/27-day-outlook.txt'
 
-ALPHA=0.3
+ALPHA=1
 
 class Record(namedtuple("OLRecord", ["Date", "Flux", "AIndex", "KpIndex"])):
   def __new__(cls, items):
@@ -76,31 +76,11 @@ class OutLook:
     fig.autofmt_xdate(rotation=5, ha="center")
 
     # first axis
-    ax1.plot(dates, aindex, linewidth=1.5, color="darkblue", label='A-index')
-    ax1.set_ylim([1, aindex.max() * 1.15])
+    self.draw_aindex(ax1, dates, aindex)
+    self.draw_kindex(ax2, dates, kindex)
+    self.draw_flux(ax3, dates, flux)
+
     loc = mdates.DayLocator(interval=int(1+len(aindex)/11))
-    ax1.legend(loc='upper right', fontsize="10")
-    ax1.axhspan(0, 5, facecolor='lightgreen', alpha=ALPHA, label='Good')
-    ax1.axhspan(5, 9, facecolor='orange', alpha=ALPHA, label='Ok')
-    ax1.axhspan(9, ax1.get_yticks().max(), facecolor='red', alpha=ALPHA, label='Bad')
-    ax1.grid(color="black", linewidth=.5)
-
-    ax2.plot(dates, kindex, linewidth=1.5, color="navy", label='KP-index')
-    ax2.set_ylim([kindex.min() / 1.3, kindex.max() * 1.25])
-    ax2.legend(loc='upper right', fontsize="10")
-    ax2.axhspan(0, 3, facecolor='lightgreen', alpha=ALPHA, label='Good')
-    ax2.axhspan(3, 5, facecolor='orange', alpha=ALPHA, label='Ok')
-    ax2.axhspan(5, ax2.get_yticks().max(), facecolor='red', alpha=ALPHA, label='Bad')
-    ax2.grid(color="black", linewidth=.5)
-
-    ax3.plot(dates, flux, "brown", linewidth=1.5, label='Flux')
-    ax3.set_ylim([min(flux)/1.1, max(flux) * 1.05])
-    ax3.legend(loc='upper right', fontsize="10")
-    ax3.axhspan(90, ax3.get_yticks().max(), facecolor='lightgreen', alpha=ALPHA, label='Good')
-    ax3.axhspan(70, 90, facecolor='orange', alpha=ALPHA, label='Ok')
-    ax3.axhspan(40, 70, facecolor='red', alpha=ALPHA, label='Bad')
-    ax3.grid(color="black", linewidth=.5)
-
     ax3.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
     ax3.xaxis.set_major_locator(loc)
     ax3.xaxis.set_minor_locator(mdates.DayLocator())
@@ -112,12 +92,11 @@ class OutLook:
         plot.axvspan(mdates.date2num(day), mdates.date2num(day) + 1, color="skyblue", alpha=0.5)
 
     plt.figtext(0.80, 0.03, "Good", size=12,
-                bbox=dict(boxstyle="round", color='lightgreen', alpha=0.5))
+                bbox=dict(boxstyle="round", color='springgreen', alpha=ALPHA))
     plt.figtext(0.87, 0.03, " OK ", size=12,
                 bbox=dict(boxstyle="round", color='orange', alpha=ALPHA))
     plt.figtext(0.93, 0.03, "Bad", size=12,
-                bbox=dict(boxstyle="round", color='red', alpha=ALPHA))
-
+                bbox=dict(boxstyle="round", color='tomato', alpha=ALPHA))
 
     plt.subplots_adjust(top=0.93, bottom=0.15)
 
@@ -126,6 +105,49 @@ class OutLook:
     plt.close()
     self.log.info('Graph "%s" saved', filename)
     return filename
+
+  @staticmethod
+  def draw_aindex(ax, dates, aindex):
+    bars = ax.bar(dates, aindex, color='springgreen', label='AIndex')
+    ax.set_ylim([0, aindex.max() * 1.15])
+    ax.legend(loc='upper right', fontsize="10")
+    ax.grid(color="gray", linewidth=.5)
+
+    for hbar in bars:
+      hbar.set_alpha(ALPHA)
+      hbar.set_color('springgreen')
+      value = hbar.get_height()
+      if 5 < value <= 9:
+        hbar.set_color('orange')
+      elif value > 9:
+        hbar.set_color('tomato')
+
+  @staticmethod
+  def draw_kindex(ax, dates, kindex):
+    bars = ax.bar(dates, kindex, color="springgreen", label='KP-index')
+    ax.set_ylim([0, kindex.max() * 1.25])
+    ax.legend(loc='upper right', fontsize="10")
+    ax.grid(color="black", linewidth=.5)
+
+    for hbar in bars:
+      hbar.set_alpha(ALPHA)
+      hbar.set_color('springgreen')
+      value = hbar.get_height()
+      if 3 <= value < 5:
+        hbar.set_color('orange')
+      elif value >= 5:
+        hbar.set_color('tomato')
+
+  @staticmethod
+  def draw_flux(ax, dates, flux):
+    ax.plot(dates, flux, "navy", linewidth=1.5, label='Flux')
+    ax.set_ylim([min(flux)/1.2, max(flux) * 1.05])
+    ax.legend(loc='upper right', fontsize="10")
+    ax.axhspan(90, ax.get_yticks().max(), facecolor='springgreen', alpha=ALPHA/2, label='Good')
+    ax.axhspan(70, 90, facecolor='orange', alpha=ALPHA/2, label='Ok')
+    ax.axhspan(40, 70, facecolor='tomato', alpha=ALPHA/2, label='Bad')
+    ax.grid(color="black", linewidth=.5)
+
 
 def main():
   logging.basicConfig(
