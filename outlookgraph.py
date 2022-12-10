@@ -141,7 +141,7 @@ class OutLook:
 
   @staticmethod
   def draw_flux(ax, dates, flux):
-    ax.plot(dates, flux, "navy", linewidth=1.5, label='Flux')
+    ax.plot(dates, flux, "navy", marker='.', linewidth=1.5, label='Flux')
     ax.set_ylim([min(flux)/1.2, max(flux) * 1.05])
     ax.legend(loc='upper right', fontsize="10")
     ax.axhspan(90, ax.get_yticks().max(), facecolor='springgreen', alpha=ALPHA/2, label='Good')
