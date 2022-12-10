@@ -22,7 +22,7 @@ import numpy as np
 
 from config import Config
 
-plt.style.use(['classic', 'seaborn-talk'])
+plt.style.use(['classic', 'seaborn-v0_8-talk'])
 
 NOAA_URL = 'https://services.swpc.noaa.gov/text/27-day-outlook.txt'
 
@@ -68,23 +68,25 @@ class OutLook:
     kindex = np.array([int(x[3]) for x in self.data])
     now = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
 
-    plt.rc('ytick', labelsize=12)
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 5))
+    fig = plt.figure(figsize=(12, 5))
+    ax1 = plt.subplot(222)
+    ax2 = plt.subplot(221)
+    ax3 = plt.subplot(212)
+
     fig.tight_layout()
     fig.suptitle('27 day Solar Predictions', fontsize=14, fontweight='bold')
-    plt.tick_params(labelsize=10)
-    fig.autofmt_xdate(rotation=5, ha="center")
 
     # first axis
     self.draw_aindex(ax1, dates, aindex)
     self.draw_kindex(ax2, dates, kindex)
     self.draw_flux(ax3, dates, flux)
 
-    loc = mdates.DayLocator(interval=int(1+len(aindex)/11))
-    for ax in [ax1, ax2, ax3]:
-      ax.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
-      ax.xaxis.set_major_locator(loc)
-      ax.xaxis.set_minor_locator(mdates.DayLocator())
+    for axe in [ax1, ax2, ax3]:
+      axe.tick_params(axis='both', which='both', labelsize=10, rotation=10)
+      axe.xaxis.set_major_formatter(mdates.DateFormatter('%b %d'))
+      axe.xaxis.set_minor_locator(mdates.DayLocator())
+
+    ax3.xaxis.set_major_formatter(mdates.DateFormatter('%a %m-%d UTC'))
 
     for day in [t.date() for t in dates[:-1]]:
       if day.isoweekday() != 6:
@@ -99,7 +101,7 @@ class OutLook:
     plt.figtext(0.93, 0.03, "Bad", size=12,
                 bbox=dict(boxstyle="round", color='tomato', alpha=ALPHA))
 
-    plt.subplots_adjust(top=0.93, bottom=0.15)
+    plt.subplots_adjust(top=0.91, bottom=0.15)
 
     plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {now}')
     plt.savefig(filename, transparent=False, dpi=100)
@@ -108,11 +110,11 @@ class OutLook:
     return filename
 
   @staticmethod
-  def draw_aindex(ax, dates, aindex):
-    bars = ax.bar(dates, aindex, color='springgreen', label='AIndex', zorder=2)
-    ax.set_ylim([0, aindex.max() * 1.15])
-    ax.legend(loc='upper right', fontsize="10")
-    ax.grid(color="gray", linewidth=.5)
+  def draw_aindex(axe, dates, aindex):
+    bars = axe.bar(dates, aindex, color='springgreen', label='AIndex', zorder=2)
+    axe.set_ylim([0, aindex.max() * 1.15])
+    axe.legend(loc='upper right', fontsize="10")
+    axe.grid(color="gray", linewidth=.5)
 
     for hbar in bars:
       hbar.set_alpha(ALPHA)
@@ -124,11 +126,11 @@ class OutLook:
         hbar.set_color('tomato')
 
   @staticmethod
-  def draw_kindex(ax, dates, kindex):
-    bars = ax.bar(dates, kindex, color="springgreen", label='KP-index', zorder=2)
-    ax.set_ylim([0, kindex.max() * 1.25])
-    ax.legend(loc='upper right', fontsize="10")
-    ax.grid(color="black", linewidth=.5)
+  def draw_kindex(axe, dates, kindex):
+    bars = axe.bar(dates, kindex, color="springgreen", label='KP-index', zorder=2)
+    axe.set_ylim([0, kindex.max() * 1.25])
+    axe.legend(loc='upper right', fontsize="10")
+    axe.grid(color="black", linewidth=.5)
 
     for hbar in bars:
       hbar.set_alpha(ALPHA)
@@ -140,14 +142,14 @@ class OutLook:
         hbar.set_color('tomato')
 
   @staticmethod
-  def draw_flux(ax, dates, flux):
-    ax.plot(dates, flux, "navy", marker='.', linewidth=1.5, label='Flux')
-    ax.set_ylim([min(flux)/1.2, max(flux) * 1.05])
-    ax.legend(loc='upper right', fontsize="10")
-    ax.axhspan(90, ax.get_yticks().max(), facecolor='springgreen', alpha=ALPHA/2, label='Good')
-    ax.axhspan(70, 90, facecolor='orange', alpha=ALPHA/2, label='Ok')
-    ax.axhspan(40, 70, facecolor='tomato', alpha=ALPHA/2, label='Bad')
-    ax.grid(color="black", linewidth=.5)
+  def draw_flux(axe, dates, flux):
+    axe.plot(dates, flux, "navy", marker='.', linewidth=1.5, label='Flux')
+    axe.set_ylim([min(flux)/1.2, max(flux) * 1.05])
+    axe.legend(loc='upper right', fontsize="10")
+    axe.axhspan(90, axe.get_yticks().max(), facecolor='springgreen', alpha=ALPHA/2, label='Good')
+    axe.axhspan(70, 90, facecolor='orange', alpha=ALPHA/2, label='Ok')
+    axe.axhspan(40, 70, facecolor='tomato', alpha=ALPHA/2, label='Bad')
+    axe.grid(color="black", linewidth=.5)
 
 
 def main():
