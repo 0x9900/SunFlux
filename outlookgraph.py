@@ -22,7 +22,7 @@ import numpy as np
 
 from config import Config
 
-plt.style.use(['classic', 'seaborn-v0_8-talk'])
+plt.style.use(['classic', 'seaborn-talk'])
 
 NOAA_URL = 'https://services.swpc.noaa.gov/text/27-day-outlook.txt'
 
