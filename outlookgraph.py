@@ -89,10 +89,10 @@ class OutLook:
     ax3.xaxis.set_major_formatter(mdates.DateFormatter('%a %b %d'))
 
     for day in [t.date() for t in dates[:-1]]:
-      if day.isoweekday() != 6:
+      if day.isoweekday() not in (6, 7):
         continue
       for plot in [ax1, ax2, ax3]:
-        plot.axvspan(mdates.date2num(day), mdates.date2num(day) + 1, color="skyblue", alpha=0.5)
+        plot.axvspan(mdates.date2num(day), mdates.date2num(day) + 1, color="skyblue", alpha=0.3)
 
     plt.figtext(0.80, 0.03, "Good", size=12,
                 bbox=dict(boxstyle="round", color='springgreen', alpha=ALPHA))
