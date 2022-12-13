@@ -27,6 +27,7 @@ from config import Config
 plt.style.use(['classic', 'fast'])
 
 NB_DAYS = 92
+MIN_TICKS = 55
 
 WWV_REQUEST = "SELECT wwv.time, wwv.SFI FROM wwv WHERE wwv.time > ?"
 
@@ -79,13 +80,13 @@ def graph(data, filename):
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
   axgc.set_ylabel('SFU at 2800 MHz', fontsize=12)
 
-  ticks = np.array([50, 70])
+  ticks = np.array([MIN_TICKS, 70])
   ticks = np.append(ticks, np.arange(90, int(y.max() * 1.10), 10))
   axgc.set_yticks(ticks)
 
   zone1 = axgc.axhspan(90, ticks.max(), facecolor='lightgreen', alpha=0.3, label='Good')
   zone2 = axgc.axhspan(70, 90, facecolor='orange', alpha=0.3, label='Ok')
-  zone3 = axgc.axhspan(40, 70, facecolor='red', alpha=0.3, label='Bad')
+  zone3 = axgc.axhspan(MIN_TICKS, 70, facecolor='red', alpha=0.3, label='Bad')
 
   trend_legend = axgc.legend(handles=[trend], fontsize=10, loc='lower left')
   axgc.add_artist(trend_legend)
