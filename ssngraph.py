@@ -21,9 +21,11 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 
+from matplotlib.ticker import MultipleLocator
+
 from config import Config
 
-plt.style.use(['classic', 'seaborn-talk'])
+plt.style.use(['classic', 'fast'])
 
 NOAA_URL = 'https://services.swpc.noaa.gov/text/daily-solar-indices.txt'
 
@@ -120,6 +122,9 @@ class SSN:
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.DayLocator())
+    axgc.yaxis.set_major_locator(MultipleLocator(25))
+    axgc.yaxis.set_minor_locator(MultipleLocator(5))
+
     axgc.set_ylim(np.min([ssn, flux])*0.2, np.max([ssn, flux])*1.2)
     axgc.minorticks_on()
 

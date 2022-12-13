@@ -46,6 +46,7 @@ setup(
     'purge_cluster',
     'showdxcc',
     'ssngraph',
+    'ssnhist',
     'sunfluxbot',
   ],
   install_requires=['numpy', 'matplotlib', 'python-telegram-bot'],
@@ -61,6 +62,7 @@ setup(
       'purge_cluster = purge_cluster:main',
       'showdxcc = showdxcc:main',
       'ssngraph = ssngraph:main',
+      'ssnhist = ssnhist:main',
       'sunfluxbot = sunfluxbot:main',
     ]
   },

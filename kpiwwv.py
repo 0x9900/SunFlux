@@ -26,7 +26,7 @@ import adapters
 
 from config import Config
 
-plt.style.use(['classic', 'seaborn-talk'])
+plt.style.use(['classic', 'fast'])
 
 NOAA_URL = "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
 

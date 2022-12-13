@@ -23,7 +23,7 @@ import numpy as np
 
 from config import Config
 
-plt.style.use(['classic', 'seaborn-talk'])
+plt.style.use(['classic', 'fast'])
 
 SIDC_URL = 'https://www.sidc.be/silso/DATA/EISN/EISN_current.csv'
 

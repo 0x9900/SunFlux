@@ -25,7 +25,7 @@ from config import Config
 
 NOAA_URL = 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json'
 
-plt.style.use(['classic', 'seaborn-talk'])
+plt.style.use(['classic', 'fast'])
 
 class KPIForecast:
   def __init__(self, cache_file, cache_time=21600):
