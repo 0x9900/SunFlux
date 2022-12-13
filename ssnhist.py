@@ -13,7 +13,7 @@ import os
 import sys
 import time
 
-from datetime import datetime
+from datetime import (datetime, timedelta)
 from urllib import request
 
 import matplotlib.dates as mdates
@@ -26,7 +26,8 @@ from config import Config
 
 plt.style.use(['classic', 'fast'])
 
-NOAA_URL = 'https://services.swpc.noaa.gov/json/solar-cycle/sunspots.json'
+URL_HISTORY  = 'https://services.swpc.noaa.gov/json/solar-cycle/sunspots.json'
+URL_PREDICTIONS = 'https://services.swpc.noaa.gov/products/solar-cycle-25-ssn-predicted-range.json'
 
 def moving_average(data, window=12):
   average = np.convolve(data, np.ones(window), 'valid') / window
@@ -34,31 +35,62 @@ def moving_average(data, window=12):
     average = np.insert(average, 0, np.nan)
   return average
 
-def _read_cache(cache_file):
+
+def _history_cache(cache_file):
   with open(cache_file, 'r', encoding='ASCII') as cfd:
     data = json.load(cfd)
   for item in data:
     item['time-tag'] = datetime.strptime(item['time-tag'], '%Y-%m')
   return data
 
-def download(cache_file='/tmp/ssnhist.json', cache_time=3600):
+
+def _predictions_cache(cache_file):
+  with open(cache_file, 'r', encoding='ASCII') as cfd:
+    data = json.load(cfd)
+  for item in data:
+    item['time-tag'] = datetime.strptime(item['time-tag'], '%Y-%m')
+    if item['smoothed_ssn_min'] < 0:
+      item['smoothed_ssn_min'] = 0
+  return data
+
+
+def download_history(cache_file, cache_time=86400):
   now = time.time()
   try:
     filest = os.stat(cache_file)
     if now - filest.st_mtime > cache_time:
       raise FileNotFoundError
   except FileNotFoundError:
-    logging.info('Downloading data from NOAA')
-    request.urlretrieve(NOAA_URL, cache_file)
-  data = _read_cache(cache_file)
+    logging.info('Downloading history data from NOAA')
+    request.urlretrieve(URL_HISTORY, cache_file)
+  data = _history_cache(cache_file)
   return data
 
 
-def graph(data, image='/tmp/ssnhist.png', year=1970):
+def download_predictions(cache_file, cache_time=86400):
+  now = time.time()
+  try:
+    filest = os.stat(cache_file)
+    if now - filest.st_mtime > cache_time:
+      raise FileNotFoundError
+  except FileNotFoundError:
+    logging.info('Downloading predictions data from NOAA')
+    request.urlretrieve(URL_PREDICTIONS, cache_file)
+  data = _predictions_cache(cache_file)
+  return data
+
+
+def graph(histo, predic, image='/tmp/ssnhist.png', year=1970):
   start_date = datetime(year, 1, 1)
-  xdates = np.array([d['time-tag'] for d in data if d['time-tag'] > start_date])
-  yvals = np.array([d['ssn'] for d in data if d['time-tag'] > start_date])
+  end_date = datetime.utcnow() + timedelta(days=365*12)
+
+  xdates = np.array([d['time-tag'] for d in histo if d['time-tag'] > start_date])
+  yvals = np.array([d['ssn'] for d in histo if d['time-tag'] > start_date])
   mavg = moving_average(yvals)
+
+  pdates = np.array([d['time-tag'] for d in predic if d['time-tag'] < end_date])
+  lvals = np.array([d['smoothed_ssn_min'] for d in predic if d['time-tag'] < end_date])
+  hvals = np.array([d['smoothed_ssn_max'] for d in predic if d['time-tag'] < end_date])
 
   today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
   fig = plt.figure(figsize=(12, 5))
@@ -68,6 +100,9 @@ def graph(data, image='/tmp/ssnhist.png', year=1970):
   axis = plt.gca()
   axis.plot(xdates, mavg, label='Average', zorder=5, color="navy", linewidth=1.5)
   axis.plot(xdates, yvals, label='Sun Spots', zorder=4, color='gray', linewidth=1.25)
+  axis.fill_between(pdates, lvals, hvals, label='Predicted', zorder=0, facecolor='powderblue',
+                    alpha=0.9, linewidth=.75, edgecolor='lightblue')
+
   axis.axhline(y=yvals.mean(), label='All time mean', zorder=1, color='blue', linewidth=.5,
                linestyle='dashed')
 
@@ -80,10 +115,11 @@ def graph(data, image='/tmp/ssnhist.png', year=1970):
   axis.yaxis.set_major_locator(MultipleLocator(25))
   axis.yaxis.set_minor_locator(MultipleLocator(5))
 
-  axis.legend(facecolor="linen", fontsize="10", loc='best')
+  axis.legend(facecolor="linen", fontsize="12", loc='best')
   axis.grid(color="gray", linestyle="dotted", linewidth=.5)
 
   plt.subplots_adjust(bottom=0.15)
+
   plt.savefig(image, transparent=False, dpi=100)
   plt.close()
   logging.info('Graph "%s" saved', image)
@@ -99,11 +135,14 @@ def main():
   except IndexError:
     name = '/tmp/ssnhist.png'
 
-  cache_file = config.get('ssnhist.cache_file', '/tmp/ssnhist.json')
+  cache_histo = config.get('ssnhist.cache_history', '/tmp/ssnhist.json')
+  cache_predict = config.get('ssnhist.cache_precictions', '/tmp/ssnpredict.json')
   cache_time = config.get('ssnhist.cache_time', 86400)
 
-  data = download(cache_file, cache_time)
-  graph(data, name, 1960)
+  histo = download_history(cache_histo, cache_time)
+  predict = download_predictions(cache_predict, cache_time)
+
+  graph(histo, predict, name, 1975)
 
 
 if __name__ == "__main__":
