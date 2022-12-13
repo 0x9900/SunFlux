@@ -49,8 +49,9 @@ def _predictions_cache(cache_file):
     data = json.load(cfd)
   for item in data:
     item['time-tag'] = datetime.strptime(item['time-tag'], '%Y-%m')
-    if item['smoothed_ssn_min'] < 0:
-      item['smoothed_ssn_min'] = 0
+    if item['smoothed_ssn_min'] < 0.0:
+      item['smoothed_ssn_min'] = 0.0
+    item['ssn'] = np.average([item['smoothed_ssn_min'], item['smoothed_ssn_max']])
   return data
 
 
@@ -91,6 +92,7 @@ def graph(histo, predic, image='/tmp/ssnhist.png', year=1970):
   pdates = np.array([d['time-tag'] for d in predic if d['time-tag'] < end_date])
   lvals = np.array([d['smoothed_ssn_min'] for d in predic if d['time-tag'] < end_date])
   hvals = np.array([d['smoothed_ssn_max'] for d in predic if d['time-tag'] < end_date])
+  pavg = np.array([d['ssn'] for d in predic if d['time-tag'] < end_date])
 
   today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
   fig = plt.figure(figsize=(12, 5))
@@ -100,6 +102,7 @@ def graph(histo, predic, image='/tmp/ssnhist.png', year=1970):
   axis = plt.gca()
   axis.plot(xdates, mavg, label='Average', zorder=5, color="navy", linewidth=1.5)
   axis.plot(xdates, yvals, label='Sun Spots', zorder=4, color='gray', linewidth=1.25)
+  axis.plot(pdates, pavg, zorder=4, color='blue', linewidth=.75, alpha=.3)
   axis.fill_between(pdates, lvals, hvals, label='Predicted', zorder=0, facecolor='powderblue',
                     alpha=0.9, linewidth=.75, edgecolor='lightblue')
 
