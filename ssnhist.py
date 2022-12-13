@@ -140,7 +140,7 @@ def main():
 
   cache_histo = config.get('ssnhist.cache_history', '/tmp/ssnhist.json')
   cache_predict = config.get('ssnhist.cache_precictions', '/tmp/ssnpredict.json')
-  cache_time = config.get('ssnhist.cache_time', 86400)
+  cache_time = config.get('ssnhist.cache_time', 86400 * 10)
 
   histo = download_history(cache_histo, cache_time)
   predict = download_predictions(cache_predict, cache_time)
