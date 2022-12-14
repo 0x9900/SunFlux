@@ -29,7 +29,7 @@ plt.style.use(['classic', 'fast'])
 URL_HISTORY  = 'https://services.swpc.noaa.gov/json/solar-cycle/sunspots.json'
 URL_PREDICTIONS = 'https://services.swpc.noaa.gov/products/solar-cycle-25-ssn-predicted-range.json'
 
-def moving_average(data, window=12):
+def moving_average(data, window=7):
   average = np.convolve(data, np.ones(window), 'valid') / window
   for _ in range(window - 1):
     average = np.insert(average, 0, np.nan)
