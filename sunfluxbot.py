@@ -594,7 +594,8 @@ def send_dxcc(update: Update, context: CallbackContext):
     logger.info('Send %s from cache', image)
 
   context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
-                         caption=f"DX activity for the last hour on: {today}",
+                         caption=(f"DX activity for the last hour on: {today}\n"
+                                  "See the animation at http://bsdworld.org/"),
                          filename=os.path.basename(image), timeout=100)
 
   logger.info("Command /dxcc by %s:%d %s", user, chat_id, query)
