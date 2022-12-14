@@ -96,7 +96,7 @@ def graph(histo, predic, image='/tmp/ssnhist.png', year=1970):
 
   today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
   fig = plt.figure(figsize=(12, 5))
-  fig.suptitle(f'SSN History from {year}', fontsize=14, fontweight='bold')
+  fig.suptitle(f'SunSpot Numbers from {year} (SSN)', fontsize=14, fontweight='bold')
   plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
 
   axis = plt.gca()
