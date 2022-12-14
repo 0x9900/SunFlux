@@ -408,7 +408,7 @@ def send_muf(update: Update, context: CallbackContext):
   today = datetime.now().strftime('%a %b %d %Y at %H:%M')
   chat_id = update.message.chat_id
   context.bot.send_photo(chat_id=chat_id, photo=open(filename, "rb"),
-                         caption=(f'Maximum Usable Frequency for: {today}'
+                         caption=(f'Maximum Usable Frequency for: {today}\n'
                                   "See the animation at http://bsdworld.org/"),
                          filename=os.path.basename(filename), timeout=100)
 
