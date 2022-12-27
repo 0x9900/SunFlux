@@ -96,11 +96,11 @@ def graph(data, condition, filename):
   axgc.plot(datetm, amin, marker='^', linewidth=0, color="navy")
   autolabel(axgc, bars)
 
-  axgc.axhline(y=20, linewidth=1, zorder=1, color='lightgreen', linestyle="dashed")
-  axgc.axhline(y=30, linewidth=1, zorder=1, color='darkorange', linestyle="dashed")
-  axgc.axhline(y=40, linewidth=1, zorder=1, color='red', linestyle="dashed")
-  axgc.axhline(y=50, linewidth=1, zorder=1, color='darkred', linestyle="dashed")
-  axgc.axhline(y=100, linewidth=1, zorder=1, color='darkmagenta', linestyle="dashed")
+  axgc.axhline(y=20, linewidth=1.5, zorder=1, color='green')
+  axgc.axhline(y=30, linewidth=1.5, zorder=1, color='darkorange')
+  axgc.axhline(y=40, linewidth=1.5, zorder=1, color='red')
+  axgc.axhline(y=50, linewidth=1.5, zorder=1, color='darkred')
+  axgc.axhline(y=100, linewidth=1.5, zorder=1, color='darkmagenta')
 
   loc = mdates.DayLocator(interval=4)
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))

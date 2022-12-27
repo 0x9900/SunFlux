@@ -81,7 +81,7 @@ class KPIForecast:
     fig.suptitle('Planetary K-Index Predictions', fontsize=14, fontweight='bold')
     axgc = plt.gca()
     bars = axgc.bar(xdates, yvalues, width=.1, linewidth=0.75, zorder=2, color=colors)
-    axgc.axhline(y=4, linewidth=1, zorder=1.5, color='red', linestyle="dashed")
+    axgc.axhline(y=4, linewidth=1.5, zorder=1.5, color='red')
 
     for rect, label in ((a, b) for a, b in zip(*(bars, labels)) if labels):
       color = 'navy' if rect.get_height() < 7 else 'black'
