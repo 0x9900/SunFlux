@@ -182,6 +182,7 @@ class DXCC:
     return dxmap
 
   def lookup(self, call):
+    call = call.upper()
     prefixes = {call[:c] for c in range(self.max_len, 0, -1)}
     for prefix in sorted(prefixes, reverse=True):
       if prefix in self._map:
