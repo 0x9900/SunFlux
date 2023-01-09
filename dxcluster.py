@@ -236,18 +236,31 @@ def get_band(freq):
   return 0
 
 
-def login(call, telnet):
+def login(call, telnet, email):
   try:
-    telnet.expect([b'Please enter your call.*\n'])
+    match = telnet.expect([
+      b'.*enter your amateur radio callsign.*\n',
+      b'.*enter your call.*\n',
+    ])
   except socket.timeout:
     raise OSError('Connection timeout') from None
   except EOFError as err:
     raise OSError(err) from None
+  if not match:
+    raise IOError('Cannot login to %s', telnet.host)
   telnet.write(str.encode(f'{call}\n'))
   telnet.expect([str.encode(f'{call} de .*\n')])
-  # telnet.write(b'Set Dx Filter SpotterCont=NA\n')
-  telnet.write(b'Set Dx Filter\n')
-  telnet.expect(['DX filter.*\n'.encode()])
+  # Trying to turn off the skimmers
+  # Set Dx Filter Not Skimmer
+  for cmd in ('SET/NOSKIMMER', 'SET/NOFT8', 'SET/NOFT4', 'SET DX FILTER NOT SKIMMER'):
+    telnet.write(cmd.encode() + b'\n')
+    LOG.info('%s - Command: %s', telnet.host, cmd)
+
+  # Trying to set the email address some clusters require it.
+  for cmd in ('SET STATION EMAIL', ):
+    email_cmd = f"{cmd} {email}"
+    telnet.write(email_cmd.encode() + b'\n')
+    LOG.info('%s - Command: %s', telnet.host, email_cmd)
 
 
 def parse_spot(line):
@@ -272,7 +285,7 @@ def parse_spot(line):
       ' '.join(elem[3:len(elem) - 1]),
     ]
   except ValueError as err:
-    LOG.warning("%s | %s", err, line)
+    LOG.warning("%s | %s", err, re.sub(r'[\n\r\t]+', ' ', line))
     return None
 
   for c_code in fields[0].split('/', 1):
@@ -327,7 +340,7 @@ def parse_wwv(line):
 def read_stream(queue, telnet):
   expect_exp = [b'DX.*\n', b'WWV de .*\n']
   current = time.time()
-  while True:
+  for _ in range(50021):       # It's an arbitrary number and it's a twin-prime
     code, _, buffer = telnet.expect(expect_exp, timeout=TELNET_TIMEOUT)
     if code == 0:
       current = time.time()
@@ -399,7 +412,7 @@ def main():
     try:
       telnet = Telnet(*cluster, timeout=300)
       LOG.info("Connection to %s:%d open", telnet.host, telnet.port)
-      login(config['call'], telnet)
+      login(config['call'], telnet, config['email'])
       LOG.info("%s identified", config['call'])
       read_stream(queue, telnet)
     except OSError as err:

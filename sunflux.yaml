@@ -1,17 +1,31 @@
 ---
 dxcluster:
   call: N0CALL
+  email: w6bsd@bsdworld.org
   db_name: /tmp/cluster/cluster.db
   db_timeout: 5
   log_file: /tmp/cluster/cluster.log
   log_level: INFO
   servers:
+  - 24.227.38.202:7373
+  - K9lc.ddns.net:7300
   - dx.maritimecontestclub.ca:7373
   - dxc.ai9t.com:7373
+  - dxc.n4zkf.com:23
   - dxc.nc7j.com:7373
+  - dxc.w3lpl.net:7373
+  - dxc.w4mya.us:7373
+  - dxc.w9pa.net:7374
+  - dxc.wd4ixd.net:7373
+  - dxspots.com:23
+  - k2can.us:7373
+  - k4md.no-ip.com:7373
+  - n6ws.ddns.net:7300
   - n8dxe.dxengineering.com:7373
+  - ve7cc.net:23
+  - w3gq.no-ip.com:7373
   - w3lpl.net:7373
-
+  - w9dp.dxcluster.net:7373
 sunfluxbot:
   cache_dir: /tmp
   token: 1234567890:YourTokenGoesHere
