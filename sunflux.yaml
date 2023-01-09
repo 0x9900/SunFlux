@@ -1,7 +1,7 @@
 ---
 dxcluster:
   call: N0CALL
-  email: w6bsd@bsdworld.org
+  email: your@email.addr
   db_name: /tmp/cluster/cluster.db
   db_timeout: 5
   log_file: /tmp/cluster/cluster.log
