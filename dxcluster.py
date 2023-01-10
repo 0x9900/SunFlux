@@ -249,7 +249,7 @@ def login(call, telnet, email):
   except EOFError as err:
     raise OSError(err) from None
   if not match:
-    raise IOError('Cannot login to %s', telnet.host)
+    raise IOError(f'Cannot login to {telnet.host}')
   telnet.write(str.encode(f'{call}\n'))
   telnet.expect([str.encode(f'{call} de .*\n')])
   # Trying to turn off the skimmers
@@ -316,9 +316,9 @@ def parse_spot(line):
   match = parse_spot.msgparse(fields[3])
   if match:
     mode = match.group('mode')
-    signal = match.group('db')
+    db_signal = match.group('db')
   else:
-    mode = signal = None
+    mode = db_signal = None
 
   fields.extend([
     call_de.continent,
@@ -328,7 +328,7 @@ def parse_spot(line):
     call_de.cqzone,
     call_to.cqzone,
     mode,
-    signal,
+    db_signal,
   ])
   return Record(fields)
 
