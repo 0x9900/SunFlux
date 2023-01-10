@@ -40,7 +40,7 @@ from config import Config
 
 FIELDS = ['DE', 'FREQUENCY', 'DX', 'MESSAGE', 'DE_CONT', 'TO_CONT',
           'DE_ITUZONE', 'TO_ITUZONE', 'DE_CQZONE', 'TO_CQZONE',
-          'BAND', 'DX_TIME']
+          'MODE', 'SIGNAL', 'BAND', 'DX_TIME']
 
 SQL_TABLE = """
 CREATE TABLE IF NOT EXISTS dxspot
@@ -55,6 +55,8 @@ CREATE TABLE IF NOT EXISTS dxspot
   to_ituzone INTEGER,
   de_cqzone INTEGER,
   to_cqzone INTEGER,
+  mode TEXT,
+  signal INTEGER,
   band INTEGER,
   time TIMESTAMP
 );
@@ -274,6 +276,9 @@ def parse_spot(line):
   if not hasattr(parse_spot, 'splitter'):
     parse_spot.splitter = re.compile(r'[:\s]+').split
 
+  if not hasattr(parse_spot, 'msgparse'):
+    parse_spot.msgparse = re.compile(r'^(?P<mode>FT[48]|CW)\s+(?P<db>-?\d+).*').match
+
   line = line.decode('UTF-8').rstrip()
   elem = parse_spot.splitter(line)[2:]
 
@@ -308,6 +313,13 @@ def parse_spot(line):
     LOG.warning("%s Not found | %s", fields[2], line)
     return None
 
+  match = parse_spot.msgparse(fields[3])
+  if match:
+    mode = match.group('mode')
+    signal = match.group('db')
+  else:
+    mode = signal = None
+
   fields.extend([
     call_de.continent,
     call_to.continent,
@@ -315,6 +327,8 @@ def parse_spot(line):
     call_to.ituzone,
     call_de.cqzone,
     call_to.cqzone,
+    mode,
+    signal,
   ])
   return Record(fields)
 
@@ -348,10 +362,10 @@ def read_stream(queue, telnet):
       if not rec:
         continue
       LOG.debug("%s - DX %r", telnet.host, rec)
-      queue.put(["INSERT INTO dxspot VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", (
+      queue.put(["INSERT INTO dxspot VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (
         rec.DE, rec.FREQUENCY, rec.DX, rec.MESSAGE, rec.DE_CONT, rec.TO_CONT,
-        rec.DE_ITUZONE, rec.TO_ITUZONE, rec.DE_CQZONE, rec.TO_CQZONE, rec.BAND,
-        rec.DX_TIME)])
+        rec.DE_ITUZONE, rec.TO_ITUZONE, rec.DE_CQZONE, rec.TO_CQZONE, rec.MODE, rec.SIGNAL,
+        rec.BAND, rec.DX_TIME)])
     elif code == 1:
       fields = parse_wwv(buffer)
       LOG.info("WWV Fields %s", repr(fields))
@@ -410,7 +424,7 @@ def main():
   random.shuffle(clusters)
   for cluster in cycle(clusters):
     try:
-      telnet = Telnet(*cluster, timeout=300)
+      telnet = Telnet(*cluster, timeout=60)
       LOG.info("Connection to %s:%d open", telnet.host, telnet.port)
       login(config['call'], telnet, config['email'])
       LOG.info("%s identified", config['call'])
