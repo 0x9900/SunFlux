@@ -80,7 +80,7 @@ class ShowDXCC:
     plt.xticks(np.arange(len(BANDS)), labels=BANDS, fontsize=14)
     plt.xlabel("Bands", fontsize=14)
     plt.yticks(np.arange(len(CONTINENTS)), labels=CONTINENTS, fontsize=14)
-    plt.ylabel("DX to Continent", fontsize=14)
+    plt.ylabel("Destination", fontsize=14)
 
     image = axgc.imshow(
       self.data, cmap=color_map,
@@ -91,7 +91,6 @@ class ShowDXCC:
 
     cbar = axgc.figure.colorbar(image, ax=axgc, shrink=0.66, format="%5.0f")
     cbar.ax.tick_params(labelsize=10)
-    # cbar.ax.set_ylabel("Contacts / Hour", rotation=-90, fontsize=12)
 
     # Loop over data dimensions and create text annotations.
     threshold = np.percentile(self.data, 96)
@@ -102,7 +101,7 @@ class ShowDXCC:
         color = 'firebrick' if self.data[i, j] > threshold else 'lime'
         axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
 
-    axgc.set_title(f"DX Spots from {self.zone_name} = {self.zone}", fontsize=16, fontweight='bold')
+    axgc.set_title(f"Band activity from {self.zone_name} = {self.zone}", fontsize=16, fontweight='bold')
     fig.text(0.02, .03, 'SunFluxBot By W6BSD', fontsize=14)
     fig.text(0.65, .95, f'{self.date.strftime("%A %B %d %Y - %H:%M")}', fontsize=14)
     fig.tight_layout()
