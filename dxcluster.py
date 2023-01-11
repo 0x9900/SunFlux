@@ -279,12 +279,8 @@ def parse_spot(line):
   if not hasattr(parse_spot, 'msgparse'):
     parse_spot.msgparse = re.compile(r'^(?P<mode>FT[48]|CW)\s+(?P<db>-?\d+).*').match
 
-  try:
-    line = line.decode('UTF-8').rstrip()
-    elem = parse_spot.splitter(line)[2:]
-  except UnicodeDecodeError as err:
-    LOG.error("%s - %s", err, line)
-    return None
+  line = line.decode('UTF-8', 'replace').rstrip()
+  elem = parse_spot.splitter(line)[2:]
 
   try:
     fields = [
@@ -343,7 +339,7 @@ def parse_wwv(line):
       r'.*\<(?P<Z>\d+)Z\>.*\sSFI=(?P<SFI>\d+), A=(?P<A>\d+), K=(?P<K>\d+), (?P<conditions>.*)$'
     )
 
-  line = line.decode('UTF-8')
+  line = line.decode('UTF-8', 'replace')
   _fields = parse_wwv.decoder.match(line.rstrip())
   if not _fields:
     return None
