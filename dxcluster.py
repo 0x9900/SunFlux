@@ -375,7 +375,7 @@ def read_stream(queue, telnet):
         fields['SFI'], fields['A'], fields['K'], fields['conditions'],
         fields['time'])])
     elif code == 2:
-      LOG.warning('%s Message: %s', telnet.host, buffer)
+      LOG.info('%s Message: %s', telnet.host, buffer)
     elif code == -1:            # timeout
       if current < time.time() - 120:
         break
