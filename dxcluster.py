@@ -352,7 +352,7 @@ def parse_wwv(line):
 
 
 def read_stream(queue, telnet):
-  expect_exp = [b'DX.*\n', b'WWV de .*\n']
+  expect_exp = [b'DX.*\n', b'WWV de .*\n', b'To ALL.*\n']
   current = time.time()
   for _ in range(50021):       # It's an arbitrary number and it's a twin-prime
     code, _, buffer = telnet.expect(expect_exp, timeout=TELNET_TIMEOUT)
@@ -374,6 +374,8 @@ def read_stream(queue, telnet):
       queue.put(["INSERT INTO wwv VALUES (?,?,?,?,?)", (
         fields['SFI'], fields['A'], fields['K'], fields['conditions'],
         fields['time'])])
+    elif code == 2:
+      LOG.warning('%s Message: %s', telnet.host, buffer)
     elif code == -1:            # timeout
       if current < time.time() - 120:
         break
