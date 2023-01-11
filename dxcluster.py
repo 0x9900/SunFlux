@@ -277,7 +277,7 @@ def parse_spot(line):
     parse_spot.splitter = re.compile(r'[:\s]+').split
 
   if not hasattr(parse_spot, 'msgparse'):
-    parse_spot.msgparse = re.compile(r'^(?P<mode>FT[48]|CW)\s+(?P<db>-?\ ?\d+).*').match
+    parse_spot.msgparse = re.compile(r'^(?P<mode>FT[48]|CW)\s+(?P<db>[+-]?\ ?\d+).*').match
 
   line = line.decode('UTF-8', 'replace').rstrip()
   elem = parse_spot.splitter(line)[2:]
