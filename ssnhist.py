@@ -84,6 +84,7 @@ def download_predictions(cache_file, cache_time=86400):
 def graph(histo, predic, image='/tmp/ssnhist.png', year=1970):
   start_date = datetime(year, 1, 1)
   end_date = datetime.utcnow() + timedelta(days=365*12)
+  last_date = histo[-1]['time-tag'].strftime("%m-%Y")
 
   xdates = np.array([d['time-tag'] for d in histo if d['time-tag'] > start_date])
   yvals = np.array([d['ssn'] for d in histo if d['time-tag'] > start_date])
@@ -96,7 +97,7 @@ def graph(histo, predic, image='/tmp/ssnhist.png', year=1970):
 
   today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
   fig = plt.figure(figsize=(12, 5))
-  fig.suptitle(f'SunSpot Numbers from {year} (SSN)', fontsize=14, fontweight='bold')
+  fig.suptitle(f'SunSpot Numbers from {year} to {last_date}', fontsize=14, fontweight='bold')
   plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
 
   axis = plt.gca()
