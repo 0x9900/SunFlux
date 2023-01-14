@@ -238,31 +238,56 @@ def get_band(freq):
   return 0
 
 
-def login(call, telnet, email):
+def spider_options(_, telnet, email):
+  commands = (
+    (b'set/dx/filter\n', b'DX filter.*\n'),
+    (b'set/wwv/output on\n', b'WWV output set.*\n'),
+    (f'set/station/email {email}\n'.encode(), b'Email address set.*\n'),
+  )
+  for cmd, reply_ex in commands:
+    LOG.info('%s - Command: %s', telnet.host, cmd.decode('UTF-8'))
+    telnet.write(cmd)
+    _, match, _ = telnet.expect([reply_ex], 15)
+    match = match.group().decode('UTF-8', 'replace')
+    LOG.info('%s - Reply: %s', telnet.host, match.strip())
+
+
+def cc_options(call, telnet, _):
+  prompt = str.encode(f'{call} de .*\n')
+  commands = (b'SET/WWV\n', b'SET/FT4\n', b'SET/SKIMMER\n', b'SET/FT8\n')
+  for cmd in commands:
+    telnet.write(cmd)
+    LOG.info('%s - Command: %s', telnet.host, cmd.decode('UTF-8'))
+    _, match, _ = telnet.expect([prompt], 15)
+    match = match.group().decode('UTF-8', 'replace')
+    LOG.info('%s - Reply: %s', telnet.host, match.strip())
+
+
+def login(call, telnet, email=None):
+  expect_exp = [b'Running CC Cluster.*\n',
+            b'AR-Cluster.*\n',
+            b'.*enter your call.*\n',
+            b'.*enter your amateur radio callsign.*\n']
   try:
-    match = telnet.expect([
-      b'.*enter your amateur radio callsign.*\n',
-      b'.*enter your call.*\n',
-    ])
+    for _ in range(5):
+      code, _,  match = telnet.expect(expect_exp, TELNET_TIMEOUT)
+      if code == 0:
+        set_options = cc_options
+      elif code == 1:
+        set_options = spider_options
+      else:
+        break
   except socket.timeout:
     raise OSError('Connection timeout') from None
   except EOFError as err:
     raise OSError(err) from None
-  if not match:
-    raise IOError(f'Cannot login to {telnet.host}')
-  telnet.write(str.encode(f'{call}\n'))
-  telnet.expect([str.encode(f'{call} de .*\n')])
-  # Trying to turn off the skimmers
-  # Set Dx Filter Not Skimmer
-  for cmd in ('SET/SKIMMER', 'SET/FT8', 'SET/FT4', 'SET DX FILTER', 'SET/WWV'):
-    telnet.write(cmd.encode() + b'\n')
-    LOG.info('%s - Command: %s', telnet.host, cmd)
 
-  # Trying to set the email address some clusters require it.
-  for cmd in ('SET STATION EMAIL', ):
-    email_cmd = f"{cmd} {email}"
-    telnet.write(email_cmd.encode() + b'\n')
-    LOG.info('%s - Command: %s', telnet.host, email_cmd)
+  prompt = [str.encode(f'{call} de .*\n')]
+  telnet.write(str.encode(f'{call}\n'))
+  _, match, _ = telnet.expect(prompt, 15)
+  match = match.group().decode('UTF-8')
+  LOG.info('%s - Reply: %s', telnet.host, match.strip())
+  set_options(call, telnet, email)
 
 
 def parse_spot(line):
@@ -427,6 +452,8 @@ def main():
   random.shuffle(clusters)
   for cluster in cycle(clusters):
     try:
+      cluster = ('dxc.w4mya.us', 7373)
+      LOG.info('Opening session to %s:%s', *cluster)
       telnet = Telnet(*cluster, timeout=60)
       LOG.info("Connection to %s:%d open", telnet.host, telnet.port)
       login(config['call'], telnet, config['email'])
