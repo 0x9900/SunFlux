@@ -313,7 +313,9 @@ def parse_spot(line):
     parse_spot.splitter = re.compile(r'[:\s]+').split
 
   if not hasattr(parse_spot, 'msgparse'):
-    parse_spot.msgparse = re.compile(r'^(?P<mode>FT[48]|CW|RTTY)\s+(?P<db>[+-]?\ ?\d+).*').match
+    parse_spot.msgparse = re.compile(
+      r'^(?P<mode>FT[48]|CW|RTTY|PSK[\d]*)\s+(?P<db>[+-]?\ ?\d+).*'
+    ).match
 
   line = line.decode('UTF-8', 'replace').rstrip()
   elem = parse_spot.splitter(line)[2:]
@@ -429,7 +431,7 @@ def main():
   del _config
 
   logging.basicConfig(
-    format='%(asctime)s %(name)s[%(process)d]:%(lineno)d %(levelname)s - %(message)s',
+    format='[%(process)d:%(lineno)d] %(levelname)s - %(message)s',
     datefmt='%H:%M:%S'
   )
   LOG = logging.getLogger('dxcluster')
