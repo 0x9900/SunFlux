@@ -368,9 +368,10 @@ def read_stream(queue, telnet):
         rec.BAND, rec.DX_TIME)])
     elif code == 1:
       fields = parse_wwv(buffer)
-      LOG.info("WWV Fields %s", repr(fields))
       if not fields:
+        LOG.error("WWV parsing Error: %s", buffer)
         continue
+      LOG.info("WWV Fields %s", repr(fields))
       queue.put(["INSERT INTO wwv VALUES (?,?,?,?,?)", (
         fields['SFI'], fields['A'], fields['K'], fields['conditions'],
         fields['time'])])
