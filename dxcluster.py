@@ -270,10 +270,13 @@ def cc_options(call, telnet, _):
 
 
 def login(call, telnet, email=None):
-  expect_exp = [b'Running CC Cluster.*\n',
-            b'AR-Cluster.*\n',
-            b'.*enter your call.*\n',
-            b'.*enter your amateur radio callsign.*\n']
+  expect_exp = [
+    b'Running CC Cluster.*\n',
+    b'AR-Cluster.*\n',
+    b'running DXSpider.*\n',
+    b'.*enter your call.*\n',
+    b'.*enter your amateur radio callsign.*\n'
+  ]
   try:
     for _ in range(5):
       code, _,  match = telnet.expect(expect_exp, TELNET_TIMEOUT)
@@ -281,6 +284,8 @@ def login(call, telnet, email=None):
         set_options = cc_options
       elif code == 1:
         set_options = spider_options
+      elif code == 2:
+        raise OSError('DX Spider cluster')
       else:
         break
   except socket.timeout:
