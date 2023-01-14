@@ -431,7 +431,7 @@ def main():
   del _config
 
   logging.basicConfig(
-    format='[%(process)d:%(lineno)d] %(levelname)s - %(message)s',
+    format='[%(lineno)d] %(levelname)s - %(message)s',
     datefmt='%H:%M:%S'
   )
   LOG = logging.getLogger('dxcluster')
@@ -447,8 +447,12 @@ def main():
     sys.exit(os.EX_IOERR)
 
   for server in config['servers']:
-    host, port = server.split(':')
-    clusters.append((host, int(port)))
+    try:
+      host, port = server.split(':')
+    except ValueError as err:
+      LOG.error('%s - %s', server, err)
+    else:
+      clusters.append((host, int(port)))
 
   create_db(config)
 
