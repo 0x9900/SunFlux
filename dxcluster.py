@@ -247,20 +247,26 @@ def spider_options(_, telnet, email):
   for cmd, reply_ex in commands:
     LOG.info('%s - Command: %s', telnet.host, cmd.decode('UTF-8'))
     telnet.write(cmd)
-    _, match, _ = telnet.expect([reply_ex], 15)
-    match = match.group().decode('UTF-8', 'replace')
-    LOG.info('%s - Reply: %s', telnet.host, match.strip())
-
+    _, match, _ = telnet.expect([reply_ex], 5)
+    if match:
+      match = match.group().decode('UTF-8', 'replace')
+      LOG.info('%s - Reply: %s', telnet.host, match.strip())
+    else:
+      LOG.warning('Telnet timeout')
 
 def cc_options(call, telnet, _):
   prompt = str.encode(f'{call} de .*\n')
-  commands = (b'SET/WWV\n', b'SET/FT4\n', b'SET/SKIMMER\n', b'SET/FT8\n')
+  commands = (b'SET/WWV\n', b'SET/FT4\n', b'SET/FT8\n',  b'SET/PSK\n', b'SET/RTTY\n',
+              b'SET/SKIMMER\n')
   for cmd in commands:
     telnet.write(cmd)
     LOG.info('%s - Command: %s', telnet.host, cmd.decode('UTF-8'))
-    _, match, _ = telnet.expect([prompt], 15)
-    match = match.group().decode('UTF-8', 'replace')
-    LOG.info('%s - Reply: %s', telnet.host, match.strip())
+    _, match, _ = telnet.expect([prompt], 5)
+    if match:
+      match = match.group().decode('UTF-8', 'replace')
+      LOG.info('%s - Reply: %s', telnet.host, match.strip())
+    else:
+      LOG.warning('Telnet timeout')
 
 
 def login(call, telnet, email=None):
@@ -284,7 +290,7 @@ def login(call, telnet, email=None):
 
   prompt = [str.encode(f'{call} de .*\n')]
   telnet.write(str.encode(f'{call}\n'))
-  _, match, _ = telnet.expect(prompt, 15)
+  _, match, _ = telnet.expect(prompt, 5)
   match = match.group().decode('UTF-8')
   LOG.info('%s - Reply: %s', telnet.host, match.strip())
   set_options(call, telnet, email)
@@ -452,7 +458,6 @@ def main():
   random.shuffle(clusters)
   for cluster in cycle(clusters):
     try:
-      cluster = ('dxc.w4mya.us', 7373)
       LOG.info('Opening session to %s:%s', *cluster)
       telnet = Telnet(*cluster, timeout=60)
       LOG.info("Connection to %s:%d open", telnet.host, telnet.port)

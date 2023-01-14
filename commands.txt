@@ -1,0 +1,172 @@
+
+
+CC Cluster Commands
+ANnounce 	Send an announcement to local USERs.  (AN <Text Message>)
+ANnounce/Full 	Send an announcement to all nodes and USERs.  (AN/F <Text Message>)
+BYE 	Disconnect from the node. (BYE) or (B)
+DX 	Send a DX spot.  (DX <Callsign> <Frequency> or DX <Frequency> <Callsign>)
+DXTest 	Returns  to USER only. (DXT P5NOW 14006.06) Good for testing RES 1 & RES 2
+DIR 	Shows mail messages on the node
+DIR/BULLETIN 	Shows mail messages to ALL, BULLETIN and anything not to a call
+DIR/NEW 	Shows only mail messages you haven't seen since your last DIR
+DIR/OWN 	Shows only mail messages to you including messages to ALL & ones you sent
+DIR/SUBJECT 	Shows mail messages with subject you enter.  (DIR/SUBJECT ARL)
+DELete 	Delete mail messages. (DEL (Msg #) (DEL 1-99) Deletes your messages from 1 to 99
+Kill 	Delete mail messages.  (K (Msg #) (K 1-99) Deletes your messages from 1 to 99
+List 	Shows mail messages on the node
+List/NEW 	Shows only mail messages you haven't seen since your last DIR or L
+List/OWN 	Shows only mail messages to you including messages to ALL & ones you sent
+QUIT 	Disconnect from the node
+READ 	Read cluster mail.  (READ <Message #>)  See Mail Send/Receive below
+REply 	REply without a number following replies to the last mail message you read.  REply <#> replies to the message with that number given.  REply/DELete replies to message and delets it.  REply/DELete/RR replies to message, delets message and gets a return receipt.  REply/RR replies to message and gets a return receipt. 
+SEND 	(SEND <Callsign>) Sends mail  to that callsign. SEND <LOCAL> to just send a message to local node USERs.  SEND <ALL>, SEND <FORSALE> and SEND <DXNEWS> will be passed to all nodes for all USERs.
+SET/ANN 	Turn on announcements
+SET/BEACON 	Turn on beacon spots.  These are spots ending in "/B" or "BCN"
+SET/BEEP 	Turn on a beep for DX and Announcement spots
+SET/BOB 	Turn on bottom of band DX spots
+SET/DX 	Turn on DX spot announcements
+SET/DXCQ 	Turn on CQ Zone in DX info for DX spots
+SET/DXITU 	Turn on ITU Zone in DX info for DX spots
+SET/DXS 	Turn on US state/province or country in DX info for DX spots
+SET/USSTATE 	Turn on US state or Canadian province spotter in DX info for DX spots
+SET/FILTER 	See Band & Mode Filtering Below
+SET/GRID 	Turns on DX Grid, toggles CQ Zone, ITU Zone, & US State to off
+SET/HOME 	Tell cluster your home node. (SET/HOME <Node Call>) If you normally connect to K8SMC then it would be (SET/HOME K8SMC) 
+SET/LOCATION 	Set your location (lat/lon) of your station.  (SET/LOCATION 42 17 N 84 21 W)
+SET/LOGIN 	Tells cluster to send USER connects and disconnects.
+SET/NAME 	Set your name (SET/NAME <First Name>)
+SET/NOANN 	Turn off announcements.
+SET/NOBEACON 	Turn off beacon spots.  These are spots ending in "/B" or "BCN"
+SET/NOBEEP 	Turn off a beep for DX and Announcement spots .
+SET/NOBOB 	Turn off bottom of band DX spots.
+SET/NOCQ 	Turn off CQ Zone in spot announcements.
+SET/NODX 	Turn off DX spot announcements.
+SET/NODXCQ 	Turn off CQ Zone in DX info for DX spots
+SET/NODXITU 	Turn off ITU Zone in DX info for DX spots
+SET/NODXS 	Turn off US state/province or country in DX info for DX spots
+SET/NOUSSTATE 	Turn off US state or Canadian province spotter in DX info for DX spots
+SET/NOGRID 	Turn off DX Grids in spot announcements
+SET/NOITU 	Turn off ITU Zone in spot announcements
+SET/NOLOGIN 	Stops cluster from sending USER connects and disconnects
+SET/NOOWN 	Turn off skimmer spots for your own call
+SET/NOSELF 	Turn off self spots by other users
+SET/NOSKIMMER 	Turn off Skimmer spots
+SET/NOTALK 	Turn off the display of talk messages
+SET/NOWCY 	Turn off the display of WCY spots
+SET/NOWWV 	Turn off the display of WWV spots
+SET/NOWX 	Turn off the display of weather announcements
+SET/OWN 	Turn on Skimmer spots for own call
+SET/NOLOGIN 	Stops cluster from sending USER connects and disconnects
+SET/QRA 	Input your Grid Square. (SET/QRA EN72)
+SET/QTH 	Set your city and state. (SET/QTH <City, State>) DX <City, Country>
+SET/RES 1 	Tells CC-Cluster to give you 1 decimal point rounding in DX spots
+SET/RES 2 	Tells CC-Cluster to give you 2 decimal point rounding in DX spots
+SET/SELF 	Turn on self spots by other users
+SET/SKIMMER 	Turn on Skimmer spots
+SET/TALK 	Turn on the display of talk messages
+SET/USSTATE 	Turns on US State, toggles CQ Zone, DX Grid, & ITU Zone to off
+SET/WCY 	Turn on the display of WCY spots
+SET/WIDTH 	Sets the line width for DX spots, normally this has been 80 characters.  Depending on your logging program you can use anything between 45 to 130 characters,  SET/WIDTH XX where XX is the number of characters.
+SET/WWV 	Turn on the display of WWV spots
+SET/WX 	Turn on the display of weather announcements
+SHow/CL 	Node Info and CCC Uptime  See SH/VERSION 
+SHow/CONF 	Shows nodes and callsigns of USERs, only nodes called LOCAL by Sysop.
+SHow/DX 	Shows last 30 spots
+SHow/DX <Call> 	Shows last 30 spots for that call
+SHow/DX/<number> 	Shows that number of spots.  SH/DX/100
+SHow/DX <Band> 	Shows spots on that band.  SH/DX 20  for 20 meters
+SHow/DX/ <Freq> 	Shows spots by frequency range.  Syntax = SH/DX 7020-7130
+SHow/DX <prefix*> 	Shows all spots for a country, standard prefix not necessary, asterisk needed
+SHow/DX 'rtty' 	Shows spots where the comment field contains (rtty)
+SHow/DXBY <call> 	Shows spots where spotter = Call
+SHow/FDX 	Shows real time formatted dx spots.
+SHow/FILTER 	Shows how you have your filters set.
+SHow/HEAD <Call> 	Shows heading - distance and bearing for the call.
+SHow/MYANN 	Shows last 5 announcements allowed by your filter settings.
+SHow/MYDX 	Shows last 30 spots allowed by your filter settings
+SHow/MYDX <Call> 	Shows last 30 spots for the call allowed by your filter settings.
+SHow/MYDX/<number> 	Shows that number of spots allowed by your filter.  SH/MYDX/100
+SHow/MYDX <Band> 	Shows spots on that band allowed by your filter settings.  SH/MYDX 20  for 20 meters
+SHow/MYFDX 	Shows last 30 spots allowed by your filter settings.  
+SHow/MYWX 	Shows last 5 weather announcements allowed by your filter settings.
+SHow/RES 	Shows the number of digits after the decimal point for frequencies
+SHow/SETTINGS 	Shows information on the node for your call and how you are setup.
+SHow/STATION 	Shows information on the node for a station.  (SH/STA <Callsign>)
+SHow/SUN 	Shows local sunrise and sunset times.  (SH/SUN <Prefix.) for that country
+SHow/TIME 	Shows GMT time.
+SHow/TIME <Call> 	Shows local time for the call.
+SHow/USDB 	Shows State/Province for US/VE calls.  (SH/USDB <Callsign>)
+SHow/USERS 	Shows callsigns of everyone connected to the local node.
+SHow/VERSION 	Shows the CCC and Winsock Versions and Winsock Uptime for connections.
+SHow/WIDTH 	Shows the length of a DX Spot. Normally 80 characters.
+SHow/WWV 	Shows WWV info, (SH/WWV) gives last 5 (SH/WWV/99) gives last 99
+SHow/WCY 	Shows last 5 DK0WCY, similar to WWV
+Talk 	Send a talk message to someone on the node.  (T <Callsign> <Message>)
+UNSET/ 	This command can be used instead of SET/NO, Compatibility for DX-Spider USERs
+WHO 	This command will return a list of connections in alphabetical order.  Items are: Call User/Node Name IP/AGW
+WX 	The command "WX" will send a local weather announcement.  (WX Sunny and Warm)
+ 
+Most Common Used Filter Commands
+Filter Settings: 	Filter settings manually can be time consuming and sometimes hard to comprehend.  I truly believe the best way is to download VE7CC's CC-USER FREE program at: http://ve7cc.net and use it to do your settings.
+Filters are mostly default to off, but one simple setting for say someone in the US or Canada that is happy seeing spots from just the US and Canada can do a quick setting for this: SET/FILTER K,VE/PASS
+SH/FILTER 	Shows all of your USER filter settings
+SH/FILTER <aaa> 	Show setting for specific filter, <aaa> = filter name.
+SH/FILTER DOC = DX Origination Country
+SH/FILTER DOS = DX Origination State
+SH/FILTER AOC = Announce Origination Country
+SH/FILTER AOS = Announce Origination State
+SH/FILTER WOC = Weather Origination Country
+SH/FILTER WOS = Weather Origination State
+SH/FILTER DXCTY = DX spot CounTrY
+SH/FILTER DXSTATE = DX spot STATE 
+SET/NOFILTER 	Resets all filters to default.  If you suspect you have entered invalid filter command or commands, reset and start over.
+SET/FILTER <aaa>/OFF 	Turn off specific filter.  <aaa> = filter name (see SH/FILTER <aaa>)
+SET/FILTER K,VE/PASS 	This would be the most common filter setting for say someone in the United States or Canada to set so as to only see spots that originated in the US or Canada. 
+SET/FILTER <aaa>/<p/r> <bbb> 	Set specific filter.
+<aaa> = filter name (see SH/FILTER <aaa>
+<p/r> = PASS or REJECT
+<bbb> = Country or State
+Example #1:  SET/FILTER DOC/PASS EA,OH,G  This would set your filter to pass originated spots from Spain, Finland and England only.
+Example #2:  SET/FILTER DXCTY/PASS F,OH  This would set your filter to pass spots for France and Finland only.
+DX Band Mode Filtering 	The DXBM filter has many variations for your settings, it is defaulted to receive all DX spots for all modes from 160 to 10 meters, (see Band & Mode Filtering below).
+
+ 
+
+Band & Mode Filtering
+You can tailor the DX spots from CC Cluster to only the bands and modes that interest you.
+The default setting for new users is to receive all DX spots from 160 to 10 meters, all modes.
+To reset the band/mode filter to pass everything, enter "SET/FILTER DXBM/OFF".
+To display your current settings, enter "SH/FILTER DXBM".
+You can change any band or band/mode
+You can set the band or band/mode to either pass or reject.
+You can add items one at a time, or all at once.
+ 
+For example:
+To add 6 meters, you enter "SET/FILTER DXBM/PASS 6".
+To delete 80 meter and 40 meter CW, enter "SET/FILTER DXBM/REJECT 80-CW,40-CW"
+ 
+Although the band/mode has a "mode" name, it does not mean that when you select 40-RTTY that you are selecting only RTTY spots. What it really means is that you are selecting the frequency range in the following table that corresponds to this name. In this case 7040-7100. The actual mode may be anything. The only thing you have selected is a frequency range.
+ 
+DXBM Frequencies Band Mode 	Low 	High 	Band Mode 	Low 	High 	Band Mode 	Low 	High
+160-CW 	1800 	1850 	  	  	  	160-SSB 	1850 	2000
+80-CW 	3500 	3580 	80-RTTY 	3580 	3700 	80-SSB 	3700 	4000
+  	  	  	  	  	  	60-SSB 	5260 	5405
+40-CW 	7000 	7040 	40-RTTY 	7040 	7100 	40-SSB 	7100 	7300
+30-CW 	10100 	10130 	30-RTTY 	10130 	10150 	  	  	 
+20-CW 	14000 	14070 	20-RTTY 	14070 	14150 	20-SSB 	14150 	14350
+17-CW 	18068 	18100 	17-RTTY 	18100 	18110 	17-SSB 	18110 	18168
+15-CW 	21000 	21070 	15-RTTY 	21070 	21200 	15-SSB 	21200 	21450
+12-CW 	24890 	24920 	12-RTTY 	24920 	24930 	12-SSB 	24930 	24990
+10-CW 	28000 	28070 	10-RTTY 	28070 	28300 	10-SSB 	28300 	29700
+6-CW 	50000 	50080 	6-SSB 	50080 	50500 	6-FM 	50500 	54000
+  	  	  	  	  	  	4-MTR 	70000 	70650
+2-CW 	144000 	144100 	2-SSB 	144100 	144500 	2-FM 	144500 	148000
+1-CW 	220000 	221000 	1-SSB 	222000 	224000 	1-FM 	221000 	222000
+  	  	  	  	  	  	MW-MW 	500000 	47000000
+
+ 
+CC-Cluster Commands for Sysops Only (Will not work for USERs)
+Purge/Mail X 	X is the number of months of mail messages that you want to keep.
+Rebuild/msgdir 	Renumbers mail messages starting at number 1.
+SET/GRID <call> <grid> 	If the call is already in the database, then you will have to delete it first.
+SET/NOGRID <call> 	To remove a call in the data base you want to update.
