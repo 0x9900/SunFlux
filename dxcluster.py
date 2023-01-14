@@ -254,7 +254,7 @@ def login(call, telnet, email):
   telnet.expect([str.encode(f'{call} de .*\n')])
   # Trying to turn off the skimmers
   # Set Dx Filter Not Skimmer
-  for cmd in ('SET/SKIMMER', 'SET/FT8', 'SET/FT4', 'SET DX FILTER'):
+  for cmd in ('SET/SKIMMER', 'SET/FT8', 'SET/FT4', 'SET DX FILTER', 'SET/WWV'):
     telnet.write(cmd.encode() + b'\n')
     LOG.info('%s - Command: %s', telnet.host, cmd)
 
