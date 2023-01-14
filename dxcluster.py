@@ -431,7 +431,7 @@ def main():
   del _config
 
   logging.basicConfig(
-    format='[%(lineno)d] %(levelname)s - %(message)s',
+    format='%(lineno)d %(levelname)s - %(message)s',
     datefmt='%H:%M:%S'
   )
   LOG = logging.getLogger('dxcluster')
