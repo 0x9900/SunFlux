@@ -374,7 +374,7 @@ def parse_spot(line):
 def parse_wwv(line):
   if not hasattr(parse_wwv, 'decoder'):
     parse_wwv.decoder = re.compile(
-      r'.*\<(?P<Z>\d+)Z\>.*\sSFI=(?P<SFI>\d+), A=(?P<A>\d+), K=(?P<K>\d+), (?P<conditions>.*)$'
+      r'.*\sSFI=(?P<SFI>\d+), A=(?P<A>\d+), K=(?P<K>\d+), (?P<conditions>.*)$'
     )
 
   line = line.decode('UTF-8', 'replace')
