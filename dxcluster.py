@@ -420,6 +420,7 @@ def read_stream(queue, telnet):
         break
       LOG.warning('Timeout - sleeping for a few seconds [%s]', telnet.host)
       time.sleep(5)
+  LOG.info('read_stream loop ended')
 
 def main():
   global LOG                    # pylint: disable=global-statement
