@@ -101,7 +101,8 @@ class ShowDXCC:
         color = 'firebrick' if self.data[i, j] > threshold else 'lime'
         axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
 
-    axgc.set_title(f"Band activity from {self.zone_name} = {self.zone}", fontsize=16, fontweight='bold')
+    axgc.set_title(f"Band activity from {self.zone_name} = {self.zone}",
+                   fontsize=16, fontweight='bold')
     fig.text(0.02, .03, 'SunFluxBot By W6BSD', fontsize=14)
     fig.text(0.65, .95, f'{self.date.strftime("%A %B %d %Y - %H:%M")}', fontsize=14)
     fig.tight_layout()
@@ -121,7 +122,7 @@ def type_date(parg):
   return date
 
 def main():
-  adapters.install_adapers()
+  adapters.install_adapters()
   config = Config()
 
   logging.basicConfig(

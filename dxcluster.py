@@ -425,7 +425,7 @@ def read_stream(queue, telnet):
 def main():
   global LOG                    # pylint: disable=global-statement
 
-  adapters.install_adapers()
+  adapters.install_adapters()
 
   _config = Config()
   config = _config.get('dxcluster')

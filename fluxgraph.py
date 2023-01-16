@@ -103,7 +103,7 @@ def graph(data, filename):
 
 
 def main():
-  adapters.install_adapers()
+  adapters.install_adapters()
   logging.basicConfig(format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s',
                       datefmt='%H:%M:%S')
   logger = logging.getLogger('fluxgraph')
