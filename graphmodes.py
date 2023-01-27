@@ -72,7 +72,7 @@ def graph(data, imgname):
       except KeyError:
         ydata[mode].append(0)
 
-  fig, ax1 = plt.subplots(figsize=(12, 8))
+  fig, ax1 = plt.subplots(figsize=(12, 5))
   fig.suptitle('Number of Spots / Modes', fontsize=16, fontweight='bold')
   ax1.set_xlabel('Date', fontsize=14, fontweight='bold')
   ax1.set_ylabel('Sports / Day', fontsize=14, fontweight='bold')
