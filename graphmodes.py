@@ -62,6 +62,7 @@ def read_data(config):
 
 
 def graph(data, imgname):
+  now = datetime.utcnow().strftime('%Y/%m/%d %H:%M')
   xdate = np.array(list(data.keys()))
   modes = sorted({k for d in data.values() for k in d})
   ydata = defaultdict(list)
@@ -74,9 +75,10 @@ def graph(data, imgname):
 
   fig, ax1 = plt.subplots(figsize=(12, 5))
   fig.suptitle('Number of Spots / Modes', fontsize=16, fontweight='bold')
+  fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {now}')
   ax1.set_xlabel('Date', fontsize=14, fontweight='bold')
   ax1.set_ylabel('Sports / Day', fontsize=14, fontweight='bold')
-  ax1.margins(.01)
+  ax1.margins(x=0.01, y=0.02)
   colors = plt.cm.Set2(np.linspace(0, 1, len(modes)))
   colors[0] = (1,.5,0,1)
   prev = np.zeros(len(xdate))
