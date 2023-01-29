@@ -43,8 +43,8 @@ def read_data(config):
     detect_types=sqlite3.PARSE_DECLTYPES
   )
   today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
-  today = today - timedelta(hours=24)
-  start = today - timedelta(hours=24*14)
+  today -= timedelta(hours=24)
+  start = today - timedelta(hours=24*15)
   with conn:
     curs = conn.cursor()
     results = curs.execute(SQL_REQ)
