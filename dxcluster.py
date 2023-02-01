@@ -2,7 +2,7 @@
 #
 # BSD 3-Clause License
 #
-# Copyright (c) 2022 Fred W6BSD
+# Copyright (c) 2022-2023 Fred W6BSD
 # All rights reserved.
 #
 # b'DX de SP5NOF:   10136.0  UI5A     FT8 +13dB from KO85 1778Hz   2138Z\r\n'
