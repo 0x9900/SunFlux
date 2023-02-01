@@ -96,20 +96,21 @@ def create_db(config):
 
 
 class DBInsert(Thread):
+  QUEUE_TIMEOUT = 30
+
   def __init__(self, config, queue):
     super().__init__()
     self.config = config
     self.queue = queue
 
   def run(self):
-    queue_timeout = 30
     conn = connect_db(self.config)
     # Run forever and consume the queue
     while True:
       try:
-        request = self.queue.get(timeout=queue_timeout)
+        request = self.queue.get(timeout=self.QUEUE_TIMEOUT)
       except Empty:
-        LOG.warning('The queue has been empty for %d seconds', queue_timeout)
+        LOG.warning('The queue has been empty for %d seconds', self.QUEUE_TIMEOUT)
         continue
 
       LOG.debug('Queue size: **** %d ****', self.queue.qsize())
@@ -390,12 +391,12 @@ def parse_wwv(line):
 
 
 def read_stream(queue, telnet):
+  timeout_count = max_timeout_count = 3
   expect_exp = [b'DX.*\n', b'WWV de .*\n', b'To ALL.*\n']
-  current = time.time()
   for _ in range(50021):       # It's an arbitrary number and it's a twin-prime
     code, _, buffer = telnet.expect(expect_exp, timeout=TELNET_TIMEOUT)
     if code == 0:
-      current = time.time()
+      timeout_count = max_timeout_count
       rec = parse_spot(buffer)
       if not rec:
         continue
@@ -416,9 +417,10 @@ def read_stream(queue, telnet):
     elif code == 2:
       LOG.info('%s Message: %s', telnet.host, buffer.decode('UTF-8', 'replace').strip())
     elif code == -1:            # timeout
-      if current < time.time() - 120:
+      timeout_count -= 1
+      if timeout_count <= 0:
         break
-      LOG.warning('Timeout - sleeping for a few seconds [%s]', telnet.host)
+      LOG.warning('Timeout count %d - sleeping for a few seconds [%s]', timeout_count, telnet.host)
       time.sleep(5)
   LOG.info('read_stream loop ended')
 
@@ -471,7 +473,7 @@ def main():
   for cluster in cycle(clusters):
     try:
       LOG.info('Opening session to %s:%s', *cluster)
-      telnet = Telnet(*cluster, timeout=60)
+      telnet = Telnet(*cluster, timeout=TELNET_TIMEOUT)
       LOG.info("Connection to %s:%d open", telnet.host, telnet.port)
       login(config['call'], telnet, config['email'])
       LOG.info("%s identified", config['call'])
