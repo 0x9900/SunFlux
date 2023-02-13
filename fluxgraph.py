@@ -68,7 +68,7 @@ def graph(data, filename):
 
   for fun in (y.argmax, y.argmin, lambda: x.size - 1):
     pos = fun()
-    xytext = (-20, 20) if pos == x.size -1 else (20,-20)
+    xytext = (20, 20) if pos == x.size -1 else (20,-20)
     plt.annotate(f"{y[pos]:d}", (x[pos], y[pos]), textcoords="offset points", xytext=xytext,
                  ha='center', fontsize=10,
                  arrowprops=dict(arrowstyle="wedge", color='dimgray'),
