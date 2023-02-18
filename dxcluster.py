@@ -113,7 +113,8 @@ class DBInsert(Thread):
         LOG.warning('The queue has been empty for %d seconds', self.QUEUE_TIMEOUT)
         continue
 
-      LOG.debug('Queue size: **** %d ****', self.queue.qsize())
+      if self.queue.qsize() > 1:
+        LOG.debug('Queue size: **** %d ****', self.queue.qsize())
       # Loop until the database is unlocked
       while True:
         try:
