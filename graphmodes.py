@@ -59,7 +59,7 @@ def read_data(config):
 
 
 def graph(data, imgname):
-  now = datetime.utcnow().strftime('%Y/%m/%d %H:%M')
+  now = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
   xdate = np.array(list(data.keys()))
   modes = sorted({k for d in data.values() for k in d})
   ydata = defaultdict(list)
