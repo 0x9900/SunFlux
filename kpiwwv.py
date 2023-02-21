@@ -73,7 +73,6 @@ def get_kpindex(config):
   return data
 
 def get_wwv(config, days):
-  # data = defaultdict(list)
   data = get_kpindex(config)
   start_date = datetime.utcnow() - timedelta(days=days)
 
@@ -98,11 +97,11 @@ def graph(data, condition, filename):
   # colors #6efa7b #a7bb36 #aa7f28 #8c4d30 #582a2d
   colors = ['#6efa7b'] * len(kindex)
   for pos, val in enumerate(kindex):
-    if 4 < val < 5:
+    if 4 <= val < 5:
       colors[pos] = '#a7bb36'
-    elif 5 < val < 6:
+    elif 5 <= val < 6:
       colors[pos] = '#aa7f28'
-    elif 7 < val < 8:
+    elif 7 <= val < 8:
       colors[pos] = '#8c4d30'
     elif val >= 8:
       colors[pos] = '#582a2d'
