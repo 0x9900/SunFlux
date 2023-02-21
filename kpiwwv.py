@@ -92,7 +92,7 @@ def graph(data, condition, filename):
   datetm = np.array([d[0] for d in data])
   kimax = np.array([np.max(d[1]) for d in data])
   kimin = np.array([np.min(d[1]) for d in data])
-  kindex = np.array([np.average(d[1]) for d in data])
+  kindex = np.array([np.percentile(d[1], 75) for d in data])
   # I should use mpl.colormaps here
   # colors #6efa7b #a7bb36 #aa7f28 #8c4d30 #582a2d
   colors = ['#6efa7b'] * len(kindex)
