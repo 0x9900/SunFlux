@@ -152,9 +152,7 @@ def main():
   except IndexError:
     name = '/tmp/kpi.png'
 
-  # data = get_wwv(config, NB_DAYS)
-  data = get_kpindex(config)
-  data = sorted(data.items())
+  data = get_wwv(config, NB_DAYS)
   condition = get_conditions(config)
   if data:
     graph(data, condition, name)
