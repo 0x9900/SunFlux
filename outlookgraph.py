@@ -28,7 +28,7 @@ NOAA_URL = 'https://services.swpc.noaa.gov/text/27-day-outlook.txt'
 
 ALPHA=1
 
-class Record(namedtuple("OLRecord", ["Date", "Flux", "AIndex", "Max KpIndex"])):
+class Record(namedtuple("OLRecord", ["Date", "Flux", "AIndex", "KpIndex"])):
   def __new__(cls, items):
     _items = [datetime.strptime(' '.join(items[:3]), "%Y %b %d")]
     _items.extend([int(x.strip()) for x in items[3:]])
@@ -127,7 +127,7 @@ class OutLook:
 
   @staticmethod
   def draw_kindex(axe, dates, kindex):
-    bars = axe.bar(dates, kindex, color="springgreen", label='KP-index', zorder=2)
+    bars = axe.bar(dates, kindex, color="springgreen", label='Max KP-index', zorder=2)
     axe.set_ylim([0, kindex.max() * 1.25])
     axe.legend(loc='upper right', fontsize="10")
     axe.grid(color="black", linewidth=.5)
