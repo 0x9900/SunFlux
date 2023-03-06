@@ -28,7 +28,7 @@ NOAA_URL = 'https://services.swpc.noaa.gov/text/27-day-outlook.txt'
 
 ALPHA=1
 
-class Record(namedtuple("OLRecord", ["Date", "Flux", "AIndex", "KpIndex"])):
+class Record(namedtuple("OLRecord", ["Date", "Flux", "AIndex", "Max KpIndex"])):
   def __new__(cls, items):
     _items = [datetime.strptime(' '.join(items[:3]), "%Y %b %d")]
     _items.extend([int(x.strip()) for x in items[3:]])
