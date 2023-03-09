@@ -127,6 +127,8 @@ def create_link(filename):
   path, fname = os.path.split(filename)
   fname, ext = os.path.splitext(fname)
   latest = os.path.join(path, f'latest{ext}')
+  if os.path.exists(latest):
+    os.unlink(latest)
   os.link(filename, latest)
   logging.info('Link to %s created', latest)
 
