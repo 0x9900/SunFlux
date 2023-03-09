@@ -106,6 +106,7 @@ class ShowDXCC:
     fig.text(0.02, .03, 'SunFluxBot By W6BSD', fontsize=14)
     fig.text(0.65, .95, f'{self.date.strftime("%A %B %d %Y - %H:%M")}', fontsize=14)
     fig.tight_layout()
+    logging.info('Save %s', filename)
     fig.savefig(filename, transparent=False, dpi=100)
 
 
@@ -120,6 +121,15 @@ def type_date(parg):
   except ValueError:
     raise argparse.ArgumentTypeError from None
   return date
+
+
+def create_link(filename):
+  path, fname = os.path.split(filename)
+  fname, ext = os.path.splitext(fname)
+  latest = os.path.join(path, f'latest{ext}')
+  os.link(filename, latest)
+  logging.info('Link to %s created', latest)
+
 
 def main():
   adapters.install_adapters()
@@ -162,7 +172,7 @@ def main():
   showdxcc.get_dxcc()
   if showdxcc.is_data():
     showdxcc.graph(filename)
-    logging.info('Save %s', filename)
+    create_link(filename)
   else:
     logging.info('No data to show')
 
