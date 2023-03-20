@@ -36,7 +36,7 @@ GROUP BY dt
 WWV_CONDITIONS = "SELECT conditions FROM wwv ORDER BY time DESC LIMIT 1"
 
 def get_conditions(config):
-  conn = sqlite3.connect(config['showdxcc.db_name'], timeout=5,
+  conn = sqlite3.connect(config['db_name'], timeout=5,
                          detect_types=sqlite3.PARSE_DECLTYPES)
   with conn:
     curs = conn.cursor()
@@ -46,7 +46,7 @@ def get_conditions(config):
 def get_wwv(config, days):
   data = []
   start_date = datetime.utcnow() - timedelta(days=days)
-  conn = sqlite3.connect(config['showdxcc.db_name'], timeout=5,
+  conn = sqlite3.connect(config['db_name'], timeout=5,
                          detect_types=sqlite3.PARSE_DECLTYPES)
   with conn:
     curs = conn.cursor()
@@ -127,13 +127,17 @@ def main():
     level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
   )
   logger = logging.getLogger('aindex')
-  config = Config()
+  _config = Config()
+  config = _config.get('aindex')
+  del _config
+
   try:
     name = sys.argv[1]
   except IndexError:
     name = '/tmp/aindex.png'
 
-  data = get_wwv(config, NB_DAYS)
+  data = get_wwv(config, config.get('nb_days', NB_DAYS))
+  import ipdb; ipdb.set_trace()
   condition = get_conditions(config)
   if data:
     graph(data, condition, name)
