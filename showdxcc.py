@@ -25,13 +25,6 @@ from config import Config
 CONTINENTS = ['AF', 'AS', 'EU', 'NA', 'OC', 'SA']
 BANDS = [6, 10, 12, 15, 17, 20, 30, 40, 60, 80, 160]
 
-REQUEST = """
-SELECT band, de_cont, to_cont, COUNT(*)
-FROM dxspot
-WHERE band >= 6 AND {} == ? AND time > ? AND time <= ?
-GROUP BY band, to_cont;
-"""
-
 class ShowDXCC:
 
   def __init__(self, config, zone_name, zone, date=None):
@@ -40,31 +33,30 @@ class ShowDXCC:
     self.data = []
     self.zone_name = zone_name
     self.zone = zone
-    if zone_name == 'continent':
-      self.zone_label = 'de_cont'
-    elif zone_name == 'ituzone':
-      self.zone_label = 'de_ituzone'
-    elif zone_name == 'cqzone':
-      self.zone_label = 'de_ituzone'
-    else:
+    try:
+      self.zone_label = {'continent': 'de_cont',
+                         'ituzone': 'de_ituzone',
+                         'cqzone': 'de_cqzone'}[zone_name]
+    except KeyError:
       raise SystemError(f'Zone {zone_name} error')
 
   def is_data(self):
     return np.any(self.data)
 
-  def get_dxcc(self):
-    start_date = self.date - timedelta(hours=1, minutes=0)
+  def get_dxcc(self, delta=1):
+    start_date = self.date - timedelta(hours=delta, minutes=0)
     end_date = self.date
-
-    conn = sqlite3.connect(
-      self.config['showdxcc.db_name'],
-      timeout=5,
-      detect_types=sqlite3.PARSE_DECLTYPES
-    )
+    request = (f"SELECT band, de_cont, to_cont, COUNT(*) FROM dxspot WHERE band >= 6 "
+               f"AND {self.zone_label} = {self.zone} "
+               f"AND time > {start_date.timestamp()} "
+               f"AND time <= {end_date.timestamp()} "
+               "GROUP BY band, to_cont;")
+    conn = sqlite3.connect(self.config['showdxcc.db_name'], timeout=5,
+                           detect_types=sqlite3.PARSE_DECLTYPES)
+    logging.debug(request)
     with conn:
       curs = conn.cursor()
-      results = curs.execute(REQUEST.format(self.zone_label),
-                             (self.zone, start_date, end_date)).fetchall()
+      results = curs.execute(request).fetchall()
 
     self.data = np.zeros((len(CONTINENTS), len(BANDS)), dtype=int)
     for band, _, to_continent, count in results:
@@ -145,6 +137,8 @@ def main():
   parser = argparse.ArgumentParser(description="Graph dxcc trafic")
   parser.add_argument("-d", "--date", type=type_date, default='now',
                       help="Graph date [YYYYMMDDHHMM]")
+  parser.add_argument("-D", "--delta", type=int, default=1,
+                      help="Number of hours [default: %(default)d]")
   z_group = parser.add_mutually_exclusive_group(required=True)
   z_group.add_argument("-c", "--continent", choices=CONTINENTS, help="Continent")
   z_group.add_argument("-I", "--ituzone", type=int, help="itu zone")
@@ -171,12 +165,9 @@ def main():
 
 
   showdxcc = ShowDXCC(config, zone_name, zone, opts.date)
-  showdxcc.get_dxcc()
-  if showdxcc.is_data():
-    showdxcc.graph(filename)
-    create_link(filename)
-  else:
-    logging.info('No data to show')
+  showdxcc.get_dxcc(opts.delta)
+  showdxcc.graph(filename)
+  create_link(filename)
 
   sys.exit(os.EX_OK)
 
