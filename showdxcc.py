@@ -32,7 +32,11 @@ class ShowDXCC:
     self.date = date if date else datetime.utcnow()
     self.data = []
     self.zone_name = zone_name
-    self.zone = zone
+    try:
+      self.zone = int(zone)
+    except ValueError:
+      self.zone = f'"{zone}"'
+
     try:
       self.zone_label = {'continent': 'de_cont',
                          'ituzone': 'de_ituzone',
