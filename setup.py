@@ -12,7 +12,7 @@ import sys
 from setuptools import setup, find_namespace_packages
 
 __author__ = "Fred C. (W6BSD)"
-__version__ = '0.1.4'
+__version__ = '0.1.5'
 __license__ = 'BSD'
 
 py_version = sys.version_info[:2]
@@ -37,6 +37,7 @@ setup(
     'adapters',
     'aindex',
     'config',
+    'DXEntity',
     'dxcluster',
     'eisngraph',
     'fluxgraph',
@@ -67,9 +68,6 @@ setup(
       'ssnhist = ssnhist:main',
       'sunfluxbot = sunfluxbot:main',
     ]
-  },
-  package_data={
-    "bigcty": ["*.csv"],
   },
   classifiers=[
     'Development Status :: 3 - Alpha',
