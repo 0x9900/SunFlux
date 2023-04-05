@@ -11,7 +11,9 @@ import logging
 import marshal
 import os
 import plistlib
+import time
 
+from collections import defaultdict
 from importlib.resources import files
 from urllib.error import HTTPError
 from urllib.request import urlretrieve
@@ -41,7 +43,7 @@ class DXCCRecord:
 class DXCC:
 
   def __init__(self):
-    self._entities = set([])
+    self._entities = defaultdict(set)
     self._max_len = 0
     self._db = os.path.join(os.path.expanduser(CTY_HOME), CTY_DB)
     cty_file = os.path.join(os.path.expanduser(CTY_HOME), CTY_FILE)
@@ -59,14 +61,14 @@ class DXCC:
     self.load_cty(cty_file)
     with open(cty_file, 'rb') as fdc:
       cty_data = plistlib.load(fdc)
-      self._max_len = max(len(k) for k in cty_data)
+    self._max_len = max(len(k) for k in cty_data)
 
     logging.info('Create cty cache: %s', self._db)
     with dbm.open(self._db, 'c') as cdb:
       for key, val in cty_data.items():
         cdb[key] = marshal.dumps(val)
-        self._entities.add(val['Country'])
-      cdb['_meta_data_'] = marshal.dumps([self._entities, self._max_len])
+        self._entities[val['Country']].add(key)
+      cdb['_meta_data_'] = marshal.dumps([dict(self._entities), self._max_len])
 
   def lookup(self, call):
     call = call.upper()
@@ -87,8 +89,13 @@ class DXCC:
   def entities(self):
     return self._entities
 
+  def get_entity(self, key):
+    if key in self._entities:
+      return self._entities[key]
+    raise KeyError(f'Entity {key} not found')
+
   def __str__(self):
-    return f"{self.__class__} {id(self)} ({len(self._map)} records)"
+    return f"{self.__class__} {id(self)} ({self._db})"
 
   def __repr__(self):
     return str(self)
