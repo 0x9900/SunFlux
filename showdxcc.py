@@ -161,12 +161,14 @@ def main():
     filename = opts.args[0]
   else:
     now = opts.date.strftime('%Y%m%d%H%M')
-    tmpdir = config.get('showdxcc.target_dir', '/var/tmp/dxcc')
+    target_root = config.get('showdxcc.target_dir', '/var/tmp/dxcc')
     if opts.continent:
-      target_dir = os.path.join(tmpdir, opts.continent)
-      filename = os.path.join(target_dir, f'dxcc-{opts.continent}-{now}.png')
+      target_dir = os.path.join(target_root, opts.continent)
       os.makedirs(target_dir, exist_ok=True)
+      filename = os.path.join(target_dir, f'dxcc-{opts.continent}-{now}.png')
     else:
+      target_dir = os.path.join(target_root, zone_name, zone)
+      os.makedirs(target_dir, exist_ok=True)
       filename = os.path.join(tmpdir, f'dxcc-{zone_name}{zone}-{now}.png')
 
 
