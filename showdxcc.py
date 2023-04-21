@@ -155,6 +155,7 @@ def main():
   for zone_name in ('continent', 'ituzone', 'cqzone'):
     zone = getattr(opts, zone_name)
     if zone:
+      zone = str(zone)
       break
 
   if opts.args:
