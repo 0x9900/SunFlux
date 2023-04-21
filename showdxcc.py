@@ -170,7 +170,7 @@ def main():
     else:
       target_dir = os.path.join(target_root, zone_name, zone)
       os.makedirs(target_dir, exist_ok=True)
-      filename = os.path.join(tmpdir, f'dxcc-{zone_name}{zone}-{now}.png')
+      filename = os.path.join(target_dir, f'dxcc-{zone_name}{zone}-{now}.png')
 
 
   showdxcc = ShowDXCC(config, zone_name, zone, opts.date)
