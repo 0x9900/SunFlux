@@ -162,11 +162,11 @@ def main():
     os.makedirs(target_dir, exist_ok=True)
     filename = os.path.join(target_dir, f'dxcc-{zone_name}{zone}-{now}.png')
 
-  showdxcc = ShowDXCC(config, zone_name, zone, opts.date)
-  showdxcc.get_dxcc(opts.delta)
-  showdxcc.graph(filename)
-  if opts.no_link:
-    create_link(filename)
+    showdxcc = ShowDXCC(config, zone_name, zone, opts.date)
+    showdxcc.get_dxcc(opts.delta)
+    showdxcc.graph(filename)
+    if opts.no_link:
+      create_link(filename)
 
   sys.exit(os.EX_OK)
 
