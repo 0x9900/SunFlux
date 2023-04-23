@@ -163,15 +163,9 @@ def main():
   else:
     now = opts.date.strftime('%Y%m%d%H%M')
     target_root = config.get('showdxcc.target_dir', '/var/tmp/dxcc')
-    if opts.continent:
-      target_dir = os.path.join(target_root, opts.continent)
-      os.makedirs(target_dir, exist_ok=True)
-      filename = os.path.join(target_dir, f'dxcc-{opts.continent}-{now}.png')
-    else:
-      target_dir = os.path.join(target_root, zone_name, zone)
-      os.makedirs(target_dir, exist_ok=True)
-      filename = os.path.join(target_dir, f'dxcc-{zone_name}{zone}-{now}.png')
-
+    target_dir = os.path.join(target_root, zone_name, opts.continent)
+    os.makedirs(target_dir, exist_ok=True)
+    filename = os.path.join(target_dir, f'dxcc-{opts.continent}-{now}.png')
 
   showdxcc = ShowDXCC(config, zone_name, zone, opts.date)
   showdxcc.get_dxcc(opts.delta)
