@@ -145,10 +145,9 @@ def main():
                       help="Number of hours [default: %(default)d]")
   parser.add_argument("-L", "--no-link", action="store_false", default=True,
                       help="Update the link \"latest\"")
-  z_group = parser.add_mutually_exclusive_group(required=True)
-  z_group.add_argument("-c", "--continent", choices=CONTINENTS, help="Continent")
-  z_group.add_argument("-I", "--ituzone", type=int, help="itu zone")
-  z_group.add_argument("-C", "--cqzone", type=int, help="cq zone")
+  parser.add_argument("-c", "--continent", choices=CONTINENTS, help="Continent")
+  parser.add_argument("-I", "--ituzone", type=int, help="itu zone")
+  parser.add_argument("-C", "--cqzone", type=int, help="cq zone")
   parser.add_argument('args', nargs="*")
   opts = parser.parse_args()
 
