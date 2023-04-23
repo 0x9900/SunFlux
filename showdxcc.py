@@ -152,12 +152,13 @@ def main():
   parser.add_argument('args', nargs="*")
   opts = parser.parse_args()
 
+  now = opts.date.strftime('%Y%m%d%H%M')
+  target_root = config.get('showdxcc.target_dir', '/var/tmp/dxcc')
+
   for zone_name in ('continent', 'ituzone', 'cqzone'):
     zone = str(getattr(opts, zone_name) or '')
     if not zone:
       continue
-    now = opts.date.strftime('%Y%m%d%H%M')
-    target_root = config.get('showdxcc.target_dir', '/var/tmp/dxcc')
     target_dir = os.path.join(target_root, zone_name, zone)
     os.makedirs(target_dir, exist_ok=True)
     filename = os.path.join(target_dir, f'dxcc-{zone_name}{zone}-{now}.png')
