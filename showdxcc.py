@@ -150,7 +150,7 @@ def main():
   z_group.add_argument("-c", "--continent", choices=CONTINENTS, help="Continent")
   z_group.add_argument("-I", "--ituzone", type=int, help="itu zone")
   z_group.add_argument("-C", "--cqzone", type=int, help="cq zone")
-  parser.add_argument('args', nargs=1)
+  parser.add_argument('args', nargs="*")
   opts = parser.parse_args()
 
   if opts.args:
