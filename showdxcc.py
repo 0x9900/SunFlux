@@ -132,6 +132,7 @@ def create_link(filename):
 def main():
   adapters.install_adapters()
   config = Config()
+  filename = None
 
   logging.basicConfig(
     format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%H:%M:%S',
@@ -145,28 +146,34 @@ def main():
                       help="Number of hours [default: %(default)d]")
   parser.add_argument("-L", "--no-link", action="store_false", default=True,
                       help="Update the link \"latest\"")
-  parser.add_argument("-c", "--continent", choices=CONTINENTS, help="Continent")
-  parser.add_argument("-I", "--ituzone", type=int, help="itu zone")
-  parser.add_argument("-C", "--cqzone", type=int, help="cq zone")
-  parser.add_argument('args', nargs="*")
+  z_group = parser.add_mutually_exclusive_group(required=True)
+  z_group.add_argument("-c", "--continent", choices=CONTINENTS, help="Continent")
+  z_group.add_argument("-I", "--ituzone", type=int, help="itu zone")
+  z_group.add_argument("-C", "--cqzone", type=int, help="cq zone")
+  parser.add_argument('args', nargs=1)
   opts = parser.parse_args()
 
-  now = opts.date.strftime('%Y%m%d%H%M')
-  target_root = config.get('showdxcc.target_dir', '/var/tmp/dxcc')
+  if opts.args:
+    filename = opts.args.pop()
+
 
   for zone_name in ('continent', 'ituzone', 'cqzone'):
     zone = str(getattr(opts, zone_name) or '')
-    if not zone:
-      continue
+    if zone:
+      break
+
+  now = opts.date.strftime('%Y%m%d%H%M')
+  if not filename:
+    target_root = config.get('showdxcc.target_dir', '/var/tmp/dxcc')
     target_dir = os.path.join(target_root, zone_name, zone)
     os.makedirs(target_dir, exist_ok=True)
     filename = os.path.join(target_dir, f'dxcc-{zone_name}{zone}-{now}.png')
 
-    showdxcc = ShowDXCC(config, zone_name, zone, opts.date)
-    showdxcc.get_dxcc(opts.delta)
-    showdxcc.graph(filename)
-    if opts.no_link:
-      create_link(filename)
+  showdxcc = ShowDXCC(config, zone_name, zone, opts.date)
+  showdxcc.get_dxcc(opts.delta)
+  showdxcc.graph(filename)
+  if opts.no_link:
+    create_link(filename)
 
   sys.exit(os.EX_OK)
 
