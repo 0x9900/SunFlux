@@ -132,6 +132,7 @@ def create_link(filename):
 def main():
   adapters.install_adapters()
   config = Config()
+  filename = None
 
   logging.basicConfig(
     format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%H:%M:%S',
@@ -149,29 +150,24 @@ def main():
   z_group.add_argument("-c", "--continent", choices=CONTINENTS, help="Continent")
   z_group.add_argument("-I", "--ituzone", type=int, help="itu zone")
   z_group.add_argument("-C", "--cqzone", type=int, help="cq zone")
-  parser.add_argument('args', nargs="*")
+  parser.add_argument('args', nargs=1)
   opts = parser.parse_args()
 
+  if opts.args:
+    filename = opts.args.pop()
+
+
   for zone_name in ('continent', 'ituzone', 'cqzone'):
-    zone = getattr(opts, zone_name)
+    zone = str(getattr(opts, zone_name) or '')
     if zone:
-      zone = str(zone)
       break
 
-  if opts.args:
-    filename = opts.args[0]
-  else:
-    now = opts.date.strftime('%Y%m%d%H%M')
+  now = opts.date.strftime('%Y%m%d%H%M')
+  if not filename:
     target_root = config.get('showdxcc.target_dir', '/var/tmp/dxcc')
-    if opts.continent:
-      target_dir = os.path.join(target_root, opts.continent)
-      os.makedirs(target_dir, exist_ok=True)
-      filename = os.path.join(target_dir, f'dxcc-{opts.continent}-{now}.png')
-    else:
-      target_dir = os.path.join(target_root, zone_name, zone)
-      os.makedirs(target_dir, exist_ok=True)
-      filename = os.path.join(target_dir, f'dxcc-{zone_name}{zone}-{now}.png')
-
+    target_dir = os.path.join(target_root, zone_name, zone)
+    os.makedirs(target_dir, exist_ok=True)
+    filename = os.path.join(target_dir, f'dxcc-{zone_name}{zone}-{now}.png')
 
   showdxcc = ShowDXCC(config, zone_name, zone, opts.date)
   showdxcc.get_dxcc(opts.delta)
