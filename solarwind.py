@@ -82,7 +82,7 @@ class SolarWind:
 
   def graph(self, imagename):
     colors = {0: "gray", 1: "orange", 2: "plum"}
-    labels = {0: "Density $1/cm^3$", 1: "Speed $km/S$", 2: "Temp $ºK$"}
+    labels = {0: "Density $1/cm^3$", 1: "Speed $km/S$", 2: "Temp $^{\circ}K$"}
 
     fig, ax = plt.subplots(3, 1, figsize=(12, 5))
     fig.suptitle('Solar Wind (plasma)', fontsize=14, fontweight='bold')
