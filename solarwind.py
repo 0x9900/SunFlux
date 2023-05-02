@@ -82,7 +82,7 @@ class SolarWind:
 
   def graph(self, imagename):
     colors = {0: "gray", 1: "orange", 2: "plum"}
-    labels = {0: "Density $1/cm^3$", 1: "Speed km/S", 2: "Temp ºK"}
+    labels = {0: "Density $1/cm^3$", 1: "Speed $km/S$", 2: "Temp $ºK$"}
 
     fig, ax = plt.subplots(3, 1, figsize=(12, 5))
     fig.suptitle('Solar Wind (plasma)', fontsize=14, fontweight='bold')
@@ -98,7 +98,8 @@ class SolarWind:
       ax[i].grid(color='darkgray', linestyle='-', linewidth=.2)
       ax[i].set_ylabel(labels[i], fontsize=10)
       ax[i].yaxis.offsetText.set_fontsize(10)
-      ax[i].yaxis.set_major_formatter(formatter)
+      if np.min(self.data[0:,i+1]) > 1000:
+        ax[i].yaxis.set_major_formatter(formatter)
       ax[i].tick_params(axis='y', labelsize=8)
       ax[i].tick_params(axis='x', labelsize=10)
       if i < 2:
