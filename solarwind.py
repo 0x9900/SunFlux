@@ -108,7 +108,7 @@ class SolarWind:
       ax[i].xaxis.set_major_locator(loc)
 
     date = datetime.utcnow()
-    plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {date}', fontsize=12)
+    plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {date}', fontsize=11)
     logging.info('Save "%s"', imagename)
     fig.savefig(imagename, transparent=False, dpi=100)
     plt.close()

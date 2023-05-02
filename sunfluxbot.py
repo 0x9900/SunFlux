@@ -289,6 +289,34 @@ def send_outlook(update: Update, context: CallbackContext):
   logger.info("Command /outlook by %s:%d", user, chat_id)
   return ConversationHandler.END
 
+def send_solarwind(update: Update, context: CallbackContext):
+  config = Config()
+  cache_dir = config.get('sunfluxbot.cache_dir', '/tmp')
+  now = time.time()
+  image = os.path.join(cache_dir, 'solarwind.png')
+  chat_id = update.message.chat_id
+
+  try:
+    img_st = os.stat(image)
+    if now - img_st.st_mtime > IMG_CACHE_TIME:
+      raise FileNotFoundError
+  except (FileNotFoundError, EOFError):
+    cmd = os.path.join(sys.path[0], "solarwind")
+    status = subprocess.call([cmd], shell=False)
+    logger.info('Call %s returned %d', cmd, status)
+    if status:
+      logger.error('Error generating the outlook graph')
+      context.bot.send_message(chat_id, (
+        'The outlook graph is not available at the moment\n'
+        'Please come back latter.'))
+      return ConversationHandler.END
+
+  context.bot.send_photo(chat_id=chat_id, photo=open(image, 'rb'),
+                         caption="3 day Solar Wind",
+                         filename=os.path.basename(image), timeout=100)
+  user = update.message.chat.username or "Stranger"
+  logger.info("Command /wind by %s:%d", user, chat_id)
+  return ConversationHandler.END
 
 def send_flux(update: Update, context: CallbackContext):
   config = Config()
@@ -679,6 +707,7 @@ def main():
   updater.dispatcher.add_handler(CommandHandler('start', start))
   updater.dispatcher.add_handler(CommandHandler('swx', send_swx))
   updater.dispatcher.add_handler(CommandHandler('warning', send_warn))
+  updater.dispatcher.add_handler(CommandHandler('wind', send_solarwind))
   updater.dispatcher.add_handler(MessageHandler(Filters.text, text_handler))
   updater.dispatcher.add_handler(CallbackQueryHandler(send_dxcc))
   updater.dispatcher.add_error_handler(error_callback)
