@@ -34,10 +34,10 @@ setup(
     exclude=["build*", "misc*", "dist*"]
   ),
   py_modules=[
+    'DXEntity',
     'adapters',
     'aindex',
     'config',
-    'DXEntity',
     'dxcluster',
     'eisngraph',
     'fluxgraph',
@@ -47,6 +47,7 @@ setup(
     'outlookgraph',
     'purge_cluster',
     'showdxcc',
+    'solarwind',
     'ssngraph',
     'ssnhist',
     'sunfluxbot',
@@ -64,6 +65,7 @@ setup(
       'outlookgraph = outlookgraph:main',
       'purge_cluster = purge_cluster:main',
       'showdxcc = showdxcc:main',
+      'solarwind = solarwind:main',
       'ssngraph = ssngraph:main',
       'ssnhist = ssnhist:main',
       'sunfluxbot = sunfluxbot:main',
