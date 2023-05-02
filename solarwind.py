@@ -31,9 +31,10 @@ plt.style.use(['classic', 'fast'])
 
 class SolarWind:
   def __init__(self, cache_file, cache_time=900):
+    self.log = logging.getLogger('SWind')
     self.cachefile = cache_file
     self.data = None
-    logging.info('Import SolarWind')
+    self.log.debug('Import SolarWind')
     now = time.time()
     try:
       filest = os.stat(self.cachefile)
@@ -46,7 +47,7 @@ class SolarWind:
       self.readcache()
 
   def download(self):
-    logging.info('Downloading data from NOAA')
+    self.log.info('Downloading data from NOAA')
     with urllib.request.urlopen(NOAA_URL) as res:
       webdata = res.read()
       encoding = res.info().get_content_charset('utf-8')
@@ -60,7 +61,7 @@ class SolarWind:
 
   def readcache(self):
     """Read data from the cache"""
-    logging.info('Read from cache "%s"', self.cachefile)
+    self.log.debug('Read from cache "%s"', self.cachefile)
     try:
       with open(self.cachefile, 'rb') as fd_cache:
         data = pickle.load(fd_cache)
@@ -70,7 +71,7 @@ class SolarWind:
 
   def writecache(self):
     """Write data into the cachefile"""
-    logging.info('Write cache "%s"', self.cachefile)
+    self.log.debug('Write cache "%s"', self.cachefile)
     with open(self.cachefile, 'wb') as fd_cache:
       pickle.dump(self.data, fd_cache)
 
@@ -110,7 +111,7 @@ class SolarWind:
 
     date = datetime.utcnow()
     plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {date}', fontsize=11)
-    logging.info('Save "%s"', imagename)
+    self.log.info('Save "%s"', imagename)
     fig.savefig(imagename, transparent=False, dpi=100)
     plt.close()
 

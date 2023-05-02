@@ -142,7 +142,7 @@ def graph(data, condition, filename):
 def main():
   adapters.install_adapters()
   logging.basicConfig(
-    format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%H:%M:%S',
+    format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%H:%M:%S',
     level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
   )
   logger = logging.getLogger('kpiwwv')
