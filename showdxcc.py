@@ -42,7 +42,7 @@ class ShowDXCC:
                          'ituzone': 'de_ituzone',
                          'cqzone': 'de_cqzone'}[zone_name]
     except KeyError:
-      raise SystemError(f'Zone {zone_name} error')
+      raise SystemError(f'Zone {zone_name} error') from None
 
   def is_data(self):
     return np.any(self.data)
@@ -64,9 +64,9 @@ class ShowDXCC:
 
     self.data = np.zeros((len(CONTINENTS), len(BANDS)), dtype=int)
     for band, _, to_continent, count in results:
-      x = CONTINENTS.index(to_continent)
-      y = BANDS.index(band)
-      self.data[x, y] = count
+      _x = CONTINENTS.index(to_continent)
+      _y = BANDS.index(band)
+      self.data[_x, _y] = count
 
   def graph(self, filename):
     color_map = self.config.get('showdxcc.color_map', 'PRGn')
@@ -102,7 +102,7 @@ class ShowDXCC:
     fig.text(0.02, .03, 'SunFluxBot By W6BSD', fontsize=14)
     fig.text(0.65, .95, f'{self.date.strftime("%A %B %d %Y - %H:%M")}', fontsize=14)
     fig.tight_layout()
-    logging.info('Save %s', filename)
+    logging.info('Save "%s"', filename)
     fig.savefig(filename, transparent=False, dpi=100)
 
 
@@ -126,7 +126,7 @@ def create_link(filename):
   if os.path.exists(latest):
     os.unlink(latest)
   os.link(filename, latest)
-  logging.info('Link to %s created', latest)
+  logging.info('Link to "%s" created', latest)
 
 
 def main():
