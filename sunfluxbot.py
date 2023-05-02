@@ -232,6 +232,7 @@ def help_command(update: Update, _context: CallbackContext):
     "> /ssn - Sun Spots",
     "> /swx - Solar indices overview",
     "> /warning - Warning time lines",
+    "> /wind - Solar wind",
     "",
     "\n_For more information or contact see /credits_",
     "More solar activity graphs at https://bsdworld.org/",
