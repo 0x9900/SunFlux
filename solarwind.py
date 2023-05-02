@@ -31,7 +31,7 @@ plt.style.use(['classic', 'fast'])
 
 class SolarWind:
   def __init__(self, cache_file, cache_time=900):
-    self.log = logging.getLogger('SWind')
+    self.log = logging.getLogger('SolarWind')
     self.cachefile = cache_file
     self.data = None
     self.log.debug('Import SolarWind')
