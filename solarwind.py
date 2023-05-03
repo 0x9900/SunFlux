@@ -102,7 +102,7 @@ class SolarWind:
       if np.min(self.data[0:,i+1]) > 1000:
         ax[i].yaxis.set_major_formatter(formatter)
       ax[i].tick_params(axis='y', labelsize=8)
-      ax[i].tick_params(axis='x', labelsize=10)
+      ax[i].tick_params(axis='x', labelsize=9)
       ax[i].xaxis.set_major_formatter(mdates.DateFormatter('%d/%H:%M'))
       ax[i].xaxis.set_major_locator(loc)
 
