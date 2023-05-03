@@ -96,16 +96,13 @@ class SolarWind:
     for i in range(3):
       ax[i].plot(self.data[0:,0], self.data[0:,i+1], color=colors[i], linewidth=.5,
                  marker='.', markersize=.5)
-      ax[i].grid(color='darkgray', linestyle='-', linewidth=.2)
+      ax[i].grid(color='tab:gray', linestyle='dotted', linewidth=.3)
       ax[i].set_ylabel(labels[i], fontsize=10)
       ax[i].yaxis.offsetText.set_fontsize(10)
       if np.min(self.data[0:,i+1]) > 1000:
         ax[i].yaxis.set_major_formatter(formatter)
       ax[i].tick_params(axis='y', labelsize=8)
       ax[i].tick_params(axis='x', labelsize=10)
-      if i < 2:
-        ax[i].xaxis.set_major_formatter(plt.NullFormatter())
-        continue
       ax[i].xaxis.set_major_formatter(mdates.DateFormatter('%d/%H:%M'))
       ax[i].xaxis.set_major_locator(loc)
 
