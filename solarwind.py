@@ -91,7 +91,7 @@ class SolarWind:
     formatter = ticker.ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
     formatter.set_powerlimits((-1,1))
-    loc = mdates.HourLocator(interval=12)
+    loc = mdates.HourLocator(interval=6)
 
     for i in range(3):
       ax[i].plot(self.data[0:,0], self.data[0:,i+1], color=colors[i], linewidth=.5,
@@ -106,8 +106,8 @@ class SolarWind:
       ax[i].xaxis.set_major_formatter(mdates.DateFormatter('%d/%H:%M'))
       ax[i].xaxis.set_major_locator(loc)
 
-    date = datetime.utcnow()
-    plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {date}', fontsize=11)
+    today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
+    plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {today}', fontsize=10)
     self.log.info('Save "%s"', imagename)
     fig.savefig(imagename, transparent=False, dpi=100)
     plt.close()
