@@ -7,6 +7,7 @@
 #
 #
 
+import argparse
 import logging
 import os
 import sqlite3
@@ -18,6 +19,8 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import numpy as np
 
+from matplotlib import cm
+
 import adapters
 
 from config import Config
@@ -28,11 +31,12 @@ plt.style.use(['classic', 'tableau-colorblind10'])
 
 TMPDIR = '/tmp'
 DPI = 100
+NB_DAYS = 15
 
 SQL_REQ = """SELECT STRFTIME("%Y%m%d", DATETIME(time, "unixepoch")) AS tm, mode, COUNT(*) AS cnt
-             FROM dxspot GROUP BY mode, tm"""
+             FROM dxspot WHERE time > {} GROUP BY mode, tm"""
 
-def read_data(config):
+def read_data(config, days=15):
   data = defaultdict(dict)
   conn = sqlite3.connect(
     config['db_name'],
@@ -41,10 +45,10 @@ def read_data(config):
   )
   today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
   today -= timedelta(hours=24)
-  start = today - timedelta(hours=24*15)
+  start = today - timedelta(hours=24*days)
   with conn:
     curs = conn.cursor()
-    results = curs.execute(SQL_REQ)
+    results = curs.execute(SQL_REQ.format(start.timestamp(),))
     for date, mode, count in results:
       date = datetime.strptime(date, '%Y%m%d')
       if not start < date <= today:
@@ -75,7 +79,7 @@ def graph(data, imgname):
   fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {now}')
   ax1.set_ylabel('Sports / Day', fontsize=12)
   ax1.margins(x=0.01, y=0.02)
-  colors = plt.cm.Set2(np.linspace(0, 1, len(modes)))
+  colors = cm.Set2(np.linspace(0, 1, len(modes)))
   colors[0] = (1,.5,0,1)
   prev = np.zeros(len(xdate))
   for idx, mode in enumerate(modes):
@@ -96,17 +100,18 @@ def main():
     format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%H:%M:%S',
     level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
   )
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-D', '--days', default=NB_DAYS, type=int,
+                      help='Number of days to graph [Default: %(default)s]')
+  parser.add_argument('name', help='Name of the graph', nargs="*", default=['/tmp/modes.png'])
+  opts = parser.parse_args()
+
   _config = Config()
   config = _config.get('dxcluster')
   del _config
 
-  try:
-    name = sys.argv[1]
-  except IndexError:
-    name = '/tmp/modes.png'
-
-  data = read_data(config)
-  graph(data, name)
+  data = read_data(config, opts.days)
+  graph(data, opts.name.pop(0))
 
 if __name__ == "__main__":
   main()
