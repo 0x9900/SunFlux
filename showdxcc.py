@@ -89,12 +89,12 @@ class ShowDXCC:
     cbar.ax.tick_params(labelsize=10)
 
     # Loop over data dimensions and create text annotations.
-    threshold = np.percentile(self.data, 96)
+    threshold = np.percentile(self.data, 92)
     for i in range(len(CONTINENTS)):
       for j in range(len(BANDS)):
         if self.data[i, j] < 1:
           continue
-        color = 'firebrick' if self.data[i, j] > threshold else 'lime'
+        color = 'black' if self.data[i, j] > threshold else 'lightgray'
         axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
 
     axgc.set_title(f"Band activity from {self.zone_name} = {self.zone}",
