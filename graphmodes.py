@@ -75,7 +75,7 @@ def graph(data, imgname):
         ydata[mode].append(0)
 
   fig, ax1 = plt.subplots(figsize=(12, 5))
-  fig.suptitle('Number of Spots / Modes', fontsize=14, fontweight='bold')
+  fig.suptitle('Band Activity / Modes', fontsize=14, fontweight='bold')
   fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {now}')
   ax1.set_ylabel('Sports / Day', fontsize=12)
   ax1.margins(x=0.01, y=0.02)
