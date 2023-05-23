@@ -56,7 +56,7 @@ class SolarWind:
     data = []
     for elem in _data[1:]:
       date = datetime.strptime(elem[0], '%Y-%m-%d %H:%M:%S.%f')
-      data.append([date, *[self.float(e) for e in elem[1:]]])
+      data.append([date, *[self.float(e) if e is not None else np.nan for e in elem[1:]]])
     self.data = np.array(sorted(data))
 
   def readcache(self):
