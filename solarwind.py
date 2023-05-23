@@ -56,7 +56,7 @@ class SolarWind:
     data = []
     for elem in _data[1:]:
       date = datetime.strptime(elem[0], '%Y-%m-%d %H:%M:%S.%f')
-      data.append([date, *[self.float(e) if e is not None else np.nan for e in elem[1:]]])
+      data.append([date, *[self.float(e) for e in elem[1:]]])
     self.data = np.array(sorted(data))
 
   def readcache(self):
@@ -78,7 +78,7 @@ class SolarWind:
   @staticmethod
   def float(num):
     if num is None:
-      return None
+      return np.nan
     return float(num)
 
   def graph(self, imagename):
