@@ -34,6 +34,16 @@ NOAA_URL = 'https://services.swpc.noaa.gov/products/solar-wind/plasma-3-day.json
 
 plt.style.use(['classic', 'fast'])
 
+def remove_outlier(points):
+  percent_lo = np.percentile(points, 25, interpolation = 'midpoint')
+  percent_hi= np.percentile(points, 75, interpolation = 'midpoint')
+  iqr = percent_hi - percent_lo
+  lower_bound = points <= (percent_lo - 5 * iqr)
+  upper_bound = points >= (percent_hi + 5 * iqr)
+  points[lower_bound | upper_bound] = np.nan
+  return points
+
+
 class SolarWind:
   def __init__(self, cache_file, cache_time=900):
     self.log = logging.getLogger('SolarWind')
@@ -99,12 +109,13 @@ class SolarWind:
     loc = mdates.HourLocator(interval=6)
 
     for i in range(3):
-      ax[i].plot(self.data[0:,0], self.data[0:,i+1], color=colors[i], linewidth=.5,
+      data = remove_outlier(self.data[0:,i+1])
+      ax[i].plot(self.data[0:,0], data, color=colors[i], linewidth=.5,
                  marker='.', markersize=.5)
       ax[i].grid(color='tab:gray', linestyle='dotted', linewidth=.3)
       ax[i].set_ylabel(labels[i], fontsize=10)
       ax[i].yaxis.offsetText.set_fontsize(10)
-      if np.min(self.data[0:,i+1]) > 1000:
+      if np.min(data) > 1000:
         ax[i].yaxis.set_major_formatter(formatter)
       ax[i].tick_params(axis='y', labelsize=8)
       ax[i].tick_params(axis='x', labelsize=9)
