@@ -7,6 +7,7 @@
 #
 #
 
+import colorsys
 import logging
 import os
 import sqlite3
@@ -35,6 +36,13 @@ GROUP BY dt
 
 WWV_CONDITIONS = "SELECT conditions FROM wwv ORDER BY time DESC LIMIT 1"
 
+def color_complement(hue, saturation, value, alpha):
+  rgb = colorsys.hsv_to_rgb(hue, saturation, value)
+  c_rgb = [1.0 - c for c in rgb]
+  c_hsv = colorsys.rgb_to_hsv(*c_rgb)
+  return c_hsv + (alpha, )
+
+
 def get_conditions(db_name):
   conn = sqlite3.connect(db_name, timeout=5,
                          detect_types=sqlite3.PARSE_DECLTYPES)
@@ -60,9 +68,9 @@ def autolabel(ax, rects):
   """Attach a text label above each bar displaying its height"""
   for rect in rects:
     height = rect.get_height()
-    ax.text(rect.get_x() + rect.get_width() / 2., 3, '%d' % int(height),
-            color="navy", fontsize="6", ha='center',
-            bbox={"facecolor": 'white', "alpha": .9})
+    color = rect.get_facecolor()
+    ax.text(rect.get_x() + rect.get_width() / 2., 1, '%d' % int(height),
+            color=color_complement(*color), fontsize="10", ha='center')
 
 def graph(data, condition, filename):
 
