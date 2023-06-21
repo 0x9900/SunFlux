@@ -112,14 +112,16 @@ class KPIForecast:
 
   def download(self):
     self.log.info('Downloading data from NOAA')
-    res = urllib.request.urlopen(NOAA_URL)
-    webdata = res.read()
-    encoding = res.info().get_content_charset('utf-8')
-    _data = json.loads(webdata.decode(encoding))
     data = []
-    for elem in _data[1:]:
-      date = datetime.strptime(elem[0], '%Y-%m-%d %H:%M:%S')
-      data.append((date, float(elem[1]), *elem[2:]))
+
+    with urllib.request.urlopen(NOAA_URL) as res:
+      webdata = res.read()
+      encoding = res.info().get_content_charset('utf-8')
+      _data = json.loads(webdata.decode(encoding))
+      for elem in _data[1:]:
+        date = datetime.strptime(elem[0], '%Y-%m-%d %H:%M:%S')
+        data.append((date, float(elem[1]), *elem[2:]))
+
     self.data = sorted(data)
 
   def readcache(self):

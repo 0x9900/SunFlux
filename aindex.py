@@ -69,7 +69,7 @@ def autolabel(ax, rects):
   for rect in rects:
     height = rect.get_height()
     color = rect.get_facecolor()
-    ax.text(rect.get_x() + rect.get_width() / 2., 1, '%d' % int(height),
+    ax.text(rect.get_x() + rect.get_width() / 2., 1, f'{int(height)}',
             color=color_complement(*color), fontsize="10", ha='center')
 
 def graph(data, condition, filename):

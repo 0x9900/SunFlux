@@ -10,8 +10,6 @@
 #
 # pylint: disable=no-member,unspecified-encoding
 
-import csv
-import io
 import logging
 import logging.handlers
 import os
@@ -23,7 +21,6 @@ import sys
 import time
 
 from collections import namedtuple
-from copy import copy
 from datetime import datetime
 from itertools import cycle
 from queue import Queue, Empty
@@ -31,8 +28,6 @@ from telnetlib import Telnet
 from threading import Thread
 
 import sqlite3
-
-from importlib.resources import files
 
 import adapters
 

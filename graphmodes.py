@@ -11,7 +11,6 @@ import argparse
 import logging
 import os
 import sqlite3
-import sys
 
 from collections import defaultdict
 from datetime import datetime, timedelta

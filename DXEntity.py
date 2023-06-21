@@ -4,8 +4,8 @@
 # Copyright (c) 2023, Fred W6BSD
 # All rights reserved.
 #
+# pylint: disable=invalid-name
 
-import csv
 import dbm.gnu as dbm
 import logging
 import marshal
@@ -14,7 +14,6 @@ import plistlib
 import time
 
 from collections import defaultdict
-from importlib.resources import files
 from urllib.error import HTTPError
 from urllib.request import urlretrieve
 
@@ -25,6 +24,7 @@ CTY_DB = "cty.db"
 CTY_EXPIRE = 86400 * 7          # One week
 
 class DXCCRecord:
+  # pylint: disable=too-few-public-methods
   __slots__ = ['prefix', 'country', 'continent', 'cqzone', 'ituzone', 'latitude', 'longitude',
                'gmtoffset']
 

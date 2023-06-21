@@ -15,12 +15,9 @@ import sys
 import time
 import urllib.request
 
-# Older versions of numpy are too verbose when arrays contain np.nan values
-# This 2 lines will have to be removed in future versions of numpy
-import warnings
-warnings.filterwarnings('ignore')
+from datetime import datetime
 
-from datetime import datetime, timedelta
+import warnings
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
@@ -29,6 +26,10 @@ import numpy as np
 from matplotlib import ticker
 
 from config import Config
+
+# Older versions of numpy are too verbose when arrays contain np.nan values
+# This 2 lines will have to be removed in future versions of numpy
+warnings.filterwarnings('ignore')
 
 NOAA_URL = 'https://services.swpc.noaa.gov/products/solar-wind/plasma-3-day.json'
 
