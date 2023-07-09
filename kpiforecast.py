@@ -105,7 +105,7 @@ class KPIForecast:
     fig.autofmt_xdate(rotation=10, ha="center")
 
     plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {date}')
-    plt.savefig(filename, transparent=False, dpi=100)
+    plt.savefig(filename, transparent=False, dpi=72)
     plt.close()
     self.log.info('Graph "%s" saved', filename)
     return filename
