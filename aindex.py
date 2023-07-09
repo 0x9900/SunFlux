@@ -110,7 +110,7 @@ def graph(data, condition, filename):
   axgc.axhline(y=50, linewidth=1.5, zorder=1, color='darkred')
   axgc.axhline(y=100, linewidth=1.5, zorder=1, color='darkmagenta')
 
-  loc = mdates.DayLocator(interval=4)
+  loc = mdates.DayLocator(interval=2)
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
   axgc.xaxis.set_major_locator(loc)
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
