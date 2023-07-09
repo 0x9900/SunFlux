@@ -72,8 +72,9 @@ def get_kpindex(config):
 
   return data
 
-def get_wwv(config, days):
+def get_wwv(config):
   data = get_kpindex(config)
+  days = config.get('kpiwwv.nb_days', NB_DAYS)
   start_date = datetime.utcnow() - timedelta(days=days)
 
   conn = sqlite3.connect(config['showdxcc.db_name'], timeout=5,
@@ -152,7 +153,7 @@ def main():
   except IndexError:
     name = '/tmp/kpi.png'
 
-  data = get_wwv(config, NB_DAYS)
+  data = get_wwv(config)
   condition = get_conditions(config)
   if data:
     graph(data, condition, name)
