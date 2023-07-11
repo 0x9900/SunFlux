@@ -79,12 +79,13 @@ def graph(data, filename):
   axgc.xaxis.set_major_locator(loc)
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
   axgc.set_ylabel('SFU at 2800 MHz', fontsize=12)
+  axgc.set_ylim([MIN_TICKS, y.max() * 1.15])
 
   ticks = np.array([MIN_TICKS, 70])
-  ticks = np.append(ticks, np.arange(90, int(y.max() * 1.10), 20))
+  ticks = np.append(ticks, np.arange(90, int(y.max() * 1.15), 20))
   axgc.set_yticks(ticks)
 
-  zone1 = axgc.axhspan(90, ticks.max(), facecolor='lightgreen', alpha=0.3, label='Good')
+  zone1 = axgc.axhspan(90, round(axgc.axis()[-1]), facecolor='lightgreen', alpha=0.3, label='Good')
   zone2 = axgc.axhspan(70, 90, facecolor='orange', alpha=0.3, label='Ok')
   zone3 = axgc.axhspan(MIN_TICKS, 70, facecolor='red', alpha=0.3, label='Bad')
 
