@@ -100,7 +100,7 @@ class SolarWind:
   def graph(self, imagename):
     colors = {0: "gray", 1: "orange", 2: "plum"}
     labels = {0: "Density $1/cm^3$", 1: "Speed $km/S$", 2: "Temp $^{\circ}K$"}
-    limits = {0: [0, 10], 1: [250, 750]} #,  2: [10**3, 10**6]}
+    limits = {0: [0, 12], 1: [250, 750]} #,  2: [10**3, 10**6]}
     fig, ax = plt.subplots(3, 1, figsize=(12, 5))
     fig.suptitle('Solar Wind (plasma)', fontsize=14, fontweight='bold')
 
@@ -116,7 +116,10 @@ class SolarWind:
       ax[i].grid(color='tab:gray', linestyle='dotted', linewidth=.3)
       ax[i].set_ylabel(labels[i], fontsize=10)
       if i in limits:
-        ax[i].set_ylim(limits[i])
+        _min, _max = limits[i]
+        ax[i].axhline(_max, linewidth=1, zorder=1, color='lightgray')
+        _max = _max if np.max(data) < _max else np.max(data) * 1.10
+        ax[i].set_ylim((_min, _max))
       ax[i].yaxis.offsetText.set_fontsize(10)
       if np.min(data) > 1000:
         ax[i].yaxis.set_major_formatter(formatter)
