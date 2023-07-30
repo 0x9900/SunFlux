@@ -119,7 +119,10 @@ def graph(histo, predic, image='/tmp/ssnhist.png', year=1970):
   axis.yaxis.set_major_locator(MultipleLocator(25))
   axis.yaxis.set_minor_locator(MultipleLocator(5))
 
-  axis.legend(facecolor="linen", fontsize="12", loc='best')
+  legend = axis.legend(facecolor="linen", fontsize="12", loc='best')
+  for line in legend.get_lines():
+    line.set_linewidth(4.0)
+
   axis.grid(color="gray", linestyle="dotted", linewidth=.5)
 
   plt.subplots_adjust(bottom=0.15)

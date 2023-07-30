@@ -121,7 +121,7 @@ class ProtonFlux:
     ax = plt.gca()
     ax.set_ylim((0.1, 100000))
     ax.tick_params(axis='x', which='both', labelsize=10, rotation=10)
-    ax.axhline(100, linewidth=1, linestyle="-.", zorder=0, color='red', label='Warning')
+    ax.axhline(100, linewidth=1, linestyle="--", zorder=0, color='red', label='Warning Threshold')
 
     formatter = ticker.ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
@@ -146,7 +146,13 @@ class ProtonFlux:
     magnitude = 1 + int(math.log(_max, 10))
     ax.set_ylim((0.1, 10**magnitude))
     plt.yscale("log")
-    plt.legend(loc='upper left', fontsize="10", facecolor="linen", borderaxespad=1)
+    legend = ax.legend(loc='upper left', fontsize="10", facecolor="linen",
+                       borderpad=1.25, borderaxespad=1)
+    for line in legend.get_lines():
+      if line.get_label().startswith('>'):
+        line.set_linewidth(5.0)
+      else:
+        line.set_linewidth(2)
 
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
     plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {today}', fontsize=10)
