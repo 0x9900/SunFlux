@@ -136,6 +136,7 @@ def webp(filename):
   fname, _ = os.path.splitext(fname)
   webpfile = os.path.join(path, f'latest.webp')
   image = Image.open(filename)
+  image = image.resize((800,530))
   image.save(webpfile, format='webp')
   logging.info('Image "%s" created', latest)
 
