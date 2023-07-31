@@ -130,7 +130,7 @@ class ProtonFlux:
 
     dates  = np.array(list(self.data.keys()))
 
-    energy = (10, 50, 100)
+    energy = (10, 30, 50, 100)
     _max = 0
     for i in range(len(energy)):
       data = np.array([flux[energy[i]] for flux in self.data.values()])
@@ -147,7 +147,7 @@ class ProtonFlux:
     magnitude = 1 + int(math.log(_max, 10))
     ax.set_ylim((0.1, 10**magnitude))
     plt.yscale("log")
-    legend = ax.legend(loc='upper left', fontsize="10", facecolor="linen",
+    legend = ax.legend(loc='center left', fontsize="10", facecolor="linen",
                        borderpad=1.25, borderaxespad=1)
     for line in legend.get_lines():
       if line.get_label().startswith('>'):
