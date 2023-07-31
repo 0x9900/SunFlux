@@ -113,7 +113,7 @@ class ProtonFlux:
     return float(num)
 
   def graph(self, imagename):
-    colors = {0: "orange", 1: "green", 2: "plum", 3: "lightgray", 4: "lightblue"}
+    colors = {0: "tab:orange", 1: "tab:olive", 2: "tab:blue", 3: "tab:cyan", 4: "tab:purple"}
     fig = plt.figure(figsize=(12, 5))
     fig.subplots_adjust(bottom=0.15)
 
@@ -121,7 +121,8 @@ class ProtonFlux:
     ax = plt.gca()
     ax.set_ylim((0.1, 100000))
     ax.tick_params(axis='x', which='both', labelsize=10, rotation=10)
-    ax.axhline(100, linewidth=1, linestyle="--", zorder=0, color='red', label='Warning Threshold')
+    ax.axhline(100, linewidth=1, linestyle="--", zorder=0, color='tab:red',
+               label='Warning Threshold')
 
     formatter = ticker.ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
