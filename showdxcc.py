@@ -138,7 +138,7 @@ def webp(filename):
   image = Image.open(filename)
   image = image.resize((800,530))
   image.save(webpfile, format='webp')
-  logging.info('Image "%s" created', latest)
+  logging.info('Image "%s" created', webpfile)
 
 
 def main():
