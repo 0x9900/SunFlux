@@ -18,6 +18,8 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import numpy as np
 
+from PIL import Image
+
 import adapters
 
 from config import Config
@@ -129,6 +131,15 @@ def create_link(filename):
   logging.info('Link to "%s" created', latest)
 
 
+def webp(filename):
+  path, fname = os.path.split(filename)
+  fname, _ = os.path.splitext(fname)
+  webpfile = os.path.join(path, f'latest.webp')
+  image = Image.open(filename)
+  image.save(webpfile, format='webp')
+  logging.info('Image "%s" created', latest)
+
+
 def main():
   adapters.install_adapters()
   config = Config()
@@ -172,6 +183,7 @@ def main():
   showdxcc = ShowDXCC(config, zone_name, zone, opts.date)
   showdxcc.get_dxcc(opts.delta)
   showdxcc.graph(filename)
+  webp(filename)
   if opts.no_link:
     create_link(filename)
 
