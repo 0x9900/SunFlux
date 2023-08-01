@@ -43,7 +43,7 @@ def noaa_date(dct):
 
 def remove_outlier(points):
   percent_lo = np.percentile(points, 25, interpolation = 'midpoint')
-  percent_hi= np.percentile(points, 75, interpolation = 'midpoint')
+  percent_hi= np.percentile(points, 95, interpolation = 'midpoint')
   iqr = percent_hi - percent_lo
   lower_bound = points <= (percent_lo - 5 * iqr)
   upper_bound = points >= (percent_hi + 5 * iqr)
@@ -134,7 +134,7 @@ class ProtonFlux:
     _max = 0
     for i in range(len(energy)):
       data = np.array([flux[energy[i]] for flux in self.data.values()])
-      # data = remove_outlier(data)
+      data = remove_outlier(data)
 
       ax.plot(dates, data, linewidth=1.5, color=colors[i], zorder=2,
               label=f'>={energy[i]} MeV')
