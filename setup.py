@@ -52,6 +52,7 @@ setup(
     'ssngraph',
     'ssnhist',
     'sunfluxbot',
+    'xray_flux',
   ],
   install_requires=['numpy', 'matplotlib', 'python-telegram-bot'],
   entry_points = {
@@ -71,6 +72,7 @@ setup(
       'ssngraph = ssngraph:main',
       'ssnhist = ssnhist:main',
       'sunfluxbot = sunfluxbot:main',
+      'xray_flux = xray_flux:main',
     ]
   },
   classifiers=[
