@@ -17,7 +17,6 @@ import sys
 import time
 import urllib.request
 
-from collections import defaultdict
 from datetime import datetime
 
 import warnings
@@ -81,7 +80,7 @@ class ProtonFlux:
       encoding = res.info().get_content_charset('utf-8')
       _data = json.loads(webdata.decode(encoding), object_hook=noaa_date)
 
-    data = dict()
+    data = {}
     for elem in _data:
       data[elem['time_tag']] = {k: 0.0 for k in (1, 10, 100, 30, 5, 50, 500, 60)}
 
@@ -107,47 +106,43 @@ class ProtonFlux:
     with open(self.cachefile, 'wb') as fd_cache:
       pickle.dump(self.data, fd_cache)
 
-  def float(num):
-    if num is None:
-      return np.nan
-    return float(num)
-
   def graph(self, imagename):
-    colors = {0: "tab:orange", 1: "tab:olive", 2: "tab:blue", 3: "tab:cyan", 4: "tab:purple"}
+    energy = (10, 30, 50, 100)  # Graphs to plot
+    colors = {10: "tab:orange", 30: "tab:olive", 50: "tab:blue", 100: "tab:cyan"}
     fig = plt.figure(figsize=(12, 5))
     fig.subplots_adjust(bottom=0.15)
 
     fig.suptitle('Proton Flux', fontsize=14, fontweight='bold')
     ax = plt.gca()
-    ax.set_ylim((0.1, 100000))
-    ax.tick_params(axis='x', which='both', labelsize=10, rotation=10)
-    ax.axhline(100, linewidth=1, linestyle="--", zorder=0, color='tab:red',
-               label='Warning Threshold')
+    ax.set_yscale("log")
+    ax.tick_params(axis='x', which='both', labelsize=12, rotation=10)
 
     formatter = ticker.ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
     formatter.set_powerlimits((-1,1))
+    ax.grid(color='brown', linestyle='dotted', linewidth=.3)
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%H:%M'))
+    ax.xaxis.set_major_locator(mdates.HourLocator(interval=12))
+    ax.xaxis.set_minor_locator(mdates.HourLocator())
 
     dates  = np.array(list(self.data.keys()))
 
-    energy = (10, 30, 50, 100)
     _max = 0
-    for i in range(len(energy)):
-      data = np.array([flux[energy[i]] for flux in self.data.values()])
+    for _energy in energy:
+      data = np.array([flux[_energy] for flux in self.data.values()])
       data = remove_outlier(data)
-
-      ax.plot(dates, data, linewidth=1.5, color=colors[i], zorder=2,
-              label=f'>={energy[i]} MeV')
-      ax.grid(color='brown', linestyle='dotted', linewidth=.3)
-      ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%H:%M'))
-      ax.xaxis.set_major_locator(mdates.HourLocator(interval=12))
-      ax.xaxis.set_minor_locator(mdates.HourLocator())
+      ax.plot(dates, data, linewidth=1.5, color=colors[_energy], zorder=2,
+              label=f'>={_energy} MeV')
       _max = max(data.max(), _max)
 
     magnitude = 1 + int(math.log(_max, 10))
     ax.set_ylim((0.1, 10**magnitude))
-    plt.yscale("log")
-    legend = ax.legend(loc='center left', fontsize="10", facecolor="linen",
+
+    if magnitude > 100:
+      ax.axhline(100, linewidth=1, linestyle="--", zorder=0, color='tab:red',
+                 label='Warning Threshold')
+
+    legend = ax.legend(loc='best', fontsize="12", facecolor="linen",
                        borderpad=1.25, borderaxespad=1)
     for line in legend.get_lines():
       if line.get_label().startswith('>'):
@@ -156,7 +151,7 @@ class ProtonFlux:
         line.set_linewidth(2)
 
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
-    plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {today}', fontsize=10)
+    plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {today}', fontsize=12)
     fig.savefig(imagename, transparent=False, dpi=100)
     plt.close()
     self.log.info('Saved "%s"', imagename)
