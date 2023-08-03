@@ -32,10 +32,14 @@ from config import Config
 # This 2 lines will have to be removed in future versions of numpy
 warnings.filterwarnings('ignore')
 
-NOAA_URL = 'https://services.swpc.noaa.gov/json/goes/primary/xrays-3-day.json'
+NOAA_XRAY = 'https://services.swpc.noaa.gov/json/goes/primary/xrays-1-day.json'
+NOAA_FLARE = 'https://services.swpc.noaa.gov/json/goes/primary/xray-flares-7-day.json'
 
-def noaa_date(dct):
-  date = datetime.strptime(dct['time_tag'], '%Y-%m-%dT%H:%M:%SZ')
+def noaa_date(field):
+  return datetime.strptime(field, '%Y-%m-%dT%H:%M:%SZ')
+
+def noaa_date_hook(dct):
+  date = noaa_date(dct['time_tag'])
   dct['time_tag'] = date
   return dct
 
@@ -68,31 +72,39 @@ class XRayFlux:
   def download(self):
     self.log.info('Downloading XRayFlux data from NOAA')
 
-    with urllib.request.urlopen(NOAA_URL) as res:
+    with urllib.request.urlopen(NOAA_XRAY) as res:
       webdata = res.read()
       encoding = res.info().get_content_charset('utf-8')
-      _data = json.loads(webdata.decode(encoding), object_hook=noaa_date)
-    self.data = {e['time_tag']: e for e in _data}
+      _data = json.loads(webdata.decode(encoding), object_hook=noaa_date_hook)
+    self.xray_data = {e['time_tag']: e for e in _data}
+
+    with urllib.request.urlopen(NOAA_FLARE) as res:
+      webdata = res.read()
+      encoding = res.info().get_content_charset('utf-8')
+      self.flare_data = json.loads(webdata.decode(encoding))
 
   def readcache(self):
     """Read data from the cache"""
     self.log.debug('Read from cache "%s"', self.cachefile)
     try:
       with open(self.cachefile, 'rb') as fd_cache:
-        data = pickle.load(fd_cache)
+        self.xray_data = pickle.load(fd_cache)
+        self.flare_data = pickle.load(fd_cache)
     except (FileNotFoundError, EOFError):
-      data = None
-    self.data = data
+      self.xray_data = None
+      self.flare_data = None
+
 
   def writecache(self):
     """Write data into the cachefile"""
     self.log.debug('Write cache "%s"', self.cachefile)
     with open(self.cachefile, 'wb') as fd_cache:
-      pickle.dump(self.data, fd_cache)
+      pickle.dump(self.xray_data, fd_cache)
+      pickle.dump(self.flare_data, fd_cache)
 
   def graph(self, imagename):
-    dates  = np.array(list(self.data.keys()))
-    data = np.array([d['flux'] for d in self.data.values()])
+    dates  = np.array(list(self.xray_data.keys()))
+    data = np.array([d['flux'] for d in self.xray_data.values()])
     data = remove_outlier(data)
 
     fig = plt.figure(figsize=(12, 5))
@@ -116,11 +128,24 @@ class XRayFlux:
     ax.set_ylim((10**min_mag, 10**max_mag))
 
     data[data==0.0] = np.nan
-    ax.plot(dates, data, linewidth=1.5, color="tab:blue", zorder=2,
-            label='Flux')
+    ax.plot(dates, data, linewidth=1.5, color="tab:blue", zorder=2, label='X-Ray Flux')
 
-    ax.legend(loc='best', fontsize="12", facecolor="linen",
-                       borderpad=1, borderaxespad=1)
+    class_colors = {'X': 'tag:red', 'M': 'tab:orange', 'C': 'tab:blue',
+                    'B': 'tab:gray', 'A': 'tab:cyan'}
+    for flare in self.flare_data:
+      start = noaa_date(flare['begin_time'])
+      end = noaa_date(flare['end_time'])
+      if end < dates.min():
+        continue
+      fclass = flare['max_class'][0]
+      ax.axvspan(mdates.date2num(start), mdates.date2num(end), color=class_colors[fclass],
+                 label=f'{fclass} Class Flare', alpha=0.2)
+
+    handles, labels = ax.get_legend_handles_labels()
+    unique = dict(zip(labels, handles))
+    ax.legend(unique.keys(), unique.values(), loc='best', fontsize="12",
+              facecolor="linen", borderpad=1, borderaxespad=1)
+
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
     plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {today}', fontsize=12)
     fig.savefig(imagename, transparent=False, dpi=100)
