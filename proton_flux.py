@@ -33,7 +33,7 @@ from config import Config
 # This 2 lines will have to be removed in future versions of numpy
 warnings.filterwarnings('ignore')
 
-NOAA_URL = 'https://services.swpc.noaa.gov/json/goes/primary/integral-protons-7-day.json'
+NOAA_URL = 'https://services.swpc.noaa.gov/json/goes/primary/integral-protons-3-day.json'
 
 def noaa_date(dct):
   date = datetime.strptime(dct['time_tag'], '%Y-%m-%dT%H:%M:%SZ')
