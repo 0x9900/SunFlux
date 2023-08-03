@@ -131,7 +131,7 @@ class ProtonFlux:
     for _energy in energy:
       data = np.array([flux[_energy] for flux in self.data.values()])
       data = remove_outlier(data)
-      ax.plot(dates, data, linewidth=1.5, color=colors[_energy], zorder=2,
+      ax.plot(dates, data, linewidth=1.25, color=colors[_energy], zorder=2,
               label=f'>={_energy} MeV')
       _max = max(data.max(), _max)
 
