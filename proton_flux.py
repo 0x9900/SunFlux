@@ -34,6 +34,7 @@ from config import Config
 warnings.filterwarnings('ignore')
 
 NOAA_URL = 'https://services.swpc.noaa.gov/json/goes/primary/integral-protons-3-day.json'
+WARNING_THRESHOLD = 10**2
 
 def noaa_date(dct):
   date = datetime.strptime(dct['time_tag'], '%Y-%m-%dT%H:%M:%SZ')
@@ -121,7 +122,7 @@ class ProtonFlux:
     formatter.set_scientific(True)
     formatter.set_powerlimits((-1,1))
     ax.grid(color='brown', linestyle='dotted', linewidth=.3)
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%H:%M'))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d %HH'))
     ax.xaxis.set_major_locator(mdates.HourLocator(interval=12))
     ax.xaxis.set_minor_locator(mdates.HourLocator())
 
@@ -138,8 +139,8 @@ class ProtonFlux:
     magnitude = 1 + int(math.log(_max, 10))
     ax.set_ylim((0.1, 10**magnitude))
 
-    if magnitude > 100:
-      ax.axhline(100, linewidth=1, linestyle="--", zorder=0, color='tab:red',
+    if magnitude > WARNING_THRESHOLD:
+      ax.axhline(WARNING_THRESHOLD, linewidth=1.5, linestyle="--", zorder=0, color='tab:red',
                  label='Warning Threshold')
 
     legend = ax.legend(loc='best', fontsize="12", facecolor="linen",
