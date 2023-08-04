@@ -110,7 +110,7 @@ class SolarWind:
     loc = mdates.HourLocator(interval=6)
 
     for i in range(3):
-      data = remove_outlier(self.data[0:,i+1])
+      data = self.data[0:,i+1]
       ax[i].plot(self.data[0:,0], data, color=colors[i], linewidth=.5,
                  marker='.', markersize=.5)
       ax[i].grid(color='tab:gray', linestyle='dotted', linewidth=.3)
@@ -125,7 +125,7 @@ class SolarWind:
         ax[i].yaxis.set_major_formatter(formatter)
       ax[i].tick_params(axis='y', labelsize=8)
       ax[i].tick_params(axis='x', labelsize=9)
-      ax[i].xaxis.set_major_formatter(mdates.DateFormatter('%d/%H:%M'))
+      ax[i].xaxis.set_major_formatter(mdates.DateFormatter('%m/%d %HH'))
       ax[i].xaxis.set_major_locator(loc)
 
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
