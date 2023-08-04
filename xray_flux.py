@@ -32,7 +32,7 @@ from config import Config
 # This 2 lines will have to be removed in future versions of numpy
 warnings.filterwarnings('ignore')
 
-NOAA_XRAY = 'https://services.swpc.noaa.gov/json/goes/primary/xrays-1-day.json'
+NOAA_XRAY = 'https://services.swpc.noaa.gov/json/goes/primary/xrays-3-day.json'
 NOAA_FLARE = 'https://services.swpc.noaa.gov/json/goes/primary/xray-flares-7-day.json'
 
 def noaa_date(field):
@@ -119,8 +119,8 @@ class XRayFlux:
     formatter.set_scientific(True)
     formatter.set_powerlimits((-1,1))
     ax.grid(color='brown', linestyle='dotted', linewidth=.3)
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%H:%M'))
-    ax.xaxis.set_major_locator(mdates.HourLocator(interval=12))
+    ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
+    ax.xaxis.set_major_locator(mdates.DayLocator())
     ax.xaxis.set_minor_locator(mdates.HourLocator())
 
     max_mag = int(math.log(data[data>0.0].max(), 10)) + 1
