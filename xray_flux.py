@@ -143,7 +143,7 @@ class XRayFlux:
 
     handles, labels = ax.get_legend_handles_labels()
     unique = dict(zip(labels, handles))
-    ax.legend(unique.values(), unique.keys(), loc='best', fontsize="12",
+    ax.legend(unique.values(), unique.keys(), loc='upper left', fontsize="12",
               facecolor="linen", borderpad=1, borderaxespad=1)
 
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
