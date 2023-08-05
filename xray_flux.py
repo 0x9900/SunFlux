@@ -137,9 +137,13 @@ class XRayFlux:
       end = noaa_date(flare['end_time'])
       if end < dates.min():
         continue
-      fclass = flare['max_class'][0]
-      ax.axvspan(mdates.date2num(start), mdates.date2num(end), color=class_colors[fclass],
-                 label=f'{fclass} Class Flare', alpha=0.2)
+      try:
+        fclass = flare['max_class'][0]
+        ax.axvspan(mdates.date2num(start), mdates.date2num(end), color=class_colors[fclass],
+                   label=f'{fclass} Class Flare', alpha=0.2)
+      except TypeError:
+        pass
+
 
     handles, labels = ax.get_legend_handles_labels()
     unique = dict(zip(labels, handles))
