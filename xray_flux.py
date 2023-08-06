@@ -169,7 +169,7 @@ def main():
     name = '/tmp/xray_flux.png'
 
   cache_file = config.get('xrayflux.cache_file', '/tmp/xrayflux.pkl')
-  cache_time = config.get('xrayflux.cache_time', 3600)
+  cache_time = config.get('xrayflux.cache_time', 900)
   xray = XRayFlux(cache_file, cache_time)
   xray.graph(name)
 
