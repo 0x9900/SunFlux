@@ -130,7 +130,7 @@ class XRayFlux:
     data[data==0.0] = np.nan
     ax.plot(dates, data, linewidth=1.5, color="tab:blue", zorder=2, label='X-Ray Flux')
 
-    class_colors = {'X': 'tag:red', 'M': 'tab:orange', 'C': 'tab:blue',
+    class_colors = {'X': 'tab:red', 'M': 'tab:orange', 'C': 'tab:blue',
                     'B': 'tab:gray', 'A': 'tab:cyan'}
     for flare in self.flare_data:
       start = noaa_date(flare['begin_time'])
