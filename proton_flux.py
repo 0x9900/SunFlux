@@ -170,7 +170,7 @@ def main():
     name = '/tmp/proton_flux.png'
 
   cache_file = config.get('protonflux.cache_file', '/tmp/proton_flux.pkl')
-  cache_time = config.get('protonflux.cache_time', 3600)
+  cache_time = config.get('protonflux.cache_time', 900)
   p_f = ProtonFlux(cache_file, cache_time)
   if not p_f.graph(name):
     return os.EX_DATAERR
