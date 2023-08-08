@@ -14,6 +14,7 @@ import plistlib
 import time
 
 from collections import defaultdict
+from functools import lru_cache
 from urllib.error import HTTPError
 from urllib.request import urlretrieve
 
@@ -74,6 +75,7 @@ class DXCC:
     _, info = self.get_prefix(call)
     return info
 
+  @lru_cache(512)
   def get_prefix(self, call):
     call = call.upper()
     prefixes = list({call[:c] for c in range(self._max_len, 0, -1)})
