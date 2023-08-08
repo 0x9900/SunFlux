@@ -143,7 +143,7 @@ class ProtonFlux:
       ax.axhline(WARNING_THRESHOLD, linewidth=1.5, linestyle="--", zorder=0, color='tab:red',
                  label='Warning Threshold')
 
-    legend = ax.legend(loc='best', fontsize="12", facecolor="linen",
+    legend = ax.legend(loc='upper left', fontsize="12", facecolor="linen",
                        borderpad=1.25, borderaxespad=1)
     for line in legend.get_lines():
       if line.get_label().startswith('>'):
