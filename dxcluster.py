@@ -391,6 +391,7 @@ def main():
 
   def sig_handler(_signum, _frame):
     LOG.setLevel(logging.INFO if LOG.level == logging.DEBUG else logging.DEBUG)
+    LOG.debug(DXCC.get_prefix.cache_info())
 
   signal.signal(signal.SIGHUP, sig_handler)
 
