@@ -75,7 +75,7 @@ class DXCC:
     _, info = self.get_prefix(call)
     return info
 
-  @lru_cache(512)
+  @lru_cache(2<<12)
   def get_prefix(self, call):
     call = call.upper()
     prefixes = list({call[:c] for c in range(self._max_len, 0, -1)})
