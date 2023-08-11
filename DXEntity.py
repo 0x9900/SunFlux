@@ -24,6 +24,8 @@ CTY_FILE = "cty.plist"
 CTY_DB = "cty.db"
 CTY_EXPIRE = 86400 * 7          # One week
 
+LRU_CACHE_SIZE = 8192
+
 class DXCCRecord:
   # pylint: disable=too-few-public-methods
   __slots__ = ['prefix', 'country', 'continent', 'cqzone', 'ituzone', 'latitude', 'longitude',
@@ -75,7 +77,7 @@ class DXCC:
     _, info = self.get_prefix(call)
     return info
 
-  @lru_cache(2<<12)
+  @lru_cache(LRU_CACHE_SIZE)
   def get_prefix(self, call):
     call = call.upper()
     prefixes = list({call[:c] for c in range(self._max_len, 0, -1)})
