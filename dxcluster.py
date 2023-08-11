@@ -390,10 +390,13 @@ def main():
   db_thread.start()
 
   def sig_handler(_signum, _frame):
-    LOG.setLevel(logging.INFO if LOG.level == logging.DEBUG else logging.DEBUG)
-    LOG.debug(DXCC.get_prefix.cache_info())
+    if _signum == signal.SIGHUP:
+      LOG.setLevel(logging.INFO if LOG.level == logging.DEBUG else logging.DEBUG)
+    elif _signum == signal.SIGUSR1:
+      LOG.info(DXCC.get_prefix.cache_info())
 
   signal.signal(signal.SIGHUP, sig_handler)
+  signal.signal(signal.SIGUSR1, sig_handler)
 
   random.shuffle(clusters)
   for cluster in cycle(clusters):
