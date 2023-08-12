@@ -395,7 +395,7 @@ def main():
     elif _signum == signal.SIGUSR1:
       cache_info = DXCC.get_prefix.cache_info()
       rate = 100 * cache_info.hits / (cache_info.misses + cache_info.hits)
-      LOG.info("DXEntities cache %s -> %.2f", cache_info,
+      LOG.info("DXEntities cache %s -> %.2f", cache_info, rate)
 
   signal.signal(signal.SIGHUP, sig_handler)
   signal.signal(signal.SIGUSR1, sig_handler)
