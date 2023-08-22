@@ -99,14 +99,14 @@ class ShowDXCC:
 
 
     # Loop over data dimensions and create text annotations.
-    threshold = np.percentile(self.data, 70)
-    for i in range(len(CONTINENTS)):
-      for j in range(len(BANDS)):
-        if self.data[i, j] < 1:
-          continue
-        color = 'white' if self.data[i, j] < threshold else 'black'
-        axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
-
+    #threshold = np.percentile(self.data, 70)
+    #for i in range(len(CONTINENTS)):
+    #  for j in range(len(BANDS)):
+    #    if self.data[i, j] < 1:
+    #      continue
+    #    color = 'white' if self.data[i, j] < threshold else 'black'
+    #    axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
+    axgc.grid(color="cyan", linestyle="dashed", linewidth=.5, alpha=.75)
     axgc.set_title(f"Band activity from {self.zone_name} = {self.zone}",
                    fontsize=16, fontweight='bold')
     fig.text(0.02, .03, 'SunFluxBot By W6BSD', fontsize=14)
