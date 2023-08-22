@@ -14,6 +14,7 @@ import sqlite3
 
 from collections import defaultdict
 from datetime import datetime, timedelta
+from itertools import product
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -66,12 +67,11 @@ def graph(data, imgname):
   xdate = np.array(list(data.keys()))
   modes = sorted({k for d in data.values() for k in d})
   ydata = defaultdict(list)
-  for val in data.values():
-    for mode in modes:
-      try:
-        ydata[mode].append(val[mode])
-      except KeyError:
-        ydata[mode].append(0)
+  for val, mode in product(data.values(), modes):
+    try:
+      ydata[mode].append(val[mode])
+    except KeyError:
+      ydata[mode].append(0)
 
   fig, ax1 = plt.subplots(figsize=(12, 5))
   fig.suptitle('Band Activity / Modes', fontsize=14, fontweight='bold')
