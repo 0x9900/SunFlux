@@ -118,7 +118,7 @@ class ShowDXCC:
   @staticmethod
   def mk_colormap():
     # colors = [(.0, '#001177'), (.20, '#aaaa00'), (.66, '#ffff00'), (1, '#993300')]
-    colors = [(.0, '#001155'), (.02, '#99aaaa'), (.3, '#ffff00'), (1, '#ff0000')]
+    colors = [(.0, '#001155'), (.1, '#99aaaa'), (.3, '#ffff00'), (1, '#ff0000')]
     cmap_name = 'my_cmap'
     n_bins = 28
     return LinearSegmentedColormap.from_list(cmap_name, colors, N=n_bins, gamma=.9)
