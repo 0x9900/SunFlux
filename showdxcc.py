@@ -18,6 +18,8 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import numpy as np
 
+from matplotlib.colors import LinearSegmentedColormap
+
 from PIL import Image
 
 import adapters
@@ -71,7 +73,7 @@ class ShowDXCC:
       self.data[_x, _y] = count
 
   def graph(self, filename):
-    color_map = self.config.get('showdxcc.color_map', 'PRGn')
+    color_map = ShowDXCC.mk_colormap() #self.config.get('showdxcc.color_map', 'PRGn')
     fig, axgc = plt.subplots(figsize=(12,8), facecolor='white')
 
     # Show all ticks and label them with the respective list entries
@@ -87,16 +89,22 @@ class ShowDXCC:
     axgc.set_aspect(aspect=1)
     axgc.tick_params(top=True, bottom=True, labeltop=True, labelbottom=True)
 
-    cbar = axgc.figure.colorbar(image, ax=axgc, shrink=0.66, format="%5.0f")
+    dmax = np.max(self.data)
+    cbar = axgc.figure.colorbar(image, ax=axgc, shrink=0.69, aspect=15, fraction=0.09,
+                                pad=0.02, ticks=[0, dmax / 2, dmax])
+    cbar.ax.set_yticklabels(['low', 'med', 'high'], fontsize=12)
     cbar.ax.tick_params(labelsize=10)
 
+    #cbar = axgc.figure.colorbar(image, ax=axgc, shrink=0.66, format="%5.0f")
+
+
     # Loop over data dimensions and create text annotations.
-    threshold = np.percentile(self.data, 92)
+    threshold = np.percentile(self.data, 70)
     for i in range(len(CONTINENTS)):
       for j in range(len(BANDS)):
         if self.data[i, j] < 1:
           continue
-        color = 'black' if self.data[i, j] > threshold else 'lightgray'
+        color = 'white' if self.data[i, j] < threshold else 'black'
         axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
 
     axgc.set_title(f"Band activity from {self.zone_name} = {self.zone}",
@@ -106,6 +114,14 @@ class ShowDXCC:
     fig.tight_layout()
     logging.info('Save "%s"', filename)
     fig.savefig(filename, transparent=False, dpi=100)
+
+  @staticmethod
+  def mk_colormap():
+    # colors = [(.0, '#001177'), (.20, '#aaaa00'), (.66, '#ffff00'), (1, '#993300')]
+    colors = [(.0, '#001155'), (.02, '#99aaaa'), (.4, '#ffff00'), (1, '#ff0000')]
+    cmap_name = 'my_cmap'
+    n_bins = 28
+    return LinearSegmentedColormap.from_list(cmap_name, colors, N=n_bins, gamma=.9)
 
 
 def type_date(parg):
