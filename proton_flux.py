@@ -160,7 +160,7 @@ class ProtonFlux:
 
 def main():
   logging.basicConfig(
-    format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%H:%M:%S',
+    format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X'',
     level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
   )
   config = Config()

@@ -133,7 +133,7 @@ def graph(histo, predic, image='/tmp/ssnhist.png', year=1970):
 
 def main():
   logging.basicConfig(
-    format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%H:%M:%S',
+    format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%x %X'',
     level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
   )
   config = Config()
