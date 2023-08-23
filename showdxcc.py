@@ -172,7 +172,7 @@ def main():
                       help="Graph date [YYYYMMDDHHMM]")
   parser.add_argument("-D", "--delta", type=int, default=1,
                       help="Number of hours [default: %(default)d]")
-  parser.add_argument("-L", "--no-link", action="store_false", default=True,
+  parser.add_argument("-L", "--no-link", action="store_true", default=False,
                       help="Update the link \"latest\"")
   z_group = parser.add_mutually_exclusive_group(required=True)
   z_group.add_argument("-c", "--continent", choices=CONTINENTS, help="Continent")
@@ -200,8 +200,8 @@ def main():
   showdxcc = ShowDXCC(config, zone_name, zone, opts.date)
   showdxcc.get_dxcc(opts.delta)
   showdxcc.graph(filename)
-  webp(filename)
-  if opts.no_link:
+  if opts.no_link is False:
+    webp(filename)
     create_link(filename)
 
   sys.exit(os.EX_OK)
