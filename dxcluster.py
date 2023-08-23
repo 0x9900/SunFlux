@@ -360,7 +360,7 @@ def main():
 
   logging.basicConfig(
     format='%(lineno)d %(levelname)s - %(message)s',
-    datefmt='%x %X''
+    datefmt='%x %X'
   )
   LOG = logging.getLogger('dxcluster')
   loglevel = os.getenv('LOGLEVEL', config.get('log_level', 'INFO'))

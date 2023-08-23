@@ -96,7 +96,7 @@ def graph(data, imgname):
 
 def main():
   logging.basicConfig(
-    format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%x %X'',
+    format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%x %X',
     level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
   )
   parser = argparse.ArgumentParser()
