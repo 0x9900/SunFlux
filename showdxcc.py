@@ -66,7 +66,7 @@ class ShowDXCC:
       curs = conn.cursor()
       results = curs.execute(request).fetchall()
 
-    self.data = np.zeros((len(CONTINENTS), len(BANDS)), dtype=int)
+    self.data = np.full((len(CONTINENTS), len(BANDS)), fill_value=np.NaN)
     for band, _, to_continent, count in results:
       _x = CONTINENTS.index(to_continent)
       _y = BANDS.index(band)
@@ -95,17 +95,15 @@ class ShowDXCC:
     cbar.ax.set_yticklabels(['low', 'med', 'high'], fontsize=12)
     cbar.ax.tick_params(labelsize=10)
 
-    #cbar = axgc.figure.colorbar(image, ax=axgc, shrink=0.66, format="%5.0f")
-
-
     # Loop over data dimensions and create text annotations.
-    #threshold = np.percentile(self.data, 70)
-    #for i in range(len(CONTINENTS)):
-    #  for j in range(len(BANDS)):
-    #    if self.data[i, j] < 1:
-    #      continue
-    #    color = 'white' if self.data[i, j] < threshold else 'black'
-    #    axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
+    # threshold = np.percentile(self.data, 70)
+    # for i in range(len(CONTINENTS)):
+    #   for j in range(len(BANDS)):
+    #     if self.data[i, j] < 1:
+    #       continue
+    #     color = 'white' if self.data[i, j] < threshold else 'black'
+    #     axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
+
     axgc.grid(color="cyan", linestyle="dashed", linewidth=.5, alpha=.75)
     axgc.set_title(f"HF Propagation from {self.zone_name} = {self.zone}",
                    fontsize=16, fontweight='bold')
@@ -121,7 +119,9 @@ class ShowDXCC:
     colors = [(.0, '#001155'), (.1, '#99aaaa'), (.3, '#ffff00'), (1, '#ff0000')]
     cmap_name = 'my_cmap'
     n_bins = 28
-    return LinearSegmentedColormap.from_list(cmap_name, colors, N=n_bins, gamma=.9)
+    cmap = LinearSegmentedColormap.from_list(cmap_name, colors, N=n_bins)
+    cmap.set_bad(colors[0][1], 1.)
+    return cmap
 
 
 def type_date(parg):
