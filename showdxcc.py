@@ -107,8 +107,9 @@ class ShowDXCC:
     axgc.grid(color="cyan", linestyle="dashed", linewidth=.5, alpha=.75)
     axgc.set_title(f"HF Propagation from {self.zone_name} = {self.zone}",
                    fontsize=16, fontweight='bold')
-    fig.text(0.02, .03, 'SunFluxBot By W6BSD', fontsize=14)
-    fig.text(0.65, .95, f'{self.date.strftime("%A %B %d %Y - %H:%M")}', fontsize=14)
+    fig.text(0.02, .03, f'(c){self.date.year} W6BSD https://bsdworld.org/', fontsize=14,
+             style='italic')
+    fig.text(0.65, .95, f'{self.date.strftime("%A %B %d %Y - %H:%M")} GMT', fontsize=14)
     fig.tight_layout()
     logging.info('Save "%s"', filename)
     fig.savefig(filename, transparent=False, dpi=100)
