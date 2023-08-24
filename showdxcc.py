@@ -66,7 +66,7 @@ class ShowDXCC:
       curs = conn.cursor()
       results = curs.execute(request).fetchall()
 
-    self.data = np.full((len(CONTINENTS), len(BANDS)), fill_value=np.NaN)
+    self.data = np.zeros((len(CONTINENTS), len(BANDS)), dtype=int)
     for band, _, to_continent, count in results:
       _x = CONTINENTS.index(to_continent)
       _y = BANDS.index(band)
