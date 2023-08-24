@@ -95,9 +95,6 @@ class ShowDXCC:
     cbar.ax.set_yticklabels(['low', 'med', 'high'], fontsize=12)
     cbar.ax.tick_params(labelsize=10)
 
-    #cbar = axgc.figure.colorbar(image, ax=axgc, shrink=0.66, format="%5.0f")
-
-
     # Loop over data dimensions and create text annotations.
     #threshold = np.percentile(self.data, 70)
     #for i in range(len(CONTINENTS)):
@@ -109,8 +106,9 @@ class ShowDXCC:
     axgc.grid(color="cyan", linestyle="dashed", linewidth=.5, alpha=.75)
     axgc.set_title(f"HF Propagation from {self.zone_name} = {self.zone}",
                    fontsize=16, fontweight='bold')
-    fig.text(0.02, .03, 'SunFluxBot By W6BSD', fontsize=14)
-    fig.text(0.65, .95, f'{self.date.strftime("%A %B %d %Y - %H:%M")}', fontsize=14)
+    fig.text(0.02, .03, f'(c){self.date.year} W6BSD https://bsdworld.org/', fontsize=14,
+             style='italic')
+    fig.text(0.65, .95, f'{self.date.strftime("%A %B %d %Y - %H:%M")} GMT', fontsize=14)
     fig.tight_layout()
     logging.info('Save "%s"', filename)
     fig.savefig(filename, transparent=False, dpi=100)
@@ -121,7 +119,8 @@ class ShowDXCC:
     colors = [(.0, '#001155'), (.1, '#99aaaa'), (.3, '#ffff00'), (1, '#ff0000')]
     cmap_name = 'my_cmap'
     n_bins = 28
-    return LinearSegmentedColormap.from_list(cmap_name, colors, N=n_bins, gamma=.9)
+    cmap = LinearSegmentedColormap.from_list(cmap_name, colors, N=n_bins, gamma=.9)
+    return cmap
 
 
 def type_date(parg):
