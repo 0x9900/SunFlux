@@ -14,6 +14,7 @@ import sqlite3
 import sys
 
 from datetime import datetime, timedelta
+from itertools import product
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -73,6 +74,7 @@ class ShowDXCC:
       self.data[_x, _y] = count
 
   def graph(self, filename):
+    dmax = np.max(self.data)
     color_map = ShowDXCC.mk_colormap() #self.config.get('showdxcc.color_map', 'PRGn')
     fig, axgc = plt.subplots(figsize=(12,8), facecolor='white')
 
@@ -89,7 +91,6 @@ class ShowDXCC:
     axgc.set_aspect(aspect=1)
     axgc.tick_params(top=True, bottom=True, labeltop=True, labelbottom=True)
 
-    dmax = np.max(self.data)
     cbar = axgc.figure.colorbar(image, ax=axgc, shrink=0.69, aspect=15, fraction=0.09,
                                 pad=0.02, ticks=[0, dmax / 2, dmax])
     cbar.ax.set_yticklabels(['low', 'med', 'high'], fontsize=12)
@@ -97,12 +98,11 @@ class ShowDXCC:
 
     # Loop over data dimensions and create text annotations.
     # threshold = np.percentile(self.data, 70)
-    # for i in range(len(CONTINENTS)):
-    #   for j in range(len(BANDS)):
-    #     if self.data[i, j] < 1:
-    #       continue
-    #     color = 'white' if self.data[i, j] < threshold else 'black'
-    #     axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
+    # for i, j in product(range(len(CONTINENTS)), range(len(BANDS))):
+    #   if self.data[i, j] < 1:
+    #     continue
+    #   color = 'white' if self.data[i, j] < threshold else 'black'
+    #   axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
 
     axgc.grid(color="cyan", linestyle="dashed", linewidth=.5, alpha=.75)
     axgc.set_title(f"HF Propagation from {self.zone_name} = {self.zone}",
@@ -116,7 +116,6 @@ class ShowDXCC:
 
   @staticmethod
   def mk_colormap():
-    # colors = [(.0, '#001177'), (.20, '#aaaa00'), (.66, '#ffff00'), (1, '#993300')]
     colors = [(.0, '#001155'), (.1, '#99aaaa'), (.3, '#ffff00'), (1, '#ff0000')]
     cmap_name = 'my_cmap'
     n_bins = 28
