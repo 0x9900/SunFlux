@@ -85,14 +85,14 @@ class ShowDXCC:
     plt.yticks(np.arange(len(CONTINENTS)), labels=CONTINENTS, fontsize=14)
     plt.ylabel("Destination", fontsize=14)
 
-    image = axgc.imshow(
-      self.data, cmap=color_map,
-      interpolation=self.config.get('showdxcc.interleave', 'gaussian')
-    )
+    timage = axgc.imshow(self.data, cmap=color_map)
+    image = axgc.imshow(self.data, cmap=color_map,
+                        interpolation=self.config.get('showdxcc.interleave', 'gaussian'))
+
     axgc.set_aspect(aspect=1)
     axgc.tick_params(top=True, bottom=True, labeltop=True, labelbottom=True)
 
-    cbar = axgc.figure.colorbar(image, ax=axgc, shrink=0.69, aspect=15, fraction=0.09,
+    cbar = axgc.figure.colorbar(timage, ax=axgc, shrink=0.69, aspect=15, fraction=0.09,
                                 pad=0.02, ticks=[0, dmax / 2, dmax])
     cbar.ax.set_yticklabels(['low', 'med', 'high'], fontsize=12)
     cbar.ax.tick_params(labelsize=10)
@@ -185,7 +185,6 @@ def main():
   if opts.args:
     filename = opts.args.pop()
 
-
   for zone_name in ('continent', 'ituzone', 'cqzone'):
     zone = str(getattr(opts, zone_name) or '')
     if zone:
@@ -200,10 +199,6 @@ def main():
 
   showdxcc = ShowDXCC(config, zone_name, zone, opts.date)
   showdxcc.get_dxcc(opts.delta)
-  if not showdxcc.is_data():
-    logging.info('No data for %s', opts.date)
-    return os.EX_DATAERR
-
   showdxcc.graph(filename)
   if opts.no_link is False:
     webp(filename)
