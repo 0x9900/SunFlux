@@ -78,6 +78,7 @@ class ShowDXCC:
     color_map = ShowDXCC.mk_colormap() #self.config.get('showdxcc.color_map', 'PRGn')
     fig, axgc = plt.subplots(figsize=(12,8), facecolor='white')
 
+    axgc.set_facecolor('#001155')
     # Show all ticks and label them with the respective list entries
     plt.xticks(np.arange(len(BANDS)), labels=BANDS, fontsize=14)
     plt.xlabel("Bands", fontsize=14)
@@ -199,12 +200,16 @@ def main():
 
   showdxcc = ShowDXCC(config, zone_name, zone, opts.date)
   showdxcc.get_dxcc(opts.delta)
+  if not showdxcc.is_data():
+    logging.info('No data for %s', opts.date)
+    return os.EX_DATAERR
+
   showdxcc.graph(filename)
   if opts.no_link is False:
     webp(filename)
     create_link(filename)
 
-  sys.exit(os.EX_OK)
+  return os.EX_OK
 
 if __name__ == "__main__":
   sys.exit(main())
