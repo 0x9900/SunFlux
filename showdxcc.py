@@ -43,9 +43,11 @@ class ShowDXCC:
       self.zone = f'"{zone}"'
 
     try:
-      self.zone_label = {'continent': 'de_cont',
-                         'ituzone': 'de_ituzone',
-                         'cqzone': 'de_cqzone'}[zone_name]
+      self.zone_label = {
+        'continent': ('de_cont', 'to_cont'),
+        'ituzone': ('de_ituzone', 'to_ituzone'),
+        'cqzone': ('de_cqzone', 'to_cqzone'),
+      }[zone_name]
     except KeyError:
       raise SystemError(f'Zone {zone_name} error') from None
 
@@ -56,7 +58,7 @@ class ShowDXCC:
     start_date = self.date - timedelta(hours=delta, minutes=0)
     end_date = self.date
     request = (f"SELECT band, de_cont, to_cont, COUNT(*) FROM dxspot WHERE band >= 6 "
-               f"AND {self.zone_label} = {self.zone} "
+               f"AND ({self.zone_label[0]} = {self.zone} OR {self.zone_label[1]} = {self.zone})"
                f"AND time > {start_date.timestamp()} "
                f"AND time <= {end_date.timestamp()} "
                "GROUP BY band, to_cont;")
