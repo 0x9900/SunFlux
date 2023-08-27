@@ -13,6 +13,7 @@ import os
 import sqlite3
 import sys
 
+from collections import deque
 from datetime import datetime, timedelta
 from itertools import product
 
@@ -53,6 +54,12 @@ class ShowDXCC:
 
   def is_data(self):
     return np.any(self.data)
+
+  @staticmethod
+  def center(continents, label):
+    deq = deque(continents)
+    deq.rotate(- 1 - (len(deq) // 2 + deq.index(label)))
+    return list(deq)
 
   def get_dxcc(self, delta=1):
     start_date = self.date - timedelta(hours=delta, minutes=0)
@@ -152,12 +159,20 @@ def create_link(filename):
 
 def webp(filename):
   path, fname = os.path.split(filename)
-  fname, _ = os.path.splitext(fname)
   webpfile = os.path.join(path, f'latest.webp')
   image = Image.open(filename)
-  image = image.resize((800,530))
+  image = image.resize((800, 530))
   image.save(webpfile, format='webp')
   logging.info('Image "%s" created', webpfile)
+
+
+def mk_thumbnail(filename):
+  path, fname = os.path.split(filename)
+  tn_file = os.path.join(path, f'tn_latest.png')
+  image = Image.open(filename)
+  image.thumbnail((600, 400))
+  image.save(tn_file, format='png', dpi=(100, 100))
+  logging.info('Thumbnail "%s" created', tn_file)
 
 
 def main():
@@ -177,6 +192,8 @@ def main():
                       help="Number of hours [default: %(default)d]")
   parser.add_argument("-L", "--no-link", action="store_true", default=False,
                       help="Update the link \"latest\"")
+  parser.add_argument("-T", "--thumbnail", action="store_true", default=False,
+                      help="Create a thumbnail file named \"tn_latest.png\"")
   z_group = parser.add_mutually_exclusive_group(required=True)
   z_group.add_argument("-c", "--continent", choices=CONTINENTS, help="Continent")
   z_group.add_argument("-I", "--ituzone", type=int, help="itu zone")
@@ -205,6 +222,8 @@ def main():
   if opts.no_link is False:
     webp(filename)
     create_link(filename)
+  if opts.thumbnail:
+    mk_thumbnail(filename)
 
   return os.EX_OK
 
