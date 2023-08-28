@@ -168,12 +168,11 @@ def webp(filename):
 
 def mk_thumbnail(filename):
   path, fname = os.path.split(filename)
+  tn_file = os.path.join(path, f'tn_latest.png')
   image = Image.open(filename)
   image.thumbnail((600, 400))
-  for format in ('png', 'webp'):
-    tn_file = os.path.join(path, f'tn_latest.' + format)
-    image.save(tn_file, format=format, dpi=(100, 100))
-    logging.info('Thumbnail "%s" created', tn_file)
+  image.save(tn_file, format='png', dpi=(100, 100))
+  logging.info('Thumbnail "%s" created', tn_file)
 
 
 def main():
