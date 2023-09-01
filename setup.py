@@ -52,6 +52,7 @@ setup(
     'ssngraph',
     'ssnhist',
     'sunfluxbot',
+    'tools',
     'xray_flux',
   ],
   install_requires=['numpy', 'matplotlib', 'python-telegram-bot'],
