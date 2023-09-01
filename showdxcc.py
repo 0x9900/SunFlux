@@ -87,7 +87,7 @@ class ShowDXCC:
     color_map = ShowDXCC.mk_colormap() #self.config.get('showdxcc.color_map', 'PRGn')
     fig, axgc = plt.subplots(figsize=(12,8), facecolor='white')
 
-    axgc.set_facecolor('#001155')
+    # axgc.set_facecolor('#001155')
     # Show all ticks and label them with the respective list entries
     plt.xticks(np.arange(len(BANDS)), labels=BANDS, fontsize=14)
     plt.xlabel("Bands", fontsize=14)
