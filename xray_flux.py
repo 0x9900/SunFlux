@@ -103,6 +103,7 @@ class XRayFlux:
     dates  = np.array(list(self.xray_data.keys()))
     data = np.array([d['flux'] for d in self.xray_data.values()])
     data = remove_outlier(data)
+    data[data < 10**-7] = np.nan
 
     fig = plt.figure(figsize=(12, 5))
     fig.subplots_adjust(bottom=0.15)
