@@ -27,6 +27,9 @@ import numpy as np
 from matplotlib import ticker
 
 from config import Config
+from tools import noaa_date
+from tools import noaa_date_hook
+from tools import remove_outliers
 
 # Older versions of numpy are too verbose when arrays contain np.nan values
 # This 2 lines will have to be removed in future versions of numpy
@@ -35,22 +38,16 @@ warnings.filterwarnings('ignore')
 NOAA_XRAY = 'https://services.swpc.noaa.gov/json/goes/primary/xrays-3-day.json'
 NOAA_FLARE = 'https://services.swpc.noaa.gov/json/goes/primary/xray-flares-7-day.json'
 
-def noaa_date(field):
-  return datetime.strptime(field, '%Y-%m-%dT%H:%M:%SZ')
-
-def noaa_date_hook(dct):
-  date = noaa_date(dct['time_tag'])
-  dct['time_tag'] = date
-  return dct
 
 def remove_outlier(points, low=25, high=95):
-  percent_lo = np.percentile(points, low, interpolation = 'midpoint')
-  percent_hi= np.percentile(points, high, interpolation = 'midpoint')
+  percent_lo = np.percentile(points, low, interpolation='midpoint')
+  percent_hi= np.percentile(points, high, interpolation='midpoint')
   iqr = percent_hi - percent_lo
   lower_bound = points <= (percent_lo - 5 * iqr)
   upper_bound = points >= (percent_hi + 5 * iqr)
   points[lower_bound | upper_bound] = np.nan
   return points
+
 
 class XRayFlux:
   def __init__(self, cache_file, cache_time=900):

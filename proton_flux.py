@@ -28,6 +28,8 @@ import numpy as np
 from matplotlib import ticker
 
 from config import Config
+from tools import noaa_date_hook
+from tools import remove_outliers
 
 # Older versions of numpy are too verbose when arrays contain np.nan values
 # This 2 lines will have to be removed in future versions of numpy
@@ -35,20 +37,6 @@ warnings.filterwarnings('ignore')
 
 NOAA_URL = 'https://services.swpc.noaa.gov/json/goes/primary/integral-protons-3-day.json'
 WARNING_THRESHOLD = 10**2
-
-def noaa_date(dct):
-  date = datetime.strptime(dct['time_tag'], '%Y-%m-%dT%H:%M:%SZ')
-  dct['time_tag'] = date
-  return dct
-
-def remove_outlier(points):
-  percent_lo = np.percentile(points, 25, interpolation = 'midpoint')
-  percent_hi= np.percentile(points, 95, interpolation = 'midpoint')
-  iqr = percent_hi - percent_lo
-  lower_bound = points <= (percent_lo - 5 * iqr)
-  upper_bound = points >= (percent_hi + 5 * iqr)
-  points[lower_bound | upper_bound] = np.nan
-  return points
 
 class ProtonFlux:
   def __init__(self, cache_file, cache_time=900):
@@ -79,7 +67,7 @@ class ProtonFlux:
     with urllib.request.urlopen(NOAA_URL) as res:
       webdata = res.read()
       encoding = res.info().get_content_charset('utf-8')
-      _data = json.loads(webdata.decode(encoding), object_hook=noaa_date)
+      _data = json.loads(webdata.decode(encoding), object_hook=noaa_date_hook)
 
     data = {}
     for elem in _data:
@@ -131,7 +119,7 @@ class ProtonFlux:
     _max = 0
     for _energy in energy:
       data = np.array([flux[_energy] for flux in self.data.values()])
-      data = remove_outlier(data)
+      data = remove_outliers(data)
       ax.plot(dates, data, linewidth=1.25, color=colors[_energy], zorder=2,
               label=f'>={_energy} MeV')
       _max = max(data.max(), _max)
