@@ -66,7 +66,7 @@ def graph(data, filename):
   trend, = axgc.plot(x, p(x), label='Trend', linestyle='--', color="red", linewidth=2)
   axgc.tick_params(labelsize=10)
 
-  for pos in set([f() for f in (y.argmax, y.argmin, lambda: x.size - 1)])
+  for pos in set([f() for f in (y.argmax, y.argmin, lambda: x.size - 1)]):
     xytext = (20, 20) if pos == x.size -1 else (20,-20)
     plt.annotate(f"{y[pos]:d}", (x[pos], y[pos]), textcoords="offset points", xytext=xytext,
                  ha='center', fontsize=10,
