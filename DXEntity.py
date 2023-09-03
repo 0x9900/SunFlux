@@ -48,6 +48,7 @@ class DXCC:
   def __init__(self):
     self._entities = defaultdict(set)
     self._max_len = 0
+    self.get_prefix = lru_cache(maxsize=LRU_CACHE_SIZE)(self.get_prefix)
     self._db = os.path.join(os.path.expanduser(CTY_HOME), CTY_DB)
     cty_file = os.path.join(os.path.expanduser(CTY_HOME), CTY_FILE)
 
@@ -77,7 +78,6 @@ class DXCC:
     _, info = self.get_prefix(call)
     return info
 
-  @lru_cache(LRU_CACHE_SIZE)
   def get_prefix(self, call):
     call = call.upper()
     prefixes = list({call[:c] for c in range(self._max_len, 0, -1)})

@@ -393,7 +393,7 @@ def main():
     if _signum == signal.SIGHUP:
       LOG.setLevel(logging.INFO if LOG.level == logging.DEBUG else logging.DEBUG)
     elif _signum == signal.SIGUSR1:
-      cache_info = DXCC.get_prefix.cache_info()
+      cache_info = parse_spot.dxcc.get_prefix.cache_info() # ugly but it works.
       rate = 100 * cache_info.hits / (cache_info.misses + cache_info.hits)
       LOG.info("DXEntities cache %s -> %.2f", cache_info, rate)
 
