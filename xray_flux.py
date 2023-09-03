@@ -129,19 +129,18 @@ class XRayFlux:
     ax.plot(dates, data, linewidth=1.5, color="tab:blue", zorder=2, label='X-Ray Flux')
 
     class_colors = {'X': 'tab:red', 'M': 'tab:orange', 'C': 'tab:blue',
-                    'B': 'tab:gray', 'A': 'tab:cyan'}
+                    'B': 'tab:olive', 'A': 'tab:cyan'}
     for flare in self.flare_data:
-      start = noaa_date(flare['begin_time'])
-      end = noaa_date(flare['end_time'])
-      if end < dates.min():
-        continue
       try:
-        fclass = flare['max_class'][0]
+        start = noaa_date(flare['begin_time'])
+        end = noaa_date(flare['end_time'])
+        fclass = flare.get('max_class')[0]
+        if end < dates.min():
+          continue
         ax.axvspan(mdates.date2num(start), mdates.date2num(end), color=class_colors[fclass],
-                   label=f'{fclass} Class Flare', alpha=0.2)
-      except TypeError:
-        pass
-
+                   label=f'{fclass} Class Flare', alpha=0.25)
+      except TypeError as err:
+        logging.error("%s - %s", flare, err)
 
     handles, labels = ax.get_legend_handles_labels()
     unique = dict(zip(labels, handles))
