@@ -20,10 +20,11 @@ import socket
 import sys
 import time
 
+from collections import defaultdict
 from collections import namedtuple
 from datetime import datetime
 from itertools import cycle
-from queue import Queue, Empty
+from queue import Queue, Full
 from telnetlib import Telnet
 from threading import Thread
 
@@ -92,36 +93,43 @@ def create_db(config):
 
 
 class DBInsert(Thread):
-  QUEUE_TIMEOUT = 30
 
   def __init__(self, config, queue):
     super().__init__()
     self.config = config
     self.queue = queue
 
+  def read_queue(self):
+    requests = defaultdict(list)
+    while self.queue.qsize():
+      command, data = self.queue.get()
+      requests[command].append(data)
+    return requests
+
   def run(self):
-    conn = connect_db(self.config)
     # Run forever and consume the queue
+    conn = connect_db(self.config)
+    while True:
+      requests = self.read_queue()
+      if not requests:
+        time.sleep(.5)
+        continue
+      for command, data in requests.items():
+        LOG.debug('data size %d', len(data))
+        self.write(conn, command, data)
+
+  def write(self, conn, command, data):
+    # Loop until the database unlocks
     while True:
       try:
-        request = self.queue.get(timeout=self.QUEUE_TIMEOUT)
-      except Empty:
-        LOG.warning('The queue has been empty for %d seconds', self.QUEUE_TIMEOUT)
-        continue
-
-      if self.queue.qsize() > 1:
-        LOG.debug('Queue size: **** %d ****', self.queue.qsize())
-      # Loop until the database is unlocked
-      while True:
-        try:
-          with conn:
-            curs = conn.cursor()
-            curs.execute(*request)
-        except sqlite3.OperationalError as err:
-          time.sleep(1)         # short pause
-          LOG.warning("Queue len: %d - Error: %s", self.queue.qsize(), err)
-        else:
-          break
+        with conn:
+          curs = conn.cursor()
+          curs.executemany(command, data)
+      except sqlite3.OperationalError as err:
+        LOG.warning("Write error: %s - Queue len: %d", err, self.queue.qsize())
+        time.sleep(2)         # short pause
+      else:
+        break
 
 
 class Record(namedtuple('UserRecord', FIELDS)):
@@ -314,6 +322,11 @@ def parse_wwv(line):
   fields['time'] = datetime.utcnow()
   return fields
 
+def queue_job(queue, command, data):
+  try:
+    queue.put([command, data], timeout=15)
+  except Full:
+    LOG.warning('Queue FULL, size: %d, job discarded', queue.qsize())
 
 def read_stream(queue, telnet):
   timeout_count = max_timeout_count = 3
@@ -326,19 +339,21 @@ def read_stream(queue, telnet):
       if not rec:
         continue
       LOG.debug("%s - DX %r", telnet.host, rec)
-      queue.put(["INSERT INTO dxspot VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (
-        rec.DE, rec.FREQUENCY, rec.DX, rec.MESSAGE, rec.DE_CONT, rec.TO_CONT,
-        rec.DE_ITUZONE, rec.TO_ITUZONE, rec.DE_CQZONE, rec.TO_CQZONE, rec.MODE, rec.SIGNAL,
-        rec.BAND, rec.DX_TIME)])
+      queue_job(
+        queue, "INSERT INTO dxspot VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        (rec.DE, rec.FREQUENCY, rec.DX, rec.MESSAGE, rec.DE_CONT, rec.TO_CONT, rec.DE_ITUZONE,
+         rec.TO_ITUZONE, rec.DE_CQZONE, rec.TO_CQZONE, rec.MODE, rec.SIGNAL, rec.BAND, rec.DX_TIME)
+      )
     elif code == 1:
       fields = parse_wwv(buffer)
       if not fields:
         LOG.error("WWV parsing Error: %s", buffer)
         continue
       LOG.info("WWV Fields %s", repr(fields))
-      queue.put(["INSERT INTO wwv VALUES (?,?,?,?,?)", (
-        fields['SFI'], fields['A'], fields['K'], fields['conditions'],
-        fields['time'])])
+      queue_job(
+        queue, "INSERT INTO wwv VALUES (?,?,?,?,?)",
+        (fields['SFI'], fields['A'], fields['K'], fields['conditions'],fields['time'])
+      )
     elif code == 2:
       LOG.info('%s Message: %s', telnet.host, buffer.decode('UTF-8', 'replace').strip())
     elif code == -1:            # timeout
@@ -384,7 +399,7 @@ def main():
 
   create_db(config)
 
-  queue = Queue(config.get('queue_len', 0))
+  queue = Queue(config.get('queue_len', 1024))
   db_thread = DBInsert(config, queue)
   db_thread.daemon = True
   db_thread.start()
