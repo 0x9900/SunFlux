@@ -53,11 +53,14 @@ class DXCC:
     cty_file = os.path.join(os.path.expanduser(CTY_HOME), CTY_FILE)
 
     try:
-      if os.path.exists(self._db):
+      fstat = os.stat(self._db)
+      if fstat.st_mtime + CTY_EXPIRE > time.time():
         logging.info('Using DXCC cache %s', self._db)
         with dbm.open(self._db, 'r') as cdb:
           self._entities, self._max_len = marshal.loads(cdb['_meta_data_'])
         return
+    except FileNotFoundError:
+      logging.error('DXEntity cache not found')
     except dbm.error as err:
       logging.error(err)
 
@@ -110,13 +113,6 @@ class DXCC:
 
   @staticmethod
   def load_cty(cty_file):
-    try:
-      fstat = os.stat(cty_file)
-      if fstat.st_mtime + CTY_EXPIRE < time.time():
-        return
-    except IOError:
-      pass
-
     cty_tmp = cty_file + '.tmp'
     try:
       urlretrieve(CTY_URL, cty_tmp)
