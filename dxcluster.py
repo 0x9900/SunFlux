@@ -115,7 +115,7 @@ class DBInsert(Thread):
         time.sleep(.5)
         continue
       for command, data in requests.items():
-        LOG.debug('data size %d', len(data))
+        LOG.debug('%s queue size %d', command[:7], len(data))
         self.write(conn, command, data)
 
   def write(self, conn, command, data):
