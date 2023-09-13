@@ -119,7 +119,7 @@ class ShowDXCC:
                    fontsize=16, fontweight='bold')
     fig.text(0.02, .03, f'(c){self.date.year} W6BSD https://bsdworld.org/', fontsize=14,
              style='italic')
-    fig.text(0.65, .95, f'{self.date.strftime("%A %B %d %Y - %H:%M")} GMT', fontsize=14)
+    fig.text(0.72, .95, f'{self.date.strftime("%a %b %d %Y - %H:%M")} GMT', fontsize=14)
     fig.tight_layout()
     logging.info('Save "%s"', filename)
     fig.savefig(filename, transparent=False, dpi=100)
