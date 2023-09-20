@@ -74,7 +74,7 @@ class KPIForecast:
       elif obs == "predicted":
         colors[pos] = 'darkgrey'
 
-    date = datetime.utcnow().strftime('%Y:%m:%d %H:%M UTC')
+    date = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
     plt.rc('xtick', labelsize=10)
     plt.rc('ytick', labelsize=10)
     fig = plt.figure(figsize=(12, 5))
