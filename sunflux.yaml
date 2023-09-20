@@ -1,60 +1,65 @@
 ---
 dxcluster:
   call: N0CALL
-  email: your@email.addr
   db_name: /tmp/cluster/cluster.db
   db_timeout: 5
+  email: your@email.addr
   log_file: /tmp/cluster/cluster.log
   log_level: INFO
+  purge_time: 408                # in hours
+  queue_len: 2048
   servers:
-  - 24.227.38.202:7373
   - K9lc.ddns.net:7300
-  - dx.maritimecontestclub.ca:7373
-  - dxc.ai9t.com:7373
-  - dxc.n4zkf.com:23
-  - dxc.nc7j.com:7373
+  - dxc.n4zkf.com:7373
   - dxc.w3lpl.net:7373
   - dxc.w4mya.us:7373
   - dxc.w9pa.net:7374
-  - dxc.wd4ixd.net:7373
-  - dxspots.com:23
   - k2can.us:7373
+  - ve7cc.net:23
+  - w9dp.dxcluster.net:7373
+  - 24.227.38.202:7373
+  - dx.maritimecontestclub.ca:7373
+  - dxc.ai9t.com:7373
+  - dxc.nc7j.com:73
   - k4md.no-ip.com:7373
   - n6ws.ddns.net:7300
-  - n8dxe.dxengineering.com:7373
-  - ve7cc.net:23
-  - w3gq.no-ip.com:7373
-  - w3lpl.net:7373
-  - w9dp.dxcluster.net:7373
+
 sunfluxbot:
-  cache_dir: /tmp
+  cache_dir: /tmp/cluster
   token: 1234567890:YourTokenGoesHere
 
-ssngraph:
-  cache_file: /tmp/ssn.pkl
+fluxgraph:
+  cache_file: /tmp/cluster/flux.pkl
   cache_time: 43200
 
-fluxgraph:
-  cache_file: /tmp/flux.pkl
+outlookgraph:
+  cache_file: /tmp/cluster/outlook.dat
   cache_time: 43200
 
 kpiwwv:
-  cache_file: /tmp/kpiwwv-noaa.json
+  cache_file: /tmp/cluster/kpiwwv-noaa.json
   cache_time: 10800
 
-pkiforecast:
-  cache_file: /tmp/kpiforecast.pkl
-  cache_time: 21600
+kpiforecast:
+  cache_file: /tmp/cluster/kpiforecast.pkl
+  cache_time: 900
 
 showdxcc:
-  db_name: /tmp/cluster/cluster.db
-  color_map: PRGn
-  interleave: gaussian
+  db_name: /tmp/cluster/dxcluster.db
+  target_dir: /var/www/html/DXCC
 
-ssn:
-  cache_dir: /tmp
-  cache_file: /tmp/ssn.pkl
-
-outlookgraph:
-  cache_file: /tmp/outlook.dat
+ssngraph:
+  cache_file: /tmp/cluster/ssn.pkl
   cache_time: 43200
+
+ssnhist:
+  cache_history: /var/tmp/cluster/ssnhist.json
+  cache_precictions: /var/tmp/cluster/ssnpredict.json
+  cache_time: 864000
+
+eisngraph:
+  cache_file: /tmp/cluster/eisn.pkl
+
+aindex:
+  db_name: /tmp/cluster/dxcluster.db
+  nb_days: 17
