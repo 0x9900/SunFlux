@@ -204,6 +204,7 @@ def cc_options(call, telnet, _):
 
 
 def login(call, telnet, email=None):
+  call = call.upper()
   expect_exp = [
     b'Running CC Cluster.*\n',
     b'AR-Cluster.*\n',
@@ -227,9 +228,13 @@ def login(call, telnet, email=None):
   except EOFError as err:
     raise OSError(err) from None
 
-  prompt = [str.encode(f'{call} de .*\n')]
+  prompt = [s.encode('utf-8') for s in  (f'{call} de .*\n', 'not a valid callsign')]
   telnet.write(str.encode(f'{call}\n'))
-  _, match, _ = telnet.expect(prompt, 5)
+  code, match, b = telnet.expect(prompt, TELNET_TIMEOUT)
+  if code == 1:
+    LOG.error('Login error %s %s', call, match.group())
+    raise OSError('The call sign should be a valid callsign followed by / and a letter')
+
   match = match.group().decode('UTF-8')
   LOG.info('%s - Reply: %s', telnet.host, match.strip())
   set_options(call, telnet, email)
