@@ -36,7 +36,7 @@ class Config:
         self.log.debug('Reading config file: %s', filename)
         try:
           self.config_data = self._read_config(filename)
-        except ValueError as err:
+        except (yaml.scanner.ScannerError, ValueError) as err:
           self.log.error('Configuration error "%s"', err)
           sys.exit(os.EX_CONFIG)
         return
