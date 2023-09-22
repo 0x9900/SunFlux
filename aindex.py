@@ -49,7 +49,11 @@ def get_conditions(db_name):
   with conn:
     curs = conn.cursor()
     result = curs.execute(WWV_CONDITIONS).fetchone()
-  return result[0]
+  try:
+    conditions = result[0]
+  except TypeError:
+    conditions = 'No Storms -> No Storms'
+  return conditions
 
 def get_wwv(db_name, days):
   data = []
