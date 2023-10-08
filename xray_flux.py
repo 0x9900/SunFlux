@@ -140,7 +140,7 @@ class XRayFlux:
         ax.axvspan(mdates.date2num(start), mdates.date2num(end), color=class_colors[fclass],
                    label=f'{fclass} Class Flare', alpha=0.25)
       except TypeError as err:
-        logging.error("%s - %s", flare, err)
+        logging.error("Data error: %s Ignoring", err)
 
     handles, labels = ax.get_legend_handles_labels()
     unique = dict(zip(labels, handles))
