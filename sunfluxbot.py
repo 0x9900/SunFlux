@@ -233,9 +233,7 @@ def help_command(update: Update, _context: CallbackContext):
     "> /swx - Solar indices overview",
     "> /warning - Warning time lines",
     "> /wind - Solar wind",
-    "",
     "\n_For more information or contact see /credits_",
-    "More solar activity graphs at https://bsdworld.org/",
   ]
   update.message.reply_text("\n".join(_help), parse_mode='Markdown')
   user = update.message.chat.username or "Stranger"
@@ -245,6 +243,8 @@ def help_command(update: Update, _context: CallbackContext):
 
 def send_credits(update: Update, _context: CallbackContext):
   _credits = [
+    "More solar activity graphs at https://bsdworld.org/",
+    "",
     "The solar data courtesy of NOAA",
     "> https://swpc.noaa.gov",
     "The DXCC heatmap data courtesy of the following clusters:",
