@@ -51,7 +51,6 @@ setup(
     'solarwind',
     'ssngraph',
     'ssnhist',
-    'sunfluxbot',
     'tools',
     'xray_flux',
   ],
@@ -72,7 +71,6 @@ setup(
       'solarwind = solarwind:main',
       'ssngraph = ssngraph:main',
       'ssnhist = ssnhist:main',
-      'sunfluxbot = sunfluxbot:main',
       'xray_flux = xray_flux:main',
     ]
   },
