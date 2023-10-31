@@ -38,7 +38,6 @@ setup(
     'adapters',
     'aindex',
     'config',
-    'dxcluster',
     'eisngraph',
     'fluxgraph',
     'graphmodes',
@@ -46,7 +45,6 @@ setup(
     'kpiwwv',
     'outlookgraph',
     'proton_flux',
-    'purge_cluster',
     'showdxcc',
     'solarwind',
     'ssngraph',
@@ -58,7 +56,6 @@ setup(
   entry_points = {
     'console_scripts': [
       'aindex = aindex:main',
-      'dxcluster = dxcluster:main',
       'eisngraph = eisngraph:main',
       'fluxgraph = fluxgraph:main',
       'graphmodes = graphmodes:main',
@@ -66,7 +63,6 @@ setup(
       'kpiwwv = kpiwwv:main',
       'outlookgraph = outlookgraph:main',
       'proton_flux = proton_flux:main',
-      'purge_cluster = purge_cluster:main',
       'showdxcc = showdxcc:main',
       'solarwind = solarwind:main',
       'ssngraph = ssngraph:main',

@@ -105,12 +105,17 @@ def main():
   parser.add_argument('name', help='Name of the graph', nargs="*", default=['/tmp/modes.png'])
   opts = parser.parse_args()
 
-  _config = Config()
-  config = _config.get('dxcluster')
-  del _config
+  try:
+    _config = Config()
+    config = _config['graphmode']
+    del _config
+  except KeyError as err:
+    logging.error(err)
+    return os.EX_CONFIG
 
   data = read_data(config, opts.days)
   graph(data, opts.name.pop(0))
+  return os.EX_OK
 
 if __name__ == "__main__":
   main()
