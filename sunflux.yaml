@@ -1,8 +1,4 @@
 ---
-sunfluxbot:
-  cache_dir: /tmp/cluster
-  token: 1234567890:YourTokenGoesHere
-
 fluxgraph:
   cache_file: /tmp/cluster/flux.pkl
   cache_time: 43200
