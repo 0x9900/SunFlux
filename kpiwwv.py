@@ -32,7 +32,7 @@ NOAA_URL = "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
 
 NB_DAYS = 7
 
-WWV_REQUEST = "SELECT wwv.time, wwv.K FROM wwv WHERE wwv.time > ?"
+WWV_REQUEST = "SELECT wwv.time, wwv.k FROM wwv WHERE wwv.time > ?"
 WWV_CONDITIONS = "SELECT conditions FROM wwv ORDER BY time DESC LIMIT 1"
 
 def bucket(dtm, size=6):
