@@ -28,13 +28,13 @@ plt.style.use(['classic', 'fast'])
 NB_DAYS = 34
 
 WWV_REQUEST = """
-SELECT MAX(wwv.A), AVG(wwv.A), MIN(wwv.A), DATE(DATETIME(wwv.time, "unixepoch")) AS dt
+SELECT MAX(wwv.a), AVG(wwv.a), MIN(wwv.a), DATE(DATETIME(wwv.time, "unixepoch")) AS dt
 FROM wwv
 WHERE wwv.time > ?
 GROUP BY dt
 """
-
 WWV_CONDITIONS = "SELECT conditions FROM wwv ORDER BY time DESC LIMIT 1"
+
 
 def color_complement(hue, saturation, value, alpha):
   rgb = colorsys.hsv_to_rgb(hue, saturation, value)
@@ -55,6 +55,7 @@ def get_conditions(db_name):
     conditions = 'No Storms -> No Storms'
   return conditions
 
+
 def get_wwv(db_name, days):
   data = []
   start_date = datetime.utcnow() - timedelta(days=days)
@@ -68,6 +69,7 @@ def get_wwv(db_name, days):
       data.append((dte, *res[:-1]))
   return data
 
+
 def autolabel(ax, rects):
   """Attach a text label above each bar displaying its height"""
   for rect in rects:
@@ -76,8 +78,8 @@ def autolabel(ax, rects):
     ax.text(rect.get_x() + rect.get_width() / 2., 1, f'{int(height)}',
             color=color_complement(*color), fontsize="10", ha='center')
 
-def graph(data, condition, filename):
 
+def graph(data, condition, filename):
   datetm = np.array([d[0] for d in data])
   amax = np.array([d[1] for d in data])
   amin = np.array([d[3] for d in data])
@@ -131,6 +133,7 @@ def graph(data, condition, filename):
   plt.savefig(filename, transparent=False, dpi=100)
   plt.close()
   return filename
+
 
 def main():
   _config = Config()
