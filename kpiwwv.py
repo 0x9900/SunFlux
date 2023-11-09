@@ -38,6 +38,7 @@ WWV_CONDITIONS = "SELECT conditions FROM wwv ORDER BY time DESC LIMIT 1"
 def bucket(dtm, size=6):
   return int(size * int(dtm.hour / size))
 
+
 def get_conditions(config):
   conn = sqlite3.connect(config['showdxcc.db_name'], timeout=5,
                          detect_types=sqlite3.PARSE_DECLTYPES)
@@ -45,6 +46,7 @@ def get_conditions(config):
     curs = conn.cursor()
     result = curs.execute(WWV_CONDITIONS).fetchone()
   return result[0]
+
 
 def get_kpindex(config):
   data = defaultdict(list)
@@ -72,6 +74,7 @@ def get_kpindex(config):
 
   return data
 
+
 def get_wwv(config):
   data = get_kpindex(config)
   days = config.get('kpiwwv.nb_days', NB_DAYS)
@@ -88,6 +91,7 @@ def get_wwv(config):
       data[date].append(elem[1])
 
   return sorted(data.items())
+
 
 def graph(data, condition, filename):
   datetm = np.array([d[0] for d in data])

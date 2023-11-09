@@ -10,8 +10,11 @@
 import colorsys
 import logging
 import os
+import pickle
 import sqlite3
 import sys
+import time
+import urllib.request
 
 from datetime import datetime, timedelta
 
@@ -27,8 +30,10 @@ plt.style.use(['classic', 'fast'])
 
 NB_DAYS = 34
 
+NOAA_URL = "https://services.swpc.noaa.gov/text/daily-geomagnetic-indices.txt"
+
 WWV_REQUEST = """
-SELECT MAX(wwv.a), AVG(wwv.a), MIN(wwv.a), DATE(DATETIME(wwv.time, "unixepoch")) AS dt
+SELECT MAX(wwv.A), AVG(wwv.A), MIN(wwv.A), DATE(DATETIME(wwv.time, "unixepoch")) AS dt
 FROM wwv
 WHERE wwv.time > ?
 GROUP BY dt
@@ -56,18 +61,61 @@ def get_conditions(db_name):
   return conditions
 
 
-def get_wwv(db_name, days):
-  data = []
+def download_aindex(cache_file):
+  data = {}
+  with urllib.request.urlopen(NOAA_URL) as res:
+    encoding = res.info().get_content_charset('utf-8')
+    for line in res:
+      line = line.decode(encoding)
+      if line.startswith(':') or line.startswith('#'):
+        continue
+      try:
+        date = datetime.strptime(f"{line[0:10]}", "%Y %m %d")
+        aindex = int(line[57:63])
+        data[date] = tuple(float(aindex) for _ in range(3))
+      except ValueError:
+        pass
+
+  with open(cache_file, 'wb') as cfd:
+    pickle.dump(data, cfd)
+
+
+def get_aindex(config):
+  cache_file = config.get('aindex.cache_file', '/tmp/aindex-noaa.pkl')
+  cache_time = config.get('aindex.cache_time', 3600*12)
+  now = time.time()
+
+  try:
+    filest = os.stat(cache_file)
+    if now - filest.st_mtime > cache_time:
+      raise FileNotFoundError
+  except FileNotFoundError:
+    download_aindex(cache_file)
+
+  with open(cache_file, 'rb') as cfd:
+    _data = pickle.load(cfd)
+
+  return _data
+
+def get_wwv(config):
+  noaa_aindex = get_aindex(config)
+  db_name = config['db_name']
+  days = config.get('nb_days', NB_DAYS)
   start_date = datetime.utcnow() - timedelta(days=days)
+  data = {}
+  for date, values in noaa_aindex.items():
+    if date >= start_date:
+      data[date] = values
+
   conn = sqlite3.connect(db_name, timeout=5,
                          detect_types=sqlite3.PARSE_DECLTYPES)
   with conn:
     curs = conn.cursor()
-    results = curs.execute(WWV_REQUEST, (start_date,))
+    results = curs.execute(WWV_REQUEST, (start_date.timestamp(),))
     for res in results:
-      dte = datetime.strptime(res[-1], '%Y-%m-%d')
-      data.append((dte, *res[:-1]))
-  return data
+      date = datetime.strptime(res[-1], '%Y-%m-%d')
+      data[date] = res[:-1]
+  return [(d, *v) for d, v in data.items()]
 
 
 def autolabel(ax, rects):
@@ -101,7 +149,8 @@ def graph(data, condition, filename):
   fig.suptitle('A-Index', fontsize=14, fontweight='bold')
   fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
   fig.text(0.15, 0.8, "Forecast: " + condition, fontsize=12, zorder=4,
-           bbox=dict(boxstyle='round', linewidth=1, facecolor='linen', alpha=1, pad=.8))
+           bbox={'boxstyle': 'round', 'linewidth': 1, 'facecolor': 'linen', 'alpha': 1,
+                  'pad': 0.8})
 
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
@@ -152,7 +201,7 @@ def main():
   except IndexError:
     name = '/tmp/aindex.png'
 
-  data = get_wwv(config['db_name'], config.get('nb_days', NB_DAYS))
+  data = get_wwv(config)
   condition = get_conditions(config['db_name'])
   if data:
     graph(data, condition, name)
