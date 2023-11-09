@@ -38,7 +38,7 @@ FROM wwv
 WHERE wwv.time > ?
 GROUP BY dt
 """
-WWV_CONDITIONS = "SELECT conditions FROM wwv ORDER BY time DESC LIMIT 1"
+WWV_CONDITIONS = "SELECT conditions FROM wwv WHERE time > ? ORDER BY time DESC LIMIT 1"
 
 
 def color_complement(hue, saturation, value, alpha):
@@ -48,16 +48,18 @@ def color_complement(hue, saturation, value, alpha):
   return c_hsv + (alpha, )
 
 
-def get_conditions(db_name):
+def get_conditions(config):
+  db_name = config['db_name']
+  start_time = datetime.utcnow() - timedelta(days=1)
   conn = sqlite3.connect(db_name, timeout=5,
                          detect_types=sqlite3.PARSE_DECLTYPES)
   with conn:
     curs = conn.cursor()
-    result = curs.execute(WWV_CONDITIONS).fetchone()
-  try:
-    conditions = result[0]
-  except TypeError:
-    conditions = 'No Storms -> No Storms'
+    result = curs.execute(WWV_CONDITIONS, (start_time,)).fetchone()
+    try:
+      conditions = result[0]
+    except TypeError:
+      conditions = 'No Storms -> No Storms'
   return conditions
 
 
@@ -202,7 +204,7 @@ def main():
     name = '/tmp/aindex.png'
 
   data = get_wwv(config)
-  condition = get_conditions(config['db_name'])
+  condition = get_conditions(config)
   if data:
     graph(data, condition, name)
     logger.info('Graph "%s" saved', name)
