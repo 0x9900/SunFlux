@@ -10,6 +10,7 @@
 import json
 import logging
 import os
+import re
 import sqlite3
 import sys
 import time
@@ -33,19 +34,27 @@ NOAA_URL = "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
 NB_DAYS = 7
 
 WWV_REQUEST = "SELECT wwv.time, wwv.k FROM wwv WHERE wwv.time > ?"
-WWV_CONDITIONS = "SELECT conditions FROM wwv ORDER BY time DESC LIMIT 1"
+WWV_CONDITIONS = "SELECT conditions FROM wwv WHERE time > ? ORDER BY time DESC LIMIT 1"
 
 def bucket(dtm, size=6):
   return int(size * int(dtm.hour / size))
 
 
 def get_conditions(config):
-  conn = sqlite3.connect(config['showdxcc.db_name'], timeout=5,
+  db_name = config['showdxcc.db_name']
+  start_time = datetime.utcnow() - timedelta(days=1)
+  conn = sqlite3.connect(db_name, timeout=5,
                          detect_types=sqlite3.PARSE_DECLTYPES)
   with conn:
     curs = conn.cursor()
-    result = curs.execute(WWV_CONDITIONS).fetchone()
-  return result[0]
+    result = curs.execute(WWV_CONDITIONS, (start_time,)).fetchone()
+    try:
+      conditions = result[0]
+    except TypeError:
+      return None
+  if re.match(r'(No Storm.*){2}', conditions):
+    return None
+  return conditions
 
 
 def get_kpindex(config):
@@ -115,8 +124,9 @@ def graph(data, condition, filename):
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('Planetary K-Index', fontsize=14, fontweight='bold')
   fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
-  fig.text(0.15, 0.8, "Forecast: " + condition, fontsize=12, zorder=4,
-           bbox=dict(boxstyle='round', linewidth=1, facecolor='linen', alpha=1, pad=.8))
+  if condition:
+    fig.text(0.15, 0.8, "Forecast: " + condition, fontsize=12, zorder=4,
+             bbox=dict(boxstyle='round', linewidth=1, facecolor='linen', alpha=1, pad=.8))
 
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)

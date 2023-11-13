@@ -11,6 +11,7 @@ import colorsys
 import logging
 import os
 import pickle
+import re
 import sqlite3
 import sys
 import time
@@ -59,7 +60,9 @@ def get_conditions(config):
     try:
       conditions = result[0]
     except TypeError:
-      conditions = 'No Storms -> No Storms'
+      return None
+  if re.match(r'(No Storm.*){2}', conditions):
+    return None
   return conditions
 
 
@@ -73,8 +76,8 @@ def download_aindex(cache_file):
         continue
       try:
         date = datetime.strptime(f"{line[0:10]}", "%Y %m %d")
-        aindex = int(line[57:63])
-        data[date] = tuple(float(aindex) for _ in range(3))
+        aindex = sorted([int(line[11:17]), int(line[33:40]), int(line[57:63])])
+        data[date] = tuple(aindex)
       except ValueError:
         pass
 
@@ -150,9 +153,10 @@ def graph(data, condition, filename):
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('A-Index', fontsize=14, fontweight='bold')
   fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
-  fig.text(0.15, 0.8, "Forecast: " + condition, fontsize=12, zorder=4,
-           bbox={'boxstyle': 'round', 'linewidth': 1, 'facecolor': 'linen', 'alpha': 1,
-                  'pad': 0.8})
+  if condition:
+    fig.text(0.15, 0.8, "Forecast: " + condition, fontsize=12, zorder=4,
+             bbox={'boxstyle': 'round', 'linewidth': 1, 'facecolor': 'linen', 'alpha': 1,
+                    'pad': 0.8})
 
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
