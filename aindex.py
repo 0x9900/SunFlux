@@ -76,8 +76,8 @@ def download_aindex(cache_file):
         continue
       try:
         date = datetime.strptime(f"{line[0:10]}", "%Y %m %d")
-        aindex = sorted([int(line[11:17]), int(line[33:40]), int(line[57:63])])
-        data[date] = tuple(aindex)
+        aindex = sorted([float(line[11:17]), float(line[33:40]), float(line[57:63])])
+        data[date] = tuple([max(aindex), sum(aindex)/len(aindex), min(aindex)])
       except ValueError:
         pass
 
@@ -118,8 +118,11 @@ def get_wwv(config):
     curs = conn.cursor()
     results = curs.execute(WWV_REQUEST, (start_date.timestamp(),))
     for res in results:
-      date = datetime.strptime(res[-1], '%Y-%m-%d')
-      data[date] = res[:-1]
+      try:
+        date = datetime.strptime(res[-1], '%Y-%m-%d')
+        data[date] = res[:-1]
+      except TypeError:
+        pass
   return [(d, *v) for d, v in data.items()]
 
 
@@ -135,8 +138,8 @@ def autolabel(ax, rects):
 def graph(data, condition, filename):
   datetm = np.array([d[0] for d in data])
   amax = np.array([d[1] for d in data])
-  amin = np.array([d[3] for d in data])
   aavg = np.array([d[2] for d in data])
+  amin = np.array([d[3] for d in data])
 
   colors = ['lightgreen'] * len(aavg)
   for pos, val in enumerate(aavg):
@@ -175,8 +178,7 @@ def graph(data, condition, filename):
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
   axgc.xaxis.set_major_locator(loc)
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
-
-  axgc.set_ylim(0, max(amax) * 1.15)
+  axgc.set_ylim(0, max(amax) * 1.1)
   axgc.set_ylabel('A-Index')
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
