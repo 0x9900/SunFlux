@@ -11,6 +11,7 @@ import argparse
 import json
 import logging
 import os
+import pickle
 import sqlite3
 import sys
 import urllib.request
@@ -39,7 +40,15 @@ NOAA_URL = 'https://services.swpc.noaa.gov/json/f107_cm_flux.json'
 def bucket(dtm, size=8):
   return int(size * int(dtm.hour / size))
 
-def download_flux():
+def download_flux(config, days=NB_DAYS):
+  # This function will be completely rewriten once we have more data.
+  cache_file = config.get('fluxgraph.cache_file', '/tmp/flux_data.pkl')
+  try:
+    with open(cache_file, 'rb') as fdf:
+      data_flux = pickle.load(fdf)
+  except FileNotFoundError:
+    data_flux = defaultdict(list)
+
   with urllib.request.urlopen(NOAA_URL) as res:
     webdata = res.read()
     encoding = res.info().get_content_charset('utf-8')
@@ -51,7 +60,17 @@ def download_flux():
     date = date.replace(hour=bucket(date), minute=0, second=0, microsecond=0)
     data[date].append(elem['flux'])
 
-  return sorted(data.items())
+  data_flux.update(data)
+  try:
+    with open(cache_file, 'wb') as fdf:
+      pickle.dump(data_flux, fdf)
+  except OSError as err:
+    logging.error(err)
+
+  start_date = datetime.utcnow() - timedelta(days=days)
+  selected = {k: v for k, v in data_flux.items() if k >= start_date}
+  return sorted(selected.items())
+
 
 def get_flux(config, days=NB_DAYS):
   data = defaultdict(list)
@@ -136,7 +155,7 @@ def main():
   opts = parser.parse_args()
 
   # data = get_flux(config, opts.days)
-  data = download_flux()
+  data = download_flux(config, days=NB_DAYS)
   if not data:
     logger.warning('No data collected')
     return os.EX_DATAERR
