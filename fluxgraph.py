@@ -8,10 +8,12 @@
 #
 
 import argparse
+import json
 import logging
 import os
 import sqlite3
 import sys
+import urllib.request
 
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -21,6 +23,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import adapters
+import tools
 
 from config import Config
 
@@ -31,10 +34,24 @@ MIN_TICKS = 55
 
 WWV_REQUEST = "SELECT wwv.time, wwv.SFI FROM wwv WHERE wwv.time > ?"
 
+NOAA_URL = 'https://services.swpc.noaa.gov/json/f107_cm_flux.json'
 
 def bucket(dtm, size=8):
   return int(size * int(dtm.hour / size))
 
+def download_flux():
+  with urllib.request.urlopen(NOAA_URL) as res:
+    webdata = res.read()
+    encoding = res.info().get_content_charset('utf-8')
+    _data = json.loads(webdata.decode(encoding))
+
+  data = defaultdict(list)
+  for elem in _data:
+    date = tools.noaa_date(elem['time_tag']+'Z')
+    date = date.replace(hour=bucket(date), minute=0, second=0, microsecond=0)
+    data[date].append(elem['flux'])
+
+  return sorted(data.items())
 
 def get_flux(config, days=NB_DAYS):
   data = defaultdict(list)
@@ -118,7 +135,8 @@ def main():
   parser.add_argument('name', help='Name of the graph', nargs="*", default=['/tmp/flux.png'])
   opts = parser.parse_args()
 
-  data = get_flux(config, opts.days)
+  # data = get_flux(config, opts.days)
+  data = download_flux()
   if not data:
     logger.warning('No data collected')
     return os.EX_DATAERR
