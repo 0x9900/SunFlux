@@ -29,7 +29,7 @@ from config import Config
 
 plt.style.use(['classic', 'fast'])
 
-NB_DAYS = 34
+NB_DAYS = 30
 
 NOAA_URL = "https://services.swpc.noaa.gov/text/daily-geomagnetic-indices.txt"
 
