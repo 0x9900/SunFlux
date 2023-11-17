@@ -41,6 +41,9 @@ GROUP BY dt
 """
 WWV_CONDITIONS = "SELECT conditions FROM wwv WHERE time > ? ORDER BY time DESC LIMIT 1"
 
+MAX = 1
+AVG = 2
+MIN = 3
 
 def color_complement(hue, saturation, value, alpha):
   rgb = colorsys.hsv_to_rgb(hue, saturation, value)
@@ -85,10 +88,12 @@ def download_aindex(cache_file):
     pickle.dump(data, cfd)
 
 
-def get_aindex(config):
-  cache_file = config.get('aindex.cache_file', '/tmp/aindex-noaa.pkl')
-  cache_time = config.get('aindex.cache_time', 3600*12)
+def get_noaa(config):
+  cache_file = config.get('cache_file', '/tmp/aindex-noaa.pkl')
+  cache_time = config.get('cache_time', 3600*12)
+  days = config.get('nb_days', NB_DAYS)
   now = time.time()
+  start_date = datetime.utcnow() - timedelta(days=days)
 
   try:
     filest = os.stat(cache_file)
@@ -100,17 +105,18 @@ def get_aindex(config):
   with open(cache_file, 'rb') as cfd:
     _data = pickle.load(cfd)
 
-  return _data
+  data = {}
+  for date, values in _data.items():
+    if date >= start_date:
+      data[date] = values
+  return data
+
 
 def get_wwv(config):
-  noaa_aindex = get_aindex(config)
-  db_name = config['db_name']
+  db_name = config.get('db_name')
   days = config.get('nb_days', NB_DAYS)
   start_date = datetime.utcnow() - timedelta(days=days)
   data = {}
-  for date, values in noaa_aindex.items():
-    if date >= start_date:
-      data[date] = values
 
   conn = sqlite3.connect(db_name, timeout=5,
                          detect_types=sqlite3.PARSE_DECLTYPES)
@@ -123,7 +129,7 @@ def get_wwv(config):
         data[date] = res[:-1]
       except TypeError:
         pass
-  return [(d, *v) for d, v in data.items()]
+  return data
 
 
 def autolabel(ax, rects):
@@ -136,13 +142,12 @@ def autolabel(ax, rects):
 
 
 def graph(data, condition, filename):
-  datetm = np.array([d[0] for d in data])
-  amax = np.array([d[1] for d in data])
-  aavg = np.array([d[2] for d in data])
-  amin = np.array([d[3] for d in data])
+  values = np.row_stack(list(data.values()))
+  keys_column = np.array(list(data.keys())).reshape((-1, 1))
+  data = np.hstack((keys_column, values))
 
-  colors = ['lightgreen'] * len(aavg)
-  for pos, val in enumerate(aavg):
+  colors = ['lightgreen'] * data[:,0].size
+  for pos, val in enumerate(data[:,AVG]):
     if 20 < val < 30:
       colors[pos] = 'darkorange'
     elif 30 < val < 50:
@@ -163,9 +168,9 @@ def graph(data, condition, filename):
 
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
-  bars = axgc.bar(datetm, aavg, linewidth=0.75, zorder=2, color=colors)
-  axgc.plot(datetm, amax, marker='v', linewidth=0, color="steelblue")
-  axgc.plot(datetm, amin, marker='^', linewidth=0, color="navy")
+  bars = axgc.bar(data[:,0], data[:,AVG], linewidth=0.75, zorder=2, color=colors)
+  axgc.plot(data[:,0], data[:,MAX], marker='v', linewidth=0, color="steelblue")
+  axgc.plot(data[:,0], data[:,MIN], marker='^', linewidth=0, color="navy")
   autolabel(axgc, bars)
 
   axgc.axhline(y=20, linewidth=1.5, zorder=1, color='green')
@@ -178,7 +183,7 @@ def graph(data, condition, filename):
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
   axgc.xaxis.set_major_locator(loc)
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
-  axgc.set_ylim(0, max(amax) * 1.1)
+  axgc.set_ylim(0, data[:,MAX].max() * 1.1)
   axgc.set_ylabel('A-Index')
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
@@ -209,8 +214,10 @@ def main():
   except IndexError:
     name = '/tmp/aindex.png'
 
-  data = get_wwv(config)
+  data = get_noaa(config)
+  data.update(get_wwv(config))
   condition = get_conditions(config)
+
   if data:
     graph(data, condition, name)
     logger.info('Graph "%s" saved', name)
