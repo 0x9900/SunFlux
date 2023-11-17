@@ -109,7 +109,9 @@ def graph(data, condition, filename):
   values = np.full((len(data), 3), np.nan, dtype=object)
   for i, row in enumerate(data.values()):
     row = np.array(row)
-    values[i,:3] = [np.nanmin(row), np.nanmedian(row), np.nanmax(row)]
+    avg = np.average(row)
+    avg = avg if avg > 0 else 0.1
+    values[i,:3] = [np.min(row), avg, np.max(row)]
 
   key_dates = np.array(list(data.keys())).reshape((-1, 1))
   data = np.hstack((key_dates, values))
