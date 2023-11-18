@@ -57,9 +57,9 @@ def get_conditions(config):
   return conditions
 
 
-def get_kpindex(config):
+def get_pkindex(config):
   data = defaultdict(list)
-  cache_file = config.get('cache_file', '/tmp/kpiww-noaa.json')
+  cache_file = config.get('cache_file', '/tmp/pkiwwv-noaa.json')
   cache_time = config.get('cache_time', 10800)
   days = config.get('nb_days', NB_DAYS)
   start_date = datetime.utcnow() - timedelta(days=days)
@@ -170,14 +170,14 @@ def main():
     format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
     level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
   )
-  logger = logging.getLogger('kpiwwv')
-  config = Config().get('kpiwwv')
+  logger = logging.getLogger('pkiwwv')
+  config = Config().get('pkiwwv')
   try:
     name = sys.argv[1]
   except IndexError:
-    name = '/tmp/kpi.png'
+    name = '/tmp/pki.png'
 
-  data = get_kpindex(config)
+  data = get_pkindex(config)
   data.update(get_wwv(config))
   condition = get_conditions(config)
   if data:

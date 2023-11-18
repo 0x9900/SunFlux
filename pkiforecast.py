@@ -7,6 +7,7 @@
 #
 #
 
+import argparse
 import json
 import logging
 import os
@@ -27,9 +28,13 @@ NOAA_URL = 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forec
 
 plt.style.use(['classic', 'fast'])
 
-class KPIForecast:
+logging.basicConfig(
+  format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
+)
+logger = logging.getLogger('pkiforecast')
+
+class PKIForecast:
   def __init__(self, cache_file, cache_time=21600):
-    self.log = logging.getLogger('KPIForecast')
     self.cachefile = cache_file
     self.data = None
 
@@ -45,13 +50,12 @@ class KPIForecast:
     finally:
       self.readcache()
 
-  def graph(self, filename):
-    if not self.data:
-      self.log.warning('No data to graph')
-      return None
+  def is_data(self):
+    return bool(self.data)
 
+  def graph(self, filenames):
     start_date = datetime.utcnow() - timedelta(days=3, hours=4)
-    end_date = datetime.utcnow() + timedelta(days=1, hours=6)
+    end_date = datetime.utcnow() + timedelta(days=1, hours=3)
     xdates = np.array([d[0] for d in self.data if start_date < d[0] < end_date])
     yvalues = np.array([d[1] for d in self.data if start_date < d[0] < end_date])
     observ = [d[2] for d in self.data if start_date < d[0] < end_date]
@@ -105,13 +109,14 @@ class KPIForecast:
     fig.autofmt_xdate(rotation=10, ha="center")
 
     plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {date}')
-    plt.savefig(filename, transparent=False, dpi=100)
+    for filename in filenames:
+      plt.savefig(filename, transparent=False, dpi=100)
+      logger.info('Graph "%s" saved', filename)
     plt.close()
-    self.log.info('Graph "%s" saved', filename)
     return filename
 
   def download(self):
-    self.log.info('Downloading data from NOAA')
+    logger.info('Downloading data from NOAA')
     data = []
 
     with urllib.request.urlopen(NOAA_URL) as res:
@@ -126,7 +131,7 @@ class KPIForecast:
 
   def readcache(self):
     """Read data from the cache"""
-    self.log.debug('Read from cache "%s"', self.cachefile)
+    logger.debug('Read from cache "%s"', self.cachefile)
     try:
       with open(self.cachefile, 'rb') as fd_cache:
         data = pickle.load(fd_cache)
@@ -136,27 +141,27 @@ class KPIForecast:
 
   def writecache(self):
     """Write data into the cachefile"""
-    self.log.debug('Write cache "%s"', self.cachefile)
+    logger.debug('Write cache "%s"', self.cachefile)
     with open(self.cachefile, 'wb') as fd_cache:
       pickle.dump(self.data, fd_cache)
 
 def main():
-  logging.basicConfig(
-    format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
-    level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
-  )
-  config = Config()
-  try:
-    name = sys.argv[1]
-  except IndexError:
-    name = '/tmp/kpiforecast.png'
+  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+  config = Config().get('pkiforecast')
 
-  cache_file = config.get('kpiforecast.cache_file', '/tmp/kpiforecast.pkl')
-  cache_time = config.get('kpiforecast.cache_time', 21600)
-  kpi = KPIForecast(cache_file, cache_time)
-  if not kpi.graph(name):
+  parser = argparse.ArgumentParser()
+  parser.add_argument('names', help='Name of the graph', nargs="*",
+                      default=['/tmp/pkiforecast.png'])
+  opts = parser.parse_args()
+
+  cache_file = config.get('cache_file', '/tmp/pkiforecast.pkl')
+  cache_time = config.get('cache_time', 21600)
+  pki = PKIForecast(cache_file, cache_time)
+  if not pki.is_data():
+    logger.warning('No data to graph')
     return os.EX_DATAERR
-
+  else:
+    pki.graph(opts.names)
   return os.EX_OK
 
 if __name__ == "__main__":
