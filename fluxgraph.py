@@ -37,7 +37,6 @@ NOAA_URL = 'https://services.swpc.noaa.gov/json/f107_cm_flux.json'
 
 logging.basicConfig(
   format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
-  level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
 )
 logger = logging.getLogger('fluxgraph')
 
