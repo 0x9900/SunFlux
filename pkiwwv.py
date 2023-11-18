@@ -7,6 +7,7 @@
 #
 #
 
+import argparse
 import json
 import logging
 import os
@@ -28,6 +29,11 @@ import adapters
 from config import Config
 
 plt.style.use(['classic', 'fast'])
+
+logging.basicConfig(
+  format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
+)
+logger = logging.getLogger('pkiwwv')
 
 NOAA_URL = "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
 
@@ -105,7 +111,8 @@ def get_wwv(config):
   return data
 
 
-def graph(data, condition, filename):
+def graph(data, condition, filenames):
+  # pylint: disable=too-many-locals
   values = np.full((len(data), 3), np.nan, dtype=object)
   for i, row in enumerate(data.values()):
     row = np.array(row)
@@ -160,29 +167,30 @@ def graph(data, condition, filename):
               facecolor='linen', borderaxespad=1)
 
   fig.autofmt_xdate(rotation=10, ha="center")
-  plt.savefig(filename, transparent=False, dpi=100)
+  for filename in filenames:
+    plt.savefig(filename, transparent=False, dpi=100)
+    logger.info('Graph "%s" saved', filename)
   plt.close()
-  return filename
+
 
 def main():
   adapters.install_adapters()
-  logging.basicConfig(
-    format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
-    level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
-  )
-  logger = logging.getLogger('pkiwwv')
+  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config().get('pkiwwv')
-  try:
-    name = sys.argv[1]
-  except IndexError:
-    name = '/tmp/pki.png'
+
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-D', '--days', default=config.get('nb_days', NB_DAYS), type=int,
+                      help='Number of days to graph [Default: %(default)s]')
+  parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/pkindex.png'])
+  opts = parser.parse_args()
+
+  config['nb_days'] = opts.days
 
   data = get_pkindex(config)
   data.update(get_wwv(config))
   condition = get_conditions(config)
   if data:
-    graph(data, condition, name)
-    logger.info('Graph "%s" saved', name)
+    graph(data, condition, opts.names)
   else:
     logger.warning('No data collected')
 
