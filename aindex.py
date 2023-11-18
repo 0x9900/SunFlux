@@ -7,6 +7,7 @@
 #
 #
 
+import argparse
 import colorsys
 import logging
 import os
@@ -28,6 +29,12 @@ import adapters
 from config import Config
 
 plt.style.use(['classic', 'fast'])
+
+logging.basicConfig(
+  format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
+  level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
+)
+logger = logging.getLogger('aindex')
 
 NB_DAYS = 30
 
@@ -141,9 +148,9 @@ def autolabel(ax, rects):
             color=color_complement(*color), fontsize="10", ha='center')
 
 
-def graph(data, condition, filename):
-  values = np.row_stack(list(data.values()))
-  keys_column = np.array(list(data.keys())).reshape((-1, 1))
+def graph(data, condition, filenames):
+  values = np.row_stack([d[1] for d in data])
+  keys_column = np.array([d[0] for d in data]).reshape((-1, 1))
   data = np.hstack((keys_column, values))
 
   colors = ['lightgreen'] * data[:,0].size
@@ -192,35 +199,32 @@ def graph(data, condition, filename):
               facecolor='linen', borderaxespad=1)
 
   fig.autofmt_xdate(rotation=10, ha="center")
-  plt.savefig(filename, transparent=False, dpi=100)
+  for filename in filenames:
+    plt.savefig(filename, transparent=False, dpi=100)
+    logger.info('Graph "%s" saved', filename)
   plt.close()
-  return filename
 
 
 def main():
-  _config = Config()
-  config = _config.get('aindex')
-  del _config
-
   adapters.install_adapters()
-  logging.basicConfig(
-    format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
-    level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
-  )
-  logger = logging.getLogger('aindex')
+  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+  config = Config().get('aindex')
 
-  try:
-    name = sys.argv[1]
-  except IndexError:
-    name = '/tmp/aindex.png'
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-D', '--days', default=config.get('nb_days', NB_DAYS), type=int,
+                      help='Number of days to graph [Default: %(default)s]')
+  parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/aindex.png'])
+  opts = parser.parse_args()
+
+  config['nb_days'] = opts.days
 
   data = get_noaa(config)
   data.update(get_wwv(config))
+  data = sorted(list(data.items()))
   condition = get_conditions(config)
 
   if data:
-    graph(data, condition, name)
-    logger.info('Graph "%s" saved', name)
+    graph(data, condition, opts.names)
   else:
     logger.warning('No data collected')
 
