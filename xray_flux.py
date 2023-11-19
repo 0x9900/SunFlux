@@ -7,6 +7,7 @@
 #
 #
 
+import argparse
 import json
 import logging
 import math
@@ -29,7 +30,11 @@ from matplotlib import ticker
 from config import Config
 from tools import noaa_date
 from tools import noaa_date_hook
-from tools import remove_outliers
+
+logging.basicConfig(
+  format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
+)
+logger = logging.getLogger('XRayFlux')
 
 # Older versions of numpy are too verbose when arrays contain np.nan values
 # This 2 lines will have to be removed in future versions of numpy
@@ -51,10 +56,9 @@ def remove_outlier(points, low=25, high=95):
 
 class XRayFlux:
   def __init__(self, cache_file, cache_time=900):
-    self.log = logging.getLogger("XRayFlux")
     self.cachefile = cache_file
     self.data = None
-    self.log.debug('Import XRay Flux')
+    logger.debug('Import XRay Flux')
     now = time.time()
     try:
       filest = os.stat(self.cachefile)
@@ -67,7 +71,7 @@ class XRayFlux:
       self.readcache()
 
   def download(self):
-    self.log.info('Downloading XRayFlux data from NOAA')
+    logger.info('Downloading XRayFlux data from NOAA')
 
     with urllib.request.urlopen(NOAA_XRAY) as res:
       webdata = res.read()
@@ -82,7 +86,7 @@ class XRayFlux:
 
   def readcache(self):
     """Read data from the cache"""
-    self.log.debug('Read from cache "%s"', self.cachefile)
+    logger.debug('Read from cache "%s"', self.cachefile)
     try:
       with open(self.cachefile, 'rb') as fd_cache:
         self.xray_data = pickle.load(fd_cache)
@@ -94,12 +98,13 @@ class XRayFlux:
 
   def writecache(self):
     """Write data into the cachefile"""
-    self.log.debug('Write cache "%s"', self.cachefile)
+    logger.debug('Write cache "%s"', self.cachefile)
     with open(self.cachefile, 'wb') as fd_cache:
       pickle.dump(self.xray_data, fd_cache)
       pickle.dump(self.flare_data, fd_cache)
 
-  def graph(self, imagename):
+  def graph(self, image_names):
+    # pylint: disable=too-many-locals
     dates  = np.array(list(self.xray_data.keys()))
     data = np.array([d['flux'] for d in self.xray_data.values()])
     data = remove_outlier(data)
@@ -149,26 +154,26 @@ class XRayFlux:
 
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
     plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {today}', fontsize=12)
-    fig.savefig(imagename, transparent=False, dpi=100)
+    for name in image_names:
+      fig.savefig(name, transparent=False, dpi=100)
+      logger.info('Saved "%s"', name)
     plt.close()
-    self.log.info('Saved "%s"', imagename)
 
 
 def main():
-  logging.basicConfig(
-    format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
-    level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
-  )
-  config = Config()
-  try:
-    name = sys.argv[1]
-  except IndexError:
-    name = '/tmp/xray_flux.png'
+  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+  config = Config().get('xray_flux', {})
 
-  cache_file = config.get('xrayflux.cache_file', '/tmp/xrayflux.pkl')
-  cache_time = config.get('xrayflux.cache_time', 900)
+  parser = argparse.ArgumentParser()
+  parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/pkindex.png'])
+  opts = parser.parse_args()
+
+  config = Config()
+
+  cache_file = config.get('cache_file', '/tmp/xrayflux.pkl')
+  cache_time = config.get('cache_time', 900)
   xray = XRayFlux(cache_file, cache_time)
-  xray.graph(name)
+  xray.graph(opts.names)
 
 if __name__ == "__main__":
   sys.exit(main())
