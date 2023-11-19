@@ -42,7 +42,6 @@ logging.basicConfig(
 logger = logging.getLogger('ProtonFlux')
 
 
-
 NOAA_URL = 'https://services.swpc.noaa.gov/json/goes/primary/integral-protons-3-day.json'
 WARNING_THRESHOLD = 10**2
 

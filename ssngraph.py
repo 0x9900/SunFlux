@@ -7,6 +7,7 @@
 #
 #
 
+import argparse
 import logging
 import os
 import pickle
@@ -26,6 +27,11 @@ from matplotlib.ticker import MultipleLocator
 from config import Config
 
 plt.style.use(['classic', 'fast'])
+
+logging.basicConfig(
+  format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
+)
+logger = logging.getLogger('SSN')
 
 NOAA_URL = 'https://services.swpc.noaa.gov/text/daily-solar-indices.txt'
 
@@ -99,14 +105,16 @@ class SSN:
       return True
     return False
 
-  def graph(self, filename):
-    if not self.data:
-      self.log.warning('No data to graph')
-      return None
+  def is_data(self):
+    return bool(self.data)
 
-    xtime = np.array([d[0] for d in self.data])
-    ssn = np.array([x[2] for x in self.data])
-    flux = np.array([x[1] for x in self.data])
+  def graph(self, image_names):
+    # pylint: disable=too-many-locals
+    data = np.array(self.data)
+
+    xtime = data[:,0]
+    ssn = data[:,2]
+    flux = data[:,1]
     avg = moving_average(ssn)
 
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
@@ -117,22 +125,23 @@ class SSN:
     axgc.tick_params(labelsize=10)
     axgc.plot(xtime, ssn, marker='o', markersize=7, color="darkolivegreen", linewidth=1)
     axgc.plot(xtime, avg, color="blue", linewidth=2, zorder=5)
-    axgc.plot(xtime, flux, linestyle='--', color="cornflowerblue", linewidth=1)
+    axgc.plot(xtime, flux, linestyle='-.', color="blue", linewidth=1)
     loc = mdates.DayLocator(interval=int(1+len(xtime)/11))
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.DayLocator())
     axgc.yaxis.set_major_locator(MultipleLocator(25))
     axgc.yaxis.set_minor_locator(MultipleLocator(5))
+    axgc.set_ylabel('Sun Sport Number')
 
-    axgc.set_ylim(np.min([ssn, flux])*0.2, np.max([ssn, flux])*1.2)
+    axgc.set_ylim(np.min([ssn, flux])*0.2, np.max([ssn, flux])*1.15)
     axgc.minorticks_on()
 
     sign = cycle([-1, 1])
     for _x, _y, _s in zip(xtime, ssn, sign):
       plt.annotate(f"{_y:d}", (_x, _y), textcoords="offset points", xytext=(0, 20*_s),
                    ha='center', fontsize=8,
-                   arrowprops=dict(arrowstyle="->", color='green'))
+                   arrowprops={"arrowstyle": "->", "color": 'green'})
 
     axgc.legend(['Sun spot', '5day average', '10.7cm Flux'], facecolor="linen", fontsize="10",
                 loc='best')
@@ -140,28 +149,32 @@ class SSN:
 
     axgc.margins(.01)
     fig.autofmt_xdate(rotation=10, ha="center")
-    plt.savefig(filename, transparent=False, dpi=100)
+    for name in image_names:
+      try:
+        plt.savefig(name, transparent=False, dpi=100)
+        logger.info('Graph "%s" saved', name)
+      except ValueError as err:
+        logger.error(err)
     plt.close()
-    self.log.info('Graph "%s" saved', filename)
-    return filename
+
 
 def main():
-  logging.basicConfig(
-    format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
-    level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
-  )
-  config = Config()
-  try:
-    name = sys.argv[1]
-  except IndexError:
-    name = '/tmp/ssn.png'
+  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+  config = Config().get('ssngraph', {})
 
-  cache_file = config.get('ssngraph.cache_file', '/tmp/ssn.pkl')
-  cache_time = config.get('ssngraph.cache_time', 43200)
+  parser = argparse.ArgumentParser()
+  parser.add_argument('names', help='Name of the graph', nargs="*",
+                      default=['/tmp/solarwind.png'])
+  opts = parser.parse_args()
+
+  cache_file = config.get('cache_file', '/tmp/ssn.pkl')
+  cache_time = config.get('cache_time', 43200)
   ssn = SSN(cache_file, cache_time)
-  if not ssn.graph(name):
+  if not ssn.is_data():
+    logger.error('No data to graph')
     return os.EX_DATAERR
 
+  ssn.graph(opts.names)
   return os.EX_OK
 
 if __name__ == "__main__":
