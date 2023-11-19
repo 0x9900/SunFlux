@@ -7,6 +7,7 @@
 #
 #
 
+import argparse
 import logging
 import os
 import sys
@@ -23,6 +24,11 @@ import numpy as np
 from config import Config
 
 plt.style.use(['classic', 'fast'])
+
+logging.basicConfig(
+  format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
+)
+logger = logging.getLogger('outloot')
 
 NOAA_URL = 'https://services.swpc.noaa.gov/text/27-day-outlook.txt'
 
@@ -57,15 +63,15 @@ class OutLook:
           continue
         self.data.append(Record(line.split()))
 
-  def graph(self, filename):
-    if not self.data:
-      self.log.warning('No data to graph')
-      return None
+  def is_data(self):
+    return bool(self.data)
 
-    dates = np.array([d[0] for d in self.data])
-    flux = np.array([int(x[1]) for x in self.data])
-    aindex = np.array([int(x[2]) for x in self.data])
-    kindex = np.array([int(x[3]) for x in self.data])
+  def graph(self, filenames):
+    data = np.array(self.data)
+    dates = data[:,0]
+    flux = data[:,1]
+    aindex = data[:,2]
+    kindex = data[:,3]
     now = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
 
     fig = plt.figure(figsize=(12, 5))
@@ -104,10 +110,10 @@ class OutLook:
     plt.subplots_adjust(top=0.91, bottom=0.15)
 
     plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {now}')
-    plt.savefig(filename, transparent=False, dpi=100)
+    for filename in filenames:
+      plt.savefig(filename, transparent=False, dpi=100)
+      logger.info('Graph "%s" saved', filename)
     plt.close()
-    self.log.info('Graph "%s" saved', filename)
-    return filename
 
   @staticmethod
   def draw_aindex(axe, dates, aindex):
@@ -153,22 +159,20 @@ class OutLook:
 
 
 def main():
-  logging.basicConfig(
-    format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
-    level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
-  )
-  config = Config()
-  try:
-    name = sys.argv[1]
-  except IndexError:
-    name = '/tmp/outlook.png'
+  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+  config = Config().get('outlookgraph', {})
+
+  parser = argparse.ArgumentParser()
+  parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/outlook.png'])
+  opts = parser.parse_args()
 
   cache_file = config.get('outlookgraph.cache_file', '/tmp/outlook.dat')
   cache_time = config.get('outlookgraph.cache_time', 43200)
   outlook = OutLook(cache_file, cache_time)
-  if not outlook.graph(name):
+  if not outlook.is_data():
+    logger.warning('No data to graph')
     return os.EX_DATAERR
-
+  outlook.graph(opts.names)
   return os.EX_OK
 
 if __name__ == "__main__":
