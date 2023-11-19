@@ -146,7 +146,6 @@ def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/eisn.png'])
   opts = parser.parse_args()
-  config = Config()
 
   cache_file = config.get('cache_file', '/tmp/eisn.pkl')
   cache_time = config.get('cache_time', 43200)
