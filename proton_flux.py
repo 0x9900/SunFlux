@@ -7,6 +7,7 @@
 #
 #
 
+import argparse
 import json
 import logging
 import math
@@ -35,15 +36,21 @@ from tools import remove_outliers
 # This 2 lines will have to be removed in future versions of numpy
 warnings.filterwarnings('ignore')
 
+logging.basicConfig(
+  format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
+)
+logger = logging.getLogger('ProtonFlux')
+
+
+
 NOAA_URL = 'https://services.swpc.noaa.gov/json/goes/primary/integral-protons-3-day.json'
 WARNING_THRESHOLD = 10**2
 
 class ProtonFlux:
   def __init__(self, cache_file, cache_time=900):
-    self.log = logging.getLogger('ProtonFlux')
     self.cachefile = cache_file
     self.data = None
-    self.log.debug('Import Proton Flux')
+    logger.debug('Import Proton Flux')
     now = time.time()
     try:
       filest = os.stat(self.cachefile)
@@ -56,7 +63,7 @@ class ProtonFlux:
       self.readcache()
 
   def download(self):
-    self.log.info('Downloading data from NOAA')
+    logger.info('Downloading data from NOAA')
     _re = re.compile(r'>=(\d+)\sMeV')
 
     def get_e(field):
@@ -81,7 +88,7 @@ class ProtonFlux:
 
   def readcache(self):
     """Read data from the cache"""
-    self.log.debug('Read from cache "%s"', self.cachefile)
+    logger.debug('Read from cache "%s"', self.cachefile)
     try:
       with open(self.cachefile, 'rb') as fd_cache:
         data = pickle.load(fd_cache)
@@ -91,11 +98,15 @@ class ProtonFlux:
 
   def writecache(self):
     """Write data into the cachefile"""
-    self.log.debug('Write cache "%s"', self.cachefile)
+    logger.debug('Write cache "%s"', self.cachefile)
     with open(self.cachefile, 'wb') as fd_cache:
       pickle.dump(self.data, fd_cache)
 
-  def graph(self, imagename):
+  def is_data(self):
+    return bool(self.data)
+
+  def graph(self, image_names):
+    # pylint: disable=too-many-locals
     energy = (10, 30, 50, 100)  # Graphs to plot
     colors = {10: "tab:orange", 30: "tab:olive", 50: "tab:blue", 100: "tab:cyan"}
     fig = plt.figure(figsize=(12, 5))
@@ -141,28 +152,34 @@ class ProtonFlux:
 
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
     plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {today}', fontsize=12)
-    fig.savefig(imagename, transparent=False, dpi=100)
+    for name in image_names:
+      try:
+        fig.savefig(name, transparent=False, dpi=100)
+        logger.info('Saved "%s"', name)
+      except ValueError as err:
+        logger.error(err)
+
     plt.close()
-    self.log.info('Saved "%s"', imagename)
 
 
 def main():
-  logging.basicConfig(
-    format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
-    level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
-  )
-  config = Config()
-  try:
-    name = sys.argv[1]
-  except IndexError:
-    name = '/tmp/proton_flux.png'
+  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+  config = Config().get("proton_flux", {})
 
-  cache_file = config.get('protonflux.cache_file', '/tmp/proton_flux.pkl')
-  cache_time = config.get('protonflux.cache_time', 900)
+  parser = argparse.ArgumentParser()
+  parser.add_argument('names', help='Name of the graph', nargs="*",
+                      default=['/tmp/proton_flux.png'])
+  opts = parser.parse_args()
+
+  cache_file = config.get('cache_file', '/tmp/proton_flux.pkl')
+  cache_time = config.get('cache_time', 900)
+
   p_f = ProtonFlux(cache_file, cache_time)
-  if not p_f.graph(name):
+  if not p_f.is_data():
+    logger.error('No data collected')
     return os.EX_DATAERR
 
+  p_f.graph(opts.names)
   return os.EX_OK
 
 if __name__ == "__main__":
