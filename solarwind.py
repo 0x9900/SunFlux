@@ -7,6 +7,7 @@
 #
 #
 
+import argparse
 import json
 import logging
 import os
@@ -31,17 +32,20 @@ from config import Config
 # This 2 lines will have to be removed in future versions of numpy
 warnings.filterwarnings('ignore')
 
-NOAA_URL = 'https://services.swpc.noaa.gov/products/solar-wind/plasma-3-day.json'
+logging.basicConfig(
+  format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
+)
+logger = logging.getLogger('SolarWind')
 
 plt.style.use(['classic', 'fast'])
 
+NOAA_URL = 'https://services.swpc.noaa.gov/products/solar-wind/plasma-3-day.json'
 
 class SolarWind:
   def __init__(self, cache_file, cache_time=900):
-    self.log = logging.getLogger('SolarWind')
     self.cachefile = cache_file
     self.data = None
-    self.log.debug('Import SolarWind')
+    logger.debug('Import SolarWind')
     now = time.time()
     try:
       filest = os.stat(self.cachefile)
@@ -54,7 +58,7 @@ class SolarWind:
       self.readcache()
 
   def download(self):
-    self.log.info('Downloading data from NOAA')
+    logger.info('Downloading data from NOAA')
     with urllib.request.urlopen(NOAA_URL) as res:
       webdata = res.read()
       encoding = res.info().get_content_charset('utf-8')
@@ -68,7 +72,7 @@ class SolarWind:
 
   def readcache(self):
     """Read data from the cache"""
-    self.log.debug('Read from cache "%s"', self.cachefile)
+    logger.debug('Read from cache "%s"', self.cachefile)
     try:
       with open(self.cachefile, 'rb') as fd_cache:
         data = pickle.load(fd_cache)
@@ -78,7 +82,7 @@ class SolarWind:
 
   def writecache(self):
     """Write data into the cachefile"""
-    self.log.debug('Write cache "%s"', self.cachefile)
+    logger.debug('Write cache "%s"', self.cachefile)
     with open(self.cachefile, 'wb') as fd_cache:
       pickle.dump(self.data, fd_cache)
 
@@ -88,9 +92,13 @@ class SolarWind:
       return np.nan
     return float(num)
 
-  def graph(self, imagename):
+  def is_data(self):
+    return bool(self.data.size)
+
+  def graph(self, image_names):
+    # pylint: disable=too-many-locals
     colors = {0: "gray", 1: "orange", 2: "plum"}
-    labels = {0: "Density $1/cm^3$", 1: "Speed $km/S$", 2: "Temp $^{\circ}K$"}
+    labels = {0: r"Density $1/cm^3$", 1: r"Speed $km/S$", 2: r"Temp $^{\circ}K$"}
     limits = {0: [0, 12], 1: [250, 750]} #,  2: [10**3, 10**6]}
     fig, ax = plt.subplots(3, 1, figsize=(12, 5))
     fig.suptitle('Solar Wind (plasma)', fontsize=14, fontweight='bold')
@@ -121,26 +129,32 @@ class SolarWind:
 
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
     plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {today}', fontsize=10)
-    self.log.info('Save "%s"', imagename)
-    fig.savefig(imagename, transparent=False, dpi=100)
+    for name in image_names:
+      try:
+        fig.savefig(name, transparent=False, dpi=100)
+        logger.info('Save "%s"', name)
+      except ValueError as err:
+        logger.error(err)
     plt.close()
 
 
 def main():
-  logging.basicConfig(
-    format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
-    level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
-  )
-  config = Config()
-  try:
-    name = sys.argv[1]
-  except IndexError:
-    name = '/tmp/solarwind.png'
+  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+  config = Config().get('solarwind', {})
 
-  cache_file = config.get('solarwind.cache_file', '/tmp/solarwind.pkl')
-  cache_time = config.get('solarwind.cache_time', 900)
+  parser = argparse.ArgumentParser()
+  parser.add_argument('names', help='Name of the graph', nargs="*",
+                      default=['/tmp/solarwind.png'])
+  opts = parser.parse_args()
+
+  cache_file = config.get('cache_file', '/tmp/solarwind.pkl')
+  cache_time = config.get('cache_time', 900)
   wind = SolarWind(cache_file, cache_time)
-  wind.graph(name)
+  if not wind.is_data():
+    logger.error('No data to plot')
+    return os.EX_DATAERR
+
+  wind.graph(opts.names)
   return os.EX_OK
 
 if __name__ == "__main__":
