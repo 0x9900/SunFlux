@@ -32,15 +32,17 @@ logging.basicConfig(
 logger = logging.getLogger('EISN')
 
 SIDC_URL = 'https://www.sidc.be/silso/DATA/EISN/EISN_current.csv'
+NB_DAYS = 90
 
 class EISN:
-  def __init__(self, cache_file, cache_time=43200):
-    self.data = EISN.read_cache(cache_file)
-
+  def __init__(self, cache_file, days=NB_DAYS, cache_time=43200):
+    data = EISN.read_cache(cache_file)
     if EISN.is_expired(cache_file, cache_time):
       logger.info('Downloading data from SIDC')
-      self.data = EISN.read_url(SIDC_URL, self.data)
-      EISN.write_cache(cache_file, self.data)
+      data = EISN.read_url(SIDC_URL, data)
+      EISN.write_cache(cache_file, data)
+    days = abs(days) * -1			# making sure we have a negative number
+    self.data = data[days:]
 
   @staticmethod
   def read_url(url, current_data):
@@ -144,12 +146,14 @@ def main():
   config = Config().get('eisn', {})
 
   parser = argparse.ArgumentParser()
+  parser.add_argument('-D', '--days', default=config.get('nb_days', NB_DAYS), type=int,
+                      help='Number of days to graph [Default: %(default)s]')
   parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/eisn.png'])
   opts = parser.parse_args()
 
   cache_file = config.get('cache_file', '/tmp/eisn.pkl')
   cache_time = config.get('cache_time', 43200)
-  eisn = EISN(cache_file, cache_time)
+  eisn = EISN(cache_file, opts.days, cache_time)
   if not eisn.is_data():
     logger.warning('No data to graph')
     return os.EX_DATAERR
