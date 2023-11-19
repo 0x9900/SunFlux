@@ -7,6 +7,7 @@
 #
 #
 
+import argparse
 import csv
 import logging
 import os
@@ -25,15 +26,19 @@ from config import Config
 
 plt.style.use(['classic', 'fast'])
 
+logging.basicConfig(
+  format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
+)
+logger = logging.getLogger('EISN')
+
 SIDC_URL = 'https://www.sidc.be/silso/DATA/EISN/EISN_current.csv'
 
 class EISN:
   def __init__(self, cache_file, cache_time=43200):
-    self.log = logging.getLogger('EISN')
     self.data = EISN.read_cache(cache_file)
 
     if EISN.is_expired(cache_file, cache_time):
-      self.log.info('Downloading data from SIDC')
+      logger.info('Downloading data from SIDC')
       self.data = EISN.read_url(SIDC_URL, self.data)
       EISN.write_cache(cache_file, self.data)
 
@@ -89,16 +94,16 @@ class EISN:
       return True
     return False
 
-  def graph(self, filename):
-    if not self.data:
-      self.log.warning('No data to graph')
-      return None
+  def is_data(self):
+    return bool(self.data)
 
-    x = np.array([d[0] for d in self.data])
-    y = np.array([int(x[2]) for x in self.data])
-    error = np.array([float(x[3]) for x in self.data])
-    vdata = np.array([int(x[4]) for x in self.data])
-    cdata = np.array([int(x[5]) for x in self.data])
+  def graph(self, filenames):
+    data = np.array(self.data)
+    x = data[:,0]
+    y = data[:,2].astype(np.float64)
+    error = data[:,3].astype(np.float64)
+    vdata = data[:,4].astype(np.float64)
+    cdata = data[:,5].astype(np.float64)
 
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
     fig = plt.figure(figsize=(12, 5))
@@ -107,7 +112,7 @@ class EISN:
     axgc = plt.gca()
     axgc.tick_params(labelsize=10)
     axgc.plot(x, y, color="blue")
-    axgc.axhline(np.average(y), color='red', linestyle='--', linewidth=1)
+    axgc.axhline(y.mean(), color='red', linestyle='--', linewidth=1)
     axgc.plot(x, vdata, marker='*', linewidth=0, color='orange')
     axgc.plot(x, cdata, marker='.', linewidth=0, color='green')
     axgc.errorbar(x, y, yerr=error, fmt='*', color='green',
@@ -127,29 +132,30 @@ class EISN:
     axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
     axgc.margins(.01)
     fig.autofmt_xdate(rotation=10, ha="center")
-    plt.savefig(filename, transparent=False, dpi=100)
+
+    for filename in filenames:
+      plt.savefig(filename, transparent=False, dpi=100)
+      logger.info('Graph "%s" saved', filename)
     plt.close()
-    self.log.info('Graph "%s" saved', filename)
-    return filename
 
 
 def main():
-  logging.basicConfig(
-    format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
-    level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
-  )
-  config = Config()
-  try:
-    name = sys.argv[1]
-  except IndexError:
-    name = '/tmp/eisn.png'
+  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+  config = Config().get('eisn', {})
 
-  cache_file = config.get('eisngraph.cache_file', '/tmp/eisn.pkl')
-  cache_time = config.get('eisngraph.cache_time', 43200)
+  parser = argparse.ArgumentParser()
+  parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/eisn.png'])
+  opts = parser.parse_args()
+  config = Config()
+
+  cache_file = config.get('cache_file', '/tmp/eisn.pkl')
+  cache_time = config.get('cache_time', 43200)
   eisn = EISN(cache_file, cache_time)
-  if not eisn.graph(name):
+  if not eisn.is_data():
+    logger.warning('No data to graph')
     return os.EX_DATAERR
 
+  eisn.graph(opts.names)
   return os.EX_OK
 
 if __name__ == "__main__":
