@@ -26,7 +26,7 @@ from config import Config
 plt.style.use(['classic', 'fast'])
 
 logging.basicConfig(
-  format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
+  format='%(levelname)s %(asctime)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
 )
 logger = logging.getLogger('outloot')
 

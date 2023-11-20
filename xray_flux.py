@@ -32,7 +32,7 @@ from tools import noaa_date
 from tools import noaa_date_hook
 
 logging.basicConfig(
-  format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
+  format='%(levelname)s %(asctime)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
 )
 logger = logging.getLogger('XRayFlux')
 

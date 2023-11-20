@@ -37,7 +37,7 @@ from tools import remove_outliers
 warnings.filterwarnings('ignore')
 
 logging.basicConfig(
-  format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
+  format='%(levelname)s %(asctime)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
 )
 logger = logging.getLogger('ProtonFlux')
 

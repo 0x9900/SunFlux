@@ -36,7 +36,7 @@ WWV_REQUEST = "SELECT wwv.time, wwv.SFI FROM wwv WHERE wwv.time > ?"
 NOAA_URL = 'https://services.swpc.noaa.gov/json/f107_cm_flux.json'
 
 logging.basicConfig(
-  format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
+  format='%(levelname)s %(asctime)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
 )
 logger = logging.getLogger('fluxgraph')
 
