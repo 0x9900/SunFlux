@@ -110,8 +110,11 @@ class PKIForecast:
 
     plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {date}')
     for filename in filenames:
-      plt.savefig(filename, transparent=False, dpi=100)
-      logger.info('Graph "%s" saved', filename)
+      try:
+        plt.savefig(filename, transparent=False, dpi=100)
+        logger.info('Graph "%s" saved', filename)
+      except ValueError as err:
+        logger.error(err)
     plt.close()
     return filename
 
@@ -147,7 +150,7 @@ class PKIForecast:
 
 def main():
   logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
-  config = Config().get('pkiforecast')
+  config = Config().get('pkiforecast', {})
 
   parser = argparse.ArgumentParser()
   parser.add_argument('names', help='Name of the graph', nargs="*",

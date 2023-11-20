@@ -171,9 +171,12 @@ def mk_thumbnail(filename):
   image = Image.open(filename)
   image.thumbnail((600, 400))
   for format in ('png','webp'):
-    tn_file = os.path.join(path, f'tn_latest.{format}')
-    image.save(tn_file, format=format, dpi=(100, 100))
-    logging.info('Thumbnail "%s" created', tn_file)
+    try:
+      tn_file = os.path.join(path, f'tn_latest.{format}')
+      image.save(tn_file, format=format, dpi=(100, 100))
+      logging.info('Thumbnail "%s" created', tn_file)
+    except ValueError as err:
+      logging.error(err)
 
 
 def main():

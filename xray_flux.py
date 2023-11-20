@@ -155,8 +155,11 @@ class XRayFlux:
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
     plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {today}', fontsize=12)
     for name in image_names:
-      fig.savefig(name, transparent=False, dpi=100)
-      logger.info('Saved "%s"', name)
+      try:
+        fig.savefig(name, transparent=False, dpi=100)
+        logger.info('Saved "%s"', name)
+      except ValueError as err:
+        logger.error(err)
     plt.close()
 
 

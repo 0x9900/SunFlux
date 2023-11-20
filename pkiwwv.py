@@ -168,15 +168,18 @@ def graph(data, condition, filenames):
 
   fig.autofmt_xdate(rotation=10, ha="center")
   for filename in filenames:
-    plt.savefig(filename, transparent=False, dpi=100)
-    logger.info('Graph "%s" saved', filename)
+    try:
+      plt.savefig(filename, transparent=False, dpi=100)
+      logger.info('Graph "%s" saved', filename)
+    except ValueError as err:
+      logger.error(err)
   plt.close()
 
 
 def main():
   adapters.install_adapters()
   logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
-  config = Config().get('pkiwwv')
+  config = Config().get('pkiwwv', {})
 
   parser = argparse.ArgumentParser()
   parser.add_argument('-D', '--days', default=config.get('nb_days', NB_DAYS), type=int,

@@ -7,10 +7,10 @@
 #
 #
 
+import argparse
 import json
 import logging
 import os
-import sys
 import time
 
 from datetime import (datetime, timedelta)
@@ -25,6 +25,12 @@ from matplotlib.ticker import MultipleLocator
 from config import Config
 
 plt.style.use(['classic', 'fast'])
+
+logging.basicConfig(
+  format='%(asctime)s %(name)s:%(lineno)3d - %(levelname)s - %(message)s', datefmt='%x %X',
+  level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
+)
+logger = logging.getLogger('ssnhist')
 
 URL_HISTORY  = 'https://services.swpc.noaa.gov/json/solar-cycle/sunspots.json'
 URL_PREDICTIONS = 'https://services.swpc.noaa.gov/products/solar-cycle-25-ssn-predicted-range.json'
@@ -62,7 +68,7 @@ def download_history(cache_file, cache_time=86400):
     if now - filest.st_mtime > cache_time:
       raise FileNotFoundError
   except FileNotFoundError:
-    logging.info('Downloading history data from NOAA')
+    logger.info('Downloading history data from NOAA')
     request.urlretrieve(URL_HISTORY, cache_file)
   data = _history_cache(cache_file)
   return data
@@ -75,13 +81,14 @@ def download_predictions(cache_file, cache_time=86400):
     if now - filest.st_mtime > cache_time:
       raise FileNotFoundError
   except FileNotFoundError:
-    logging.info('Downloading predictions data from NOAA')
+    logger.info('Downloading predictions data from NOAA')
     request.urlretrieve(URL_PREDICTIONS, cache_file)
   data = _predictions_cache(cache_file)
   return data
 
 
-def graph(histo, predic, image='/tmp/ssnhist.png', year=1970):
+def graph(histo, predic, image_names, year=1970):
+  # pylint: disable=too-many-locals
   start_date = datetime(year, 1, 1)
   end_date = datetime.utcnow() + timedelta(days=365*12)
   last_date = histo[-1]['time-tag'].strftime("%m-%Y")
@@ -127,29 +134,31 @@ def graph(histo, predic, image='/tmp/ssnhist.png', year=1970):
 
   plt.subplots_adjust(bottom=0.15)
 
-  plt.savefig(image, transparent=False, dpi=100)
+  for image in image_names:
+    try:
+      plt.savefig(image, transparent=False, dpi=100)
+      logger.info('Graph "%s" saved', image)
+    except ValueError as err:
+      logger.error(err)
   plt.close()
-  logging.info('Graph "%s" saved', image)
+
 
 def main():
-  logging.basicConfig(
-    format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%x %X',
-    level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
-  )
-  config = Config()
-  try:
-    name = sys.argv[1]
-  except IndexError:
-    name = '/tmp/ssnhist.png'
+  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
+  config = Config().get('aindex', {})
 
-  cache_histo = config.get('ssnhist.cache_history', '/tmp/ssnhist.json')
-  cache_predict = config.get('ssnhist.cache_precictions', '/tmp/ssnpredict.json')
-  cache_time = config.get('ssnhist.cache_time', 86400 * 10)
+  parser = argparse.ArgumentParser()
+  parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/ssnhist.png'])
+  opts = parser.parse_args()
+
+  cache_histo = config.get('cache_history', '/tmp/ssnhist.json')
+  cache_predict = config.get('cache_precictions', '/tmp/ssnpredict.json')
+  cache_time = config.get('cache_time', 86400 * 10)
 
   histo = download_history(cache_histo, cache_time)
   predict = download_predictions(cache_predict, cache_time)
 
-  graph(histo, predict, name, 1975)
+  graph(histo, predict, opts.names, 1975)
 
 
 if __name__ == "__main__":

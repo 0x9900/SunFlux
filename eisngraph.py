@@ -136,8 +136,11 @@ class EISN:
     fig.autofmt_xdate(rotation=10, ha="center")
 
     for filename in filenames:
-      plt.savefig(filename, transparent=False, dpi=100)
-      logger.info('Graph "%s" saved', filename)
+      try:
+        plt.savefig(filename, transparent=False, dpi=100)
+        logger.info('Graph "%s" saved', filename)
+      except ValueError as err:
+        logger.error(err)
     plt.close()
 
 

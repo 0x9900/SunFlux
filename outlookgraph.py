@@ -111,8 +111,11 @@ class OutLook:
 
     plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {now}')
     for filename in filenames:
-      plt.savefig(filename, transparent=False, dpi=100)
-      logger.info('Graph "%s" saved', filename)
+      try:
+        plt.savefig(filename, transparent=False, dpi=100)
+        logger.info('Graph "%s" saved', filename)
+      except ValueError as err:
+        logger.error(err)
     plt.close()
 
   @staticmethod

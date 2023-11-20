@@ -150,15 +150,18 @@ def graph(data, filenames):
   fig.autofmt_xdate(rotation=10, ha="center")
   plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {date}')
   for name in filenames:
-    plt.savefig(name, transparent=False, dpi=100)
-    logger.info('Graph "%s" saved', name)
+    try:
+      plt.savefig(name, transparent=False, dpi=100)
+      logger.info('Graph "%s" saved', name)
+    except ValueError as err:
+      logger.error(err)
   plt.close()
 
 
 def main():
   adapters.install_adapters()
   logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
-  config = Config().get('fluxgraph')
+  config = Config().get('fluxgraph', {})
 
   parser = argparse.ArgumentParser()
   parser.add_argument('-D', '--days', default=config.get('nb_days', NB_DAYS), type=int,
