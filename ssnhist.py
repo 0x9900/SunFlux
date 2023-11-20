@@ -27,7 +27,7 @@ from config import Config
 plt.style.use(['classic', 'fast'])
 
 logging.basicConfig(
-  format='%(levelname)s %(asctime)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
+  format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
   level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
 )
 logger = logging.getLogger('ssnhist')
