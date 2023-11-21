@@ -151,7 +151,7 @@ def graph(data, condition, filenames):
   axgc.bar(data[:,0], data[:,2], width=0.20, linewidth=0.75, zorder=2, color=colors)
   axgc.plot(data[:,0], data[:,3], marker='^', linewidth=0, zorder=4, color="green")
 
-  axgc.axhline(y=4, linewidth=1.5, zorder=1.5, color='red')
+  axgc.axhline(y=4, linewidth=1.5, zorder=1.5, color='red', label='Threshold')
 
   loc = mdates.DayLocator(interval=1)
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
@@ -163,7 +163,7 @@ def graph(data, condition, filenames):
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
 
-  axgc.legend(['Min', 'Max'], loc='upper right', fontsize='10',
+  axgc.legend(['Min', 'Max', 'Storm Threshold'], loc='upper right', fontsize='10',
               facecolor='linen', borderaxespad=1)
 
   fig.autofmt_xdate(rotation=10, ha="center")
