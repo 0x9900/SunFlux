@@ -37,12 +37,12 @@ logger = logging.getLogger('pkiwwv')
 
 NOAA_URL = "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
 
-NB_DAYS = 7
+NB_DAYS = 5
 
 WWV_REQUEST = "SELECT wwv.time, wwv.k FROM wwv WHERE wwv.time > ?"
 WWV_CONDITIONS = "SELECT conditions FROM wwv WHERE time > ? ORDER BY time DESC LIMIT 1"
 
-def bucket(dtm, size=6):
+def bucket(dtm, size=4):
   return int(size * int(dtm.hour / size))
 
 
@@ -148,7 +148,7 @@ def graph(data, condition, filenames):
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
   axgc.plot(data[:,0], data[:,1], marker='v', linewidth=0, zorder=3, color="navy")
-  axgc.bar(data[:,0], data[:,2], width=0.20, linewidth=0.75, zorder=2, color=colors)
+  axgc.bar(data[:,0], data[:,2], width=0.14, linewidth=0.75, zorder=2, color=colors)
   axgc.plot(data[:,0], data[:,3], marker='^', linewidth=0, zorder=4, color="green")
 
   axgc.axhline(y=4, linewidth=1.5, zorder=1.5, color='red', label='Threshold')
@@ -163,7 +163,7 @@ def graph(data, condition, filenames):
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
 
-  axgc.legend(['Min', 'Max', 'Storm Threshold'], loc='upper right', fontsize='10',
+  axgc.legend(['Min', 'Max', 'Storm Threshold'], loc='upper left', fontsize='10',
               facecolor='linen', borderaxespad=1)
 
   fig.autofmt_xdate(rotation=10, ha="center")
