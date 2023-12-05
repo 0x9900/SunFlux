@@ -184,13 +184,16 @@ def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('-D', '--days', default=config.get('nb_days', NB_DAYS), type=int,
                       help='Number of days to graph [Default: %(default)s]')
+  parser.add_argument('-c', '--cluster', action="store_true", default=False,
+                      help='Add data coming from the cluster network [Default: %(default)s]')
   parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/pkindex.png'])
   opts = parser.parse_args()
 
   config['nb_days'] = opts.days
 
   data = get_pkindex(config)
-  data.update(get_wwv(config))
+  if opts.cluster:
+    data.update(get_wwv(config))
   condition = get_conditions(config)
   if data:
     graph(data, condition, opts.names)
