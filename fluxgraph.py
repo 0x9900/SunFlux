@@ -115,7 +115,7 @@ def graph(data, filenames):
   arr = np.array(data)
   arr[:,0] = mdates.date2num(arr[:,0])
   x, y = arr[:,0].astype(np.float64), arr[:,1].astype(np.int32)
-  poly = np.poly1d(np.polyfit(x, y, 2))
+  poly = np.poly1d(np.polyfit(x, y, 1))
   avg = moving_average(arr[:,1], 7)
 
   date = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
