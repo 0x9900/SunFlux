@@ -42,6 +42,13 @@ logger = logging.getLogger('fluxgraph')
 
 plt.style.use(['classic', 'fast'])
 
+def moving_average(data, window=5):
+  average = np.convolve(data, np.ones(window), 'valid') / window
+  for _ in range(window - 1):
+    average = np.insert(average, 0, np.nan)
+  return average
+
+
 def download_flux(cache_file):
   data = {}
   with urllib.request.urlopen(NOAA_URL) as res:
@@ -109,13 +116,15 @@ def graph(data, filenames):
   arr[:,0] = mdates.date2num(arr[:,0])
   x, y = arr[:,0].astype(np.float64), arr[:,1].astype(np.int32)
   poly = np.poly1d(np.polyfit(x, y, 3))
+  avg = moving_average(arr[:,1], 7)
 
   date = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('Daily 10cm Flux Index', fontsize=14, fontweight='bold')
   axgc = plt.gca()
-  axgc.plot(x, y, linewidth=1.5, label='Flux')
-  trend, = axgc.plot(x, poly(x), label='Trend', linestyle='--', color="red", linewidth=2)
+  axgc.plot(x, y, linewidth=1, label='Flux', color="royalblue")
+  mave, = axgc.plot(x, avg, linewidth=1.75, label='Daily Average', color="indigo")
+  trend, = axgc.plot(x, poly(x), label='Trend', linestyle=':', color="red", linewidth=2)
   axgc.tick_params(labelsize=10)
 
   for pos in set([y.argmax(), y.argmin(), x.size - 1]):
@@ -140,7 +149,7 @@ def graph(data, filenames):
   zone2 = axgc.axhspan(70, 90, facecolor='orange', alpha=0.3, label='Ok')
   zone3 = axgc.axhspan(MIN_TICKS, 70, facecolor='red', alpha=0.3, label='Bad')
 
-  trend_legend = axgc.legend(handles=[trend], fontsize=10, loc='lower left')
+  trend_legend = axgc.legend(handles=[trend, mave], fontsize=10, loc='lower left')
   axgc.add_artist(trend_legend)
   axgc.legend(handles=[zone1, zone2, zone3], fontsize=10, loc="upper left")
 
