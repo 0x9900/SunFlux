@@ -113,9 +113,11 @@ def get_flux(config):
 def graph(data, filenames):
   # pylint: disable=invalid-name, too-many-locals
   arr = np.array(data)
+  dstart = mdates.date2num(data[-1][0] - timedelta(days=21))
   arr[:,0] = mdates.date2num(arr[:,0])
   x, y = arr[:,0].astype(np.float64), arr[:,1].astype(np.int32)
-  poly = np.poly1d(np.polyfit(x, y, 1))
+  idx = x[:] > dstart
+  poly = np.poly1d(np.polyfit(x[idx], y[idx], 1))
   avg = moving_average(arr[:,1], 7)
 
   date = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
@@ -124,7 +126,8 @@ def graph(data, filenames):
   axgc = plt.gca()
   axgc.plot(x, y, linewidth=1, label='Flux', color="royalblue")
   mave, = axgc.plot(x, avg, linewidth=1.75, label='Daily Average', color="indigo")
-  trend, = axgc.plot(x, poly(x), label='Trend', linestyle=':', color="red", linewidth=2)
+  trend, = axgc.plot(x[idx], poly(x[idx]), label='Trend (3 weeks)', linestyle='--',
+                     color="red", linewidth=2)
   axgc.tick_params(labelsize=10)
 
   for pos in set([y.argmax(), y.argmin(), x.size - 1]):
