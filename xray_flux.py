@@ -16,20 +16,16 @@ import pickle
 import sys
 import time
 import urllib.request
-
-from datetime import datetime
-
 import warnings
+from datetime import datetime
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
-
 from matplotlib import ticker
 
 from config import Config
-from tools import noaa_date
-from tools import noaa_date_hook
+from tools import noaa_date, noaa_date_hook
 
 logging.basicConfig(
   format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',

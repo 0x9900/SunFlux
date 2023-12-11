@@ -16,7 +16,6 @@ import sqlite3
 import sys
 import time
 import urllib.request
-
 from datetime import datetime, timedelta
 
 import matplotlib.dates as mdates
@@ -25,7 +24,6 @@ import numpy as np
 
 import adapters
 import tools
-
 from config import Config
 
 NB_DAYS = 92

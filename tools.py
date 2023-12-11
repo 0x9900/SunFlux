@@ -7,9 +7,10 @@
 #
 #
 
+from datetime import datetime
+
 import numpy as np
 
-from datetime import datetime
 
 def remove_outliers(points, low=25, high=95):
   percent_lo = np.percentile(points, low, interpolation='midpoint')

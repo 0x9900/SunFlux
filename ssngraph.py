@@ -13,15 +13,13 @@ import os
 import pickle
 import sys
 import time
-
-from datetime import datetime, date
+from datetime import date, datetime
 from itertools import cycle
 from urllib.request import urlopen
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
-
 from matplotlib.ticker import MultipleLocator
 
 from config import Config

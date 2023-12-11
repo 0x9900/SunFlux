@@ -15,15 +15,12 @@ import pickle
 import sys
 import time
 import urllib.request
-
-from datetime import datetime
-
 import warnings
+from datetime import datetime
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
-
 from matplotlib import ticker
 
 from config import Config

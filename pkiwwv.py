@@ -15,7 +15,6 @@ import re
 import sqlite3
 import sys
 import time
-
 from collections import defaultdict
 from datetime import datetime, timedelta
 from urllib.request import urlretrieve
@@ -25,7 +24,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import adapters
-
 from config import Config
 
 plt.style.use(['classic', 'fast'])

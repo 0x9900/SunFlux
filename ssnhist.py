@@ -12,14 +12,12 @@ import json
 import logging
 import os
 import time
-
-from datetime import (datetime, timedelta)
+from datetime import datetime, timedelta
 from urllib import request
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
-
 from matplotlib.ticker import MultipleLocator
 
 from config import Config

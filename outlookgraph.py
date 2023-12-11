@@ -12,7 +12,6 @@ import logging
 import os
 import sys
 import time
-
 from collections import namedtuple
 from datetime import datetime
 from urllib.request import urlretrieve

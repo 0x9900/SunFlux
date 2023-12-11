@@ -17,20 +17,16 @@ import re
 import sys
 import time
 import urllib.request
-
-from datetime import datetime
-
 import warnings
+from datetime import datetime
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
-
 from matplotlib import ticker
 
 from config import Config
-from tools import noaa_date_hook
-from tools import remove_outliers
+from tools import noaa_date_hook, remove_outliers
 
 # Older versions of numpy are too verbose when arrays contain np.nan values
 # This 2 lines will have to be removed in future versions of numpy

@@ -15,7 +15,6 @@ import pickle
 import sys
 import time
 import urllib.request
-
 from datetime import datetime, timedelta
 
 import matplotlib.dates as mdates

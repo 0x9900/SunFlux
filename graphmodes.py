@@ -11,18 +11,15 @@ import argparse
 import logging
 import os
 import sqlite3
-
 from collections import defaultdict
 from datetime import datetime, timedelta
 from itertools import product
 
 import matplotlib.pyplot as plt
 import numpy as np
-
 from matplotlib import cm
 
 import adapters
-
 from config import Config
 
 adapters.install_adapters()

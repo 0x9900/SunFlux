@@ -12,20 +12,16 @@ import logging
 import os
 import sqlite3
 import sys
-
 from collections import deque
 from datetime import datetime, timedelta
 from itertools import product
 
 import matplotlib.pyplot as plt
 import numpy as np
-
 from matplotlib.colors import LinearSegmentedColormap
-
 from PIL import Image
 
 import adapters
-
 from config import Config
 
 CONTINENTS = ['AF', 'AS', 'EU', 'NA', 'OC', 'SA']

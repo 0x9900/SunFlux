@@ -17,7 +17,6 @@ import sqlite3
 import sys
 import time
 import urllib.request
-
 from datetime import datetime, timedelta
 
 import matplotlib.dates as mdates
@@ -25,7 +24,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import adapters
-
 from config import Config
 
 plt.style.use(['classic', 'fast'])
