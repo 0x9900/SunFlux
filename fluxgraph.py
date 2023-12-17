@@ -111,7 +111,7 @@ def get_flux(config):
 def graph(data, filenames):
   # pylint: disable=invalid-name, too-many-locals
   arr = np.array(data)
-  dstart = mdates.date2num(data[-1][0] - timedelta(days=21))
+  dstart = mdates.date2num(data[-1][0] - timedelta(days=15))
   arr[:,0] = mdates.date2num(arr[:,0])
   x, y = arr[:,0].astype(np.float64), arr[:,1].astype(np.int32)
   idx = x[:] > dstart
