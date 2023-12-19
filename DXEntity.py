@@ -81,6 +81,7 @@ class DXCC:
     return info
 
   def get_prefix(self, call):
+    # pylint: disable=method-hidden
     call = call.upper()
     prefixes = list({call[:c] for c in range(self._max_len, 0, -1)})
     prefixes.sort(key=lambda x: -len(x))
