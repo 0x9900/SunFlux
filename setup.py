@@ -52,7 +52,7 @@ setup(
     'tools',
     'xray_flux',
   ],
-  install_requires=['numpy', 'matplotlib', 'python-telegram-bot'],
+  install_requires=['numpy', 'matplotlib'],
   entry_points = {
     'console_scripts': [
       'aindex = aindex:main',

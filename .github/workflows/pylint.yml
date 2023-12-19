@@ -1,0 +1,43 @@
+name: Pylint
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install pylint
+        python -m pip install numpy
+        python -m pip install matplotlib
+        python -m pip install PyYAML
+    - name: Analysing the code with pylint
+      run: |
+        pylint DXEntity.py
+        pylint adapters.py
+        pylint aindex.py
+        pylint config.py
+        pylint eisngraph.py
+        pylint fluxgraph.py
+        pylint graphmodes.py
+        pylint outlookgraph.py
+        pylint pkiforecast.py
+        pylint pkiwwv.py
+        pylint proton_flux.py
+        pylint setup.py
+        pylint showdxcc.py
+        pylint solarwind.py
+        pylint ssngraph.py
+        pylint ssnhist.py
+        pylint tools.py
+        pylint xray_flux.py
