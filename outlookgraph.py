@@ -66,6 +66,7 @@ class OutLook:
     return bool(self.data)
 
   def graph(self, filenames):
+    # pylint: disable=too-many-locals
     data = np.array(self.data)
     dates = data[:,0]
     flux = data[:,1]
@@ -100,11 +101,11 @@ class OutLook:
         plot.axvspan(mdates.date2num(day), mdates.date2num(day) + 1, color="skyblue", alpha=0.3)
 
     plt.figtext(0.80, 0.03, "Good", size=12,
-                bbox=dict(boxstyle="round", color='springgreen', alpha=ALPHA))
+                bbox={"boxstyle": "round", "color": "springgreen", "alpha": ALPHA})
     plt.figtext(0.87, 0.03, " OK ", size=12,
-                bbox=dict(boxstyle="round", color='orange', alpha=ALPHA))
+                bbox={"boxstyle": "round", "color": "orange", "alpha": ALPHA})
     plt.figtext(0.93, 0.03, "Bad", size=12,
-                bbox=dict(boxstyle="round", color='tomato', alpha=ALPHA))
+                bbox={"boxstyle": "round", "color": "tomato", "alpha": ALPHA})
 
     plt.subplots_adjust(top=0.91, bottom=0.15)
 
