@@ -42,7 +42,7 @@ NOAA_FLARE = 'https://services.swpc.noaa.gov/json/goes/primary/xray-flares-7-day
 
 def remove_outlier(points, low=25, high=95):
   percent_lo = np.percentile(points, low, interpolation='midpoint')
-  percent_hi= np.percentile(points, high, interpolation='midpoint')
+  percent_hi = np.percentile(points, high, interpolation='midpoint')
   iqr = percent_hi - percent_lo
   lower_bound = points <= (percent_lo - 5 * iqr)
   upper_bound = points >= (percent_hi + 5 * iqr)
@@ -91,7 +91,6 @@ class XRayFlux:
       self.xray_data = None
       self.flare_data = None
 
-
   def writecache(self):
     """Write data into the cachefile"""
     logger.debug('Write cache "%s"', self.cachefile)
@@ -101,7 +100,7 @@ class XRayFlux:
 
   def graph(self, image_names):
     # pylint: disable=too-many-locals
-    dates  = np.array(list(self.xray_data.keys()))
+    dates = np.array(list(self.xray_data.keys()))
     data = np.array([d['flux'] for d in self.xray_data.values()])
     data = remove_outlier(data)
     data[data < 10**-7] = np.nan
@@ -122,11 +121,11 @@ class XRayFlux:
     ax.xaxis.set_major_locator(mdates.DayLocator())
     ax.xaxis.set_minor_locator(mdates.HourLocator())
 
-    max_mag = int(math.log(data[data>0.0].max(), 10)) + 1
-    min_mag = int(math.log(data[data>0.0].min(), 10)) - 1
+    max_mag = int(math.log(data[data > 0.0].max(), 10)) + 1
+    min_mag = int(math.log(data[data > 0.0].min(), 10)) - 1
     ax.set_ylim((10**min_mag, 10**max_mag))
 
-    data[data==0.0] = np.nan
+    data[data == 0.0] = np.nan
     ax.plot(dates, data, linewidth=1.5, color="tab:blue", zorder=2, label='X-Ray Flux')
 
     class_colors = {'X': 'tab:red', 'M': 'tab:orange', 'C': 'tab:blue',
@@ -173,6 +172,7 @@ def main():
   cache_time = config.get('cache_time', 900)
   xray = XRayFlux(cache_file, cache_time)
   xray.graph(opts.names)
+
 
 if __name__ == "__main__":
   sys.exit(main())

@@ -31,13 +31,15 @@ logger = logging.getLogger('outloot')
 
 NOAA_URL = 'https://services.swpc.noaa.gov/text/27-day-outlook.txt'
 
-ALPHA=1
+ALPHA = 1
+
 
 class Record(namedtuple("OLRecord", ["Date", "Flux", "AIndex", "KpIndex"])):
   def __new__(cls, items):
     _items = [datetime.strptime(' '.join(items[:3]), "%Y %b %d")]
     _items.extend([int(x.strip()) for x in items[3:]])
     return tuple.__new__(cls, _items)
+
 
 class OutLook:
   def __init__(self, cache_file, cache_time=43200):
@@ -153,11 +155,11 @@ class OutLook:
   @staticmethod
   def draw_flux(axe, dates, flux):
     axe.plot(dates, flux, "navy", marker='.', linewidth=1.5, label='Flux')
-    axe.set_ylim([min(flux)/1.2, max(flux) * 1.05])
+    axe.set_ylim([min(flux) / 1.2, max(flux) * 1.05])
     axe.legend(loc='upper right', fontsize="10")
-    axe.axhspan(90, axe.get_yticks().max(), facecolor='springgreen', alpha=ALPHA/2, label='Good')
-    axe.axhspan(70, 90, facecolor='orange', alpha=ALPHA/2, label='Ok')
-    axe.axhspan(40, 70, facecolor='tomato', alpha=ALPHA/2, label='Bad')
+    axe.axhspan(90, axe.get_yticks().max(), facecolor='springgreen', alpha=ALPHA / 2, label='Good')
+    axe.axhspan(70, 90, facecolor='orange', alpha=ALPHA / 2, label='Ok')
+    axe.axhspan(40, 70, facecolor='tomato', alpha=ALPHA / 2, label='Bad')
     axe.grid(color="black", linewidth=.5)
 
 
@@ -177,6 +179,7 @@ def main():
     return os.EX_DATAERR
   outlook.graph(opts.names)
   return os.EX_OK
+
 
 if __name__ == "__main__":
   sys.exit(main())

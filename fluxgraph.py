@@ -40,6 +40,7 @@ logger = logging.getLogger('fluxgraph')
 
 plt.style.use(['classic', 'fast'])
 
+
 def moving_average(data, window=5):
   average = np.convolve(data, np.ones(window), 'valid') / window
   for _ in range(window - 1):
@@ -68,7 +69,7 @@ def download_flux(cache_file):
 
 def get_noaa_flux(config):
   cache_file = config.get('cache_file', '/tmp/aindex-noaa.pkl')
-  cache_time = config.get('cache_time', 3600*2)
+  cache_time = config.get('cache_time', 3600 * 2)
   days = config.get('nb_days', NB_DAYS)
   now = time.time()
   start_date = datetime.utcnow() - timedelta(days=days)
@@ -88,7 +89,6 @@ def get_noaa_flux(config):
         data[date] = flux
   return data
 
-# ------------------------------------------------------------------------
 
 def get_flux(config):
   db_name = config.get('db_name')
@@ -129,7 +129,7 @@ def graph(data, filenames):
   axgc.tick_params(labelsize=10)
 
   for pos in set([y.argmax(), y.argmin(), x.size - 1]):
-    xytext = (20, 20) if pos == x.size -1 else (20,-20)
+    xytext = (20, 20) if pos == x.size - 1 else (20, -20)
     plt.annotate(f"{int(y[pos]):d}", (x[pos], y[pos]), textcoords="offset points", xytext=xytext,
                  ha='center', fontsize=10,
                  arrowprops={'arrowstyle': 'wedge', 'color': 'dimgray'},
@@ -191,6 +191,7 @@ def main():
   logger.debug('Dataset size: %d', len(data))
   graph(data, opts.names)
   return os.EX_OK
+
 
 if __name__ == "__main__":
   sys.exit(main())

@@ -38,6 +38,7 @@ plt.style.use(['classic', 'fast'])
 
 NOAA_URL = 'https://services.swpc.noaa.gov/products/solar-wind/plasma-3-day.json'
 
+
 class SolarWind:
   def __init__(self, cache_file, cache_time=900):
     self.cachefile = cache_file
@@ -96,7 +97,7 @@ class SolarWind:
     # pylint: disable=too-many-locals
     colors = {0: "gray", 1: "orange", 2: "plum"}
     labels = {0: r"Density $1/cm^3$", 1: r"Speed $km/S$", 2: r"Temp $^{\circ}K$"}
-    limits = {0: [0, 12], 1: [250, 750]} #,  2: [10**3, 10**6]}
+    limits = {0: [0, 12], 1: [250, 750]}  # , 2: [10**3, 10**6]}
     fig, ax = plt.subplots(3, 1, figsize=(12, 5))
     fig.suptitle('Solar Wind (plasma)', fontsize=14, fontweight='bold')
 
@@ -106,7 +107,7 @@ class SolarWind:
     loc = mdates.HourLocator(interval=6)
 
     for i in range(3):
-      data = self.data[0:,i+1]
+      data = self.data[0:,i + 1]
       ax[i].plot(self.data[0:,0], data, color=colors[i], linewidth=.5,
                  marker='.', markersize=.5)
       ax[i].grid(color='tab:gray', linestyle='dotted', linewidth=.3)
@@ -153,6 +154,7 @@ def main():
 
   wind.graph(opts.names)
   return os.EX_OK
+
 
 if __name__ == "__main__":
   sys.exit(main())

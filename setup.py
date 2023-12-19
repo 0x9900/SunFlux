@@ -53,7 +53,7 @@ setup(
     'xray_flux',
   ],
   install_requires=['numpy', 'matplotlib'],
-  entry_points = {
+  entry_points={
     'console_scripts': [
       'aindex = aindex:main',
       'eisngraph = eisngraph:main',

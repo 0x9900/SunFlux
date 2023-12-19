@@ -40,6 +40,7 @@ def moving_average(data, window=5):
     average = np.insert(average, 0, np.nan)
   return average
 
+
 class SSN:
   def __init__(self, cache_file, cache_time=43200):
     self.log = logging.getLogger('SSN')
@@ -124,7 +125,7 @@ class SSN:
     axgc.plot(xtime, ssn, marker='o', markersize=7, color="darkolivegreen", linewidth=1)
     axgc.plot(xtime, avg, color="blue", linewidth=2, zorder=5)
     axgc.plot(xtime, flux, linestyle='-.', color="blue", linewidth=1)
-    loc = mdates.DayLocator(interval=int(1+len(xtime)/11))
+    loc = mdates.DayLocator(interval=int(1 + len(xtime) / 11))
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.DayLocator())
@@ -132,12 +133,12 @@ class SSN:
     axgc.yaxis.set_minor_locator(MultipleLocator(5))
     axgc.set_ylabel('Sun Sport Number')
 
-    axgc.set_ylim(np.min([ssn, flux])*0.2, np.max([ssn, flux])*1.15)
+    axgc.set_ylim(np.min([ssn, flux]) * 0.2, np.max([ssn, flux]) * 1.15)
     axgc.minorticks_on()
 
     sign = cycle([-1, 1])
     for _x, _y, _s in zip(xtime, ssn, sign):
-      plt.annotate(f"{_y:d}", (_x, _y), textcoords="offset points", xytext=(0, 20*_s),
+      plt.annotate(f"{_y:d}", (_x, _y), textcoords="offset points", xytext=(0, 20 * _s),
                    ha='center', fontsize=8,
                    arrowprops={"arrowstyle": "->", "color": 'green'})
 
@@ -174,6 +175,7 @@ def main():
 
   ssn.graph(opts.names)
   return os.EX_OK
+
 
 if __name__ == "__main__":
   sys.exit(main())

@@ -32,6 +32,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger('pkiforecast')
 
+
 class PKIForecast:
   def __init__(self, cache_file, cache_time=21600):
     self.cachefile = cache_file
@@ -40,7 +41,7 @@ class PKIForecast:
     now = time.time()
     try:
       filest = os.stat(self.cachefile)
-      if now - filest.st_mtime > cache_time: # 6 hours
+      if now - filest.st_mtime > cache_time:  # 6 hours
         raise FileNotFoundError
     except FileNotFoundError:
       self.download()
@@ -63,7 +64,7 @@ class PKIForecast:
 
     # colors #6efa7b #a7bb36 #aa7f28 #8c4d30 #582a2d
     colors = ['#6efa7b'] * len(observ)
-    for pos, (obs, val)  in enumerate(zip(observ, yvalues)):
+    for pos, (obs, val) in enumerate(zip(observ, yvalues)):
       if obs == 'observed':
         if 4 <= val < 5:
           colors[pos] = '#a7bb36'
@@ -147,6 +148,7 @@ class PKIForecast:
     with open(self.cachefile, 'wb') as fd_cache:
       pickle.dump(self.data, fd_cache)
 
+
 def main():
   logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config().get('pkiforecast', {})
@@ -164,6 +166,7 @@ def main():
     return os.EX_DATAERR
   pki.graph(opts.names)
   return os.EX_OK
+
 
 if __name__ == "__main__":
   sys.exit(main())

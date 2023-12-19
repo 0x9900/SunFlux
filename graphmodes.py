@@ -33,6 +33,7 @@ NB_DAYS = 15
 SQL_REQ = """SELECT STRFTIME("%Y%m%d", DATETIME(time, "unixepoch")) AS tm, mode, COUNT(*) AS cnt
              FROM dxspot WHERE time > {} GROUP BY mode, tm"""
 
+
 def read_data(config, days=15):
   data = defaultdict(dict)
   conn = sqlite3.connect(
@@ -42,7 +43,7 @@ def read_data(config, days=15):
   )
   today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
   today -= timedelta(hours=24)
-  start = today - timedelta(hours=24*days)
+  start = today - timedelta(hours=24 * days)
   with conn:
     curs = conn.cursor()
     results = curs.execute(SQL_REQ.format(start.timestamp(),))
@@ -75,7 +76,7 @@ def graph(data, imgname):
   fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {now}')
   ax1.set_ylabel('Sports / Day', fontsize=12)
   ax1.margins(x=0.01, y=0.02)
-  colors = cm.Set2(np.linspace(0, 1, len(modes))) # pylint: disable=no-member
+  colors = cm.Set2(np.linspace(0, 1, len(modes)))  # pylint: disable=no-member
   colors[0] = (1,.5,0,1)
   prev = np.zeros(len(xdate))
   for idx, mode in enumerate(modes):
@@ -113,6 +114,7 @@ def main():
   data = read_data(config, opts.days)
   graph(data, opts.name.pop(0))
   return os.EX_OK
+
 
 if __name__ == "__main__":
   main()

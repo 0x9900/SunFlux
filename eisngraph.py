@@ -33,6 +33,7 @@ logger = logging.getLogger('EISN')
 SIDC_URL = 'https://www.sidc.be/silso/DATA/EISN/EISN_current.csv'
 NB_DAYS = 90
 
+
 class EISN:
   def __init__(self, cache_file, days=NB_DAYS, cache_time=43200):
     data = EISN.read_cache(cache_file)
@@ -119,17 +120,17 @@ class EISN:
     axgc.errorbar(x, y, yerr=error, fmt='*', color='green',
                   ecolor='darkolivegreen', elinewidth=.8, capsize=5,
                   capthick=.8)
-    axgc.fill_between(x, y-error, y+error, facecolor='plum', alpha=1.0,
+    axgc.fill_between(x, y - error, y + error, facecolor='plum', alpha=1.0,
                       linewidth=.75, edgecolor='b')
 
     axgc.legend(['EISN', 'Average', 'Valid Data', 'Entries'], loc='best',
                 fontsize="10", facecolor="linen", borderaxespad=1, ncol=2)
 
-    loc = mdates.DayLocator(interval=int(1+len(x)/11))
+    loc = mdates.DayLocator(interval=int(1 + len(x) / 11))
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.DayLocator())
-    axgc.set_ylim(0, y.max()*1.2)
+    axgc.set_ylim(0, y.max() * 1.2)
     axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
     axgc.margins(.01)
     fig.autofmt_xdate(rotation=10, ha="center")
@@ -162,6 +163,7 @@ def main():
 
   eisn.graph(opts.names)
   return os.EX_OK
+
 
 if __name__ == "__main__":
   sys.exit(main())

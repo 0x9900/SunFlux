@@ -41,6 +41,7 @@ logger = logging.getLogger('ProtonFlux')
 NOAA_URL = 'https://services.swpc.noaa.gov/json/goes/primary/integral-protons-3-day.json'
 WARNING_THRESHOLD = 10**2
 
+
 class ProtonFlux:
   def __init__(self, cache_file, cache_time=900):
     self.cachefile = cache_file
@@ -120,7 +121,7 @@ class ProtonFlux:
     ax.xaxis.set_major_locator(mdates.HourLocator(interval=12))
     ax.xaxis.set_minor_locator(mdates.HourLocator())
 
-    dates  = np.array(list(self.data.keys()))
+    dates = np.array(list(self.data.keys()))
 
     _max = 0
     for _energy in energy:
@@ -176,6 +177,7 @@ def main():
 
   p_f.graph(opts.names)
   return os.EX_OK
+
 
 if __name__ == "__main__":
   sys.exit(main())

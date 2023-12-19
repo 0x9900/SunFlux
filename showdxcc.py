@@ -26,6 +26,7 @@ from config import Config
 CONTINENTS = ['AF', 'AS', 'EU', 'NA', 'OC', 'SA']
 BANDS = [6, 10, 12, 15, 17, 20, 30, 40, 60, 80, 160]
 
+
 class ShowDXCC:
 
   def __init__(self, config, zone_name, zone, date=None):
@@ -79,7 +80,7 @@ class ShowDXCC:
 
   def graph(self, filename):
     dmax = np.max(self.data)
-    color_map = ShowDXCC.mk_colormap() #self.config.get('showdxcc.color_map', 'PRGn')
+    color_map = ShowDXCC.mk_colormap()  # self.config.get('showdxcc.color_map', 'PRGn')
     fig, axgc = plt.subplots(figsize=(12,8), facecolor='white')
 
     # axgc.set_facecolor('#001155')
@@ -225,6 +226,7 @@ def main():
     mk_thumbnail(filename)
 
   return os.EX_OK
+
 
 if __name__ == "__main__":
   sys.exit(main())

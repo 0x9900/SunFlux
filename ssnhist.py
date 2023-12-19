@@ -30,8 +30,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger('ssnhist')
 
-URL_HISTORY  = 'https://services.swpc.noaa.gov/json/solar-cycle/sunspots.json'
+URL_HISTORY = 'https://services.swpc.noaa.gov/json/solar-cycle/sunspots.json'
 URL_PREDICTIONS = 'https://services.swpc.noaa.gov/products/solar-cycle-25-ssn-predicted-range.json'
+
 
 def moving_average(data, window=7):
   average = np.convolve(data, np.ones(window), 'valid') / window
@@ -88,7 +89,7 @@ def download_predictions(cache_file, cache_time=86400):
 def graph(histo, predic, image_names, year=1970):
   # pylint: disable=too-many-locals
   start_date = datetime(year, 1, 1)
-  end_date = datetime.utcnow() + timedelta(days=365*12)
+  end_date = datetime.utcnow() + timedelta(days=365 * 12)
   last_date = histo[-1]['time-tag'].strftime("%m-%Y")
 
   xdates = np.array([d['time-tag'] for d in histo if d['time-tag'] > start_date])

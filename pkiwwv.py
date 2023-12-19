@@ -26,6 +26,14 @@ import numpy as np
 import adapters
 from config import Config
 
+NOAA_URL = "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
+
+NB_DAYS = 5
+
+WWV_REQUEST = "SELECT wwv.time, wwv.k FROM wwv WHERE wwv.time > ?"
+WWV_CONDITIONS = "SELECT conditions FROM wwv WHERE time > ? ORDER BY time DESC LIMIT 1"
+
+
 plt.style.use(['classic', 'fast'])
 
 logging.basicConfig(
@@ -33,12 +41,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger('pkiwwv')
 
-NOAA_URL = "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
-
-NB_DAYS = 5
-
-WWV_REQUEST = "SELECT wwv.time, wwv.k FROM wwv WHERE wwv.time > ?"
-WWV_CONDITIONS = "SELECT conditions FROM wwv WHERE time > ? ORDER BY time DESC LIMIT 1"
 
 def bucket(dtm, size=4):
   return int(size * int(dtm.hour / size))

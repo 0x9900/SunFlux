@@ -25,6 +25,7 @@ CTY_EXPIRE = 86400 * 7          # One week
 
 LRU_CACHE_SIZE = 8192
 
+
 class DXCCRecord:
   # pylint: disable=too-few-public-methods
   __slots__ = ['prefix', 'country', 'continent', 'cqzone', 'ituzone', 'latitude', 'longitude',

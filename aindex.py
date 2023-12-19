@@ -50,6 +50,7 @@ MAX = 1
 AVG = 2
 MIN = 3
 
+
 def color_complement(hue, saturation, value, alpha):
   rgb = colorsys.hsv_to_rgb(hue, saturation, value)
   c_rgb = [1.0 - c for c in rgb]
@@ -85,7 +86,7 @@ def download_aindex(cache_file):
       try:
         date = datetime.strptime(f"{line[0:10]}", "%Y %m %d")
         aindex = sorted([float(line[11:17]), float(line[33:40]), float(line[57:63])])
-        data[date] = tuple([max(aindex), sum(aindex)/len(aindex), min(aindex)])
+        data[date] = tuple([max(aindex), sum(aindex) / len(aindex), min(aindex)])
       except ValueError:
         pass
 
@@ -95,7 +96,7 @@ def download_aindex(cache_file):
 
 def get_noaa(config):
   cache_file = config.get('cache_file', '/tmp/aindex-noaa.pkl')
-  cache_time = config.get('cache_time', 3600*12)
+  cache_time = config.get('cache_time', 3600 * 12)
   days = config.get('nb_days', NB_DAYS)
   now = time.time()
   start_date = datetime.utcnow() - timedelta(days=days)
@@ -169,7 +170,7 @@ def graph(data, condition, filenames):
   if condition:
     fig.text(0.15, 0.8, "Forecast: " + condition, fontsize=12, zorder=4,
              bbox={'boxstyle': 'round', 'linewidth': 1, 'facecolor': 'linen', 'alpha': 1,
-                    'pad': 0.8})
+                   'pad': 0.8})
 
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)

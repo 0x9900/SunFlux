@@ -15,9 +15,11 @@ import yaml
 CONFIG_FILENAME = "sunflux.yaml"
 CONFIG_LOCATIONS = ['/etc', '~/.local', '.']
 
+
 class Config:
   _instance = None
   config_data = None
+
   def __new__(cls, *args, **kwargs):
     # pylint: disable=unused-argument
     if cls._instance is None:
