@@ -14,7 +14,6 @@ import sqlite3
 import sys
 from collections import deque
 from datetime import datetime, timedelta
-from itertools import product
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -91,8 +90,8 @@ class ShowDXCC:
     plt.ylabel("Destination", fontsize=14)
 
     timage = axgc.imshow(self.data, cmap=color_map)
-    image = axgc.imshow(self.data, cmap=color_map,
-                        interpolation=self.config.get('showdxcc.interleave', 'gaussian'))
+    axgc.imshow(self.data, cmap=color_map,
+                interpolation=self.config.get('showdxcc.interleave', 'gaussian'))
 
     axgc.set_aspect(aspect=1)
     axgc.tick_params(top=True, bottom=True, labeltop=True, labelbottom=True)
@@ -154,8 +153,8 @@ def create_link(filename):
 
 
 def webp(filename):
-  path, fname = os.path.split(filename)
-  webpfile = os.path.join(path, f'latest.webp')
+  path, _ = os.path.split(filename)
+  webpfile = os.path.join(path, 'latest.webp')
   image = Image.open(filename)
   image = image.resize((800, 530))
   image.save(webpfile, format='webp')
@@ -163,13 +162,13 @@ def webp(filename):
 
 
 def mk_thumbnail(filename):
-  path, fname = os.path.split(filename)
+  path, _ = os.path.split(filename)
   image = Image.open(filename)
   image.thumbnail((600, 400))
-  for format in ('png','webp'):
+  for fmt in ('png','webp'):
     try:
-      tn_file = os.path.join(path, f'tn_latest.{format}')
-      image.save(tn_file, format=format, dpi=(100, 100))
+      tn_file = os.path.join(path, f'tn_latest.{fmt}')
+      image.save(tn_file, format=fmt, dpi=(100, 100))
       logging.info('Thumbnail "%s" created', tn_file)
     except ValueError as err:
       logging.error(err)

@@ -53,6 +53,7 @@ class PKIForecast:
     return bool(self.data)
 
   def graph(self, filenames):
+    # pylint: disable=too-many-locals
     start_date = datetime.utcnow() - timedelta(days=3, hours=4)
     end_date = datetime.utcnow() + timedelta(days=1, hours=3)
     xdates = np.array([d[0] for d in self.data if start_date < d[0] < end_date])
@@ -115,7 +116,6 @@ class PKIForecast:
       except ValueError as err:
         logger.error(err)
     plt.close()
-    return filename
 
   def download(self):
     logger.info('Downloading data from NOAA')
@@ -162,8 +162,7 @@ def main():
   if not pki.is_data():
     logger.warning('No data to graph')
     return os.EX_DATAERR
-  else:
-    pki.graph(opts.names)
+  pki.graph(opts.names)
   return os.EX_OK
 
 if __name__ == "__main__":
