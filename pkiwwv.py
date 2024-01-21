@@ -141,9 +141,8 @@ def graph(data, condition, filenames):
   fig.suptitle('Planetary K-Index', fontsize=14, fontweight='bold')
   fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
   if condition:
-    fig.text(0.15, 0.8, "Forecast: " + condition, fontsize=12, zorder=4,
-             bbox={"boxstyle": 'round', "linewidth": 1, "facecolor": 'linen',
-                   "alpha": 1, "pad": .8})
+    fig.text(0.136, 0.68, "Forecast: " + condition, fontsize=12, zorder=4,
+             fontweight='bold', color='red')
 
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
