@@ -89,9 +89,13 @@ class PKIForecast:
     axgc.axhline(y=4, linewidth=1.5, zorder=1.5, color='red', label='Storm Threshold')
 
     for rect, label in ((a, b) for a, b in zip(*(bars, labels)) if labels):
-      color = 'navy' if rect.get_height() < 7 else 'black'
+      if not label:
+        continue
+      color = 'red' if rect.get_height() > 5 else 'black'
+      fweight = 'bold' if rect.get_height() > 5 else 'normal'
+      print(label, rect.get_height(), color)
       axgc.text(rect.get_x() + rect.get_width() / 2., .3, label, alpha=1,
-                color=color, fontsize="12", ha='center')
+                color=color, fontweight=fweight, fontsize="10", ha='center')
 
     loc = mdates.DayLocator(interval=1)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))

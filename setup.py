@@ -34,7 +34,6 @@ setup(
     exclude=["build*", "misc*", "dist*"]
   ),
   py_modules=[
-    'DXEntity',
     'adapters',
     'aindex',
     'config',

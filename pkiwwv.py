@@ -31,7 +31,9 @@ NOAA_URL = "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
 NB_DAYS = 5
 
 WWV_REQUEST = "SELECT wwv.time, wwv.k FROM wwv WHERE wwv.time > ?"
-WWV_CONDITIONS = "SELECT conditions FROM wwv WHERE time > ? ORDER BY time DESC LIMIT 1"
+WWV_CONDITIONS = ("SELECT conditions FROM wwv "
+                  "WHERE time > ? and conditions != '' "
+                  "ORDER BY time DESC LIMIT 1")
 
 
 plt.style.use(['classic', 'fast'])
