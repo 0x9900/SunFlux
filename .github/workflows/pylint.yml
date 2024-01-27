@@ -23,7 +23,6 @@ jobs:
         python -m pip install PyYAML
     - name: Analysing the code with pylint
       run: |
-        pylint DXEntity.py
         pylint adapters.py
         pylint aindex.py
         pylint config.py
