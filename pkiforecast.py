@@ -54,7 +54,7 @@ class PKIForecast:
     return bool(self.data)
 
   def graph(self, filenames):
-    # pylint: disable=too-many-locals
+    # pylint: disable=too-many-locals,too-many-statements
     start_date = datetime.utcnow() - timedelta(days=3, hours=4)
     end_date = datetime.utcnow() + timedelta(days=1, hours=3)
     xdates = np.array([d[0] for d in self.data if start_date < d[0] < end_date])
