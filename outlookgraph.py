@@ -70,10 +70,10 @@ class OutLook:
   def graph(self, filenames):
     # pylint: disable=too-many-locals
     data = np.array(self.data)
-    dates = data[:,0]
-    flux = data[:,1]
-    aindex = data[:,2]
-    kindex = data[:,3]
+    dates = data[:, 0]
+    flux = data[:, 1]
+    aindex = data[:, 2]
+    kindex = data[:, 3]
     now = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
 
     fig = plt.figure(figsize=(12, 5))

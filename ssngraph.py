@@ -111,9 +111,9 @@ class SSN:
     # pylint: disable=too-many-locals
     data = np.array(self.data)
 
-    xtime = data[:,0]
-    ssn = data[:,2]
-    flux = data[:,1]
+    xtime = data[:, 0]
+    ssn = data[:, 2]
+    flux = data[:, 1]
     avg = moving_average(ssn)
 
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')

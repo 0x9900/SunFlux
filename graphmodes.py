@@ -77,7 +77,7 @@ def graph(data, imgname):
   ax1.set_ylabel('Sports / Day', fontsize=12)
   ax1.margins(x=0.01, y=0.02)
   colors = cm.Set2(np.linspace(0, 1, len(modes)))  # pylint: disable=no-member
-  colors[0] = (1,.5,0,1)
+  colors[0] = (1, .5, 0, 1)
   prev = np.zeros(len(xdate))
   for idx, mode in enumerate(modes):
     value = np.array(ydata[mode], dtype=float)

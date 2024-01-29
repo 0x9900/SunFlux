@@ -103,12 +103,12 @@ class SolarWind:
 
     formatter = ticker.ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
-    formatter.set_powerlimits((-1,1))
+    formatter.set_powerlimits((-1, 1))
     loc = mdates.HourLocator(interval=6)
 
     for i in range(3):
-      data = self.data[0:,i + 1]
-      ax[i].plot(self.data[0:,0], data, color=colors[i], linewidth=.5,
+      data = self.data[0:, i + 1]
+      ax[i].plot(self.data[0:, 0], data, color=colors[i], linewidth=.5,
                  marker='.', markersize=.5)
       ax[i].grid(color='tab:gray', linestyle='dotted', linewidth=.3)
       ax[i].set_ylabel(labels[i], fontsize=10)
