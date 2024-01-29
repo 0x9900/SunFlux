@@ -1,4 +1,4 @@
-name: Pylint
+name: Code compliance
 
 on: [push]
 
