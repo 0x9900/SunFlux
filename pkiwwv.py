@@ -120,15 +120,15 @@ def graph(data, condition, filenames):
     row = np.array(row)
     avg = np.average(row)
     avg = avg if avg > 0 else 0.1
-    values[i,:3] = [np.min(row), avg, np.max(row)]
+    values[i, :3] = [np.min(row), avg, np.max(row)]
 
   key_dates = np.array(list(data.keys())).reshape((-1, 1))
   data = np.hstack((key_dates, values))
 
   # I should use mpl.colormaps here
   # colors #6efa7b #a7bb36 #aa7f28 #8c4d30 #582a2d
-  colors = ['#6efa7b'] * data[:,0].size
-  for pos, val in enumerate(data[:,2]):
+  colors = ['#6efa7b'] * data[:, 0].size
+  for pos, val in enumerate(data[:, 2]):
     if 4 <= val < 5:
       colors[pos] = '#a7bb36'
     elif 5 <= val < 6:
@@ -148,9 +148,9 @@ def graph(data, condition, filenames):
 
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
-  axgc.plot(data[:,0], data[:,1], marker='v', linewidth=0, zorder=3, color="navy")
-  axgc.bar(data[:,0], data[:,2], width=0.14, linewidth=0.75, zorder=2, color=colors)
-  axgc.plot(data[:,0], data[:,3], marker='^', linewidth=0, zorder=4, color="green")
+  axgc.plot(data[:, 0], data[:, 1], marker='v', linewidth=0, zorder=3, color="navy")
+  axgc.bar(data[:, 0], data[:, 2], width=0.14, linewidth=0.75, zorder=2, color=colors)
+  axgc.plot(data[:, 0], data[:, 3], marker='^', linewidth=0, zorder=4, color="green")
 
   axgc.axhline(y=4, linewidth=1.5, zorder=1.5, color='red', label='Threshold')
 

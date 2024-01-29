@@ -81,7 +81,7 @@ class ShowDXCC:
   def graph(self, filename):
     dmax = np.max(self.data)
     color_map = ShowDXCC.mk_colormap()  # self.config.get('showdxcc.color_map', 'PRGn')
-    fig, axgc = plt.subplots(figsize=(12,8), facecolor='white')
+    fig, axgc = plt.subplots(figsize=(12, 8), facecolor='white')
 
     # axgc.set_facecolor('#001155')
     # Show all ticks and label them with the respective list entries
@@ -166,7 +166,7 @@ def mk_thumbnail(filename):
   path, _ = os.path.split(filename)
   image = Image.open(filename)
   image.thumbnail((600, 400))
-  for fmt in ('png','webp'):
+  for fmt in ('png', 'webp'):
     try:
       tn_file = os.path.join(path, f'tn_latest.{fmt}')
       image.save(tn_file, format=fmt, dpi=(100, 100))

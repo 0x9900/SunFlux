@@ -101,11 +101,11 @@ class EISN:
 
   def graph(self, filenames):
     data = np.array(self.data)
-    x = data[:,0]
-    y = data[:,2].astype(np.float64)
-    error = data[:,3].astype(np.float64)
-    vdata = data[:,4].astype(np.float64)
-    cdata = data[:,5].astype(np.float64)
+    x = data[:, 0]
+    y = data[:, 2].astype(np.float64)
+    error = data[:, 3].astype(np.float64)
+    vdata = data[:, 4].astype(np.float64)
+    cdata = data[:, 5].astype(np.float64)
 
     today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
     fig = plt.figure(figsize=(12, 5))

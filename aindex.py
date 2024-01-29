@@ -152,8 +152,8 @@ def graph(data, condition, filenames):
   keys_column = np.array([d[0] for d in data]).reshape((-1, 1))
   data = np.hstack((keys_column, values))
 
-  colors = ['lightgreen'] * data[:,0].size
-  for pos, val in enumerate(data[:,AVG]):
+  colors = ['lightgreen'] * data[:, 0].size
+  for pos, val in enumerate(data[:, AVG]):
     if 20 < val < 30:
       colors[pos] = 'darkorange'
     elif 30 < val < 50:
@@ -174,9 +174,9 @@ def graph(data, condition, filenames):
 
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
-  bars = axgc.bar(data[:,0], data[:,AVG], linewidth=0.75, zorder=2, color=colors)
-  axgc.plot(data[:,0], data[:,MAX], marker='v', linewidth=0, color="steelblue")
-  axgc.plot(data[:,0], data[:,MIN], marker='^', linewidth=0, color="navy")
+  bars = axgc.bar(data[:, 0], data[:, AVG], linewidth=0.75, zorder=2, color=colors)
+  axgc.plot(data[:, 0], data[:, MAX], marker='v', linewidth=0, color="steelblue")
+  axgc.plot(data[:, 0], data[:, MIN], marker='^', linewidth=0, color="navy")
   autolabel(axgc, bars)
 
   axgc.axhline(y=20, linewidth=1.5, zorder=1, color='green')
@@ -189,7 +189,7 @@ def graph(data, condition, filenames):
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
   axgc.xaxis.set_major_locator(loc)
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
-  axgc.set_ylim(0, data[:,MAX].max() * 1.1)
+  axgc.set_ylim(0, data[:, MAX].max() * 1.1)
   axgc.set_ylabel('A-Index')
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)

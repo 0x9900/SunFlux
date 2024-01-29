@@ -115,7 +115,7 @@ class XRayFlux:
 
     formatter = ticker.ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
-    formatter.set_powerlimits((-1,1))
+    formatter.set_powerlimits((-1, 1))
     ax.grid(color='brown', linestyle='dotted', linewidth=.3)
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
     ax.xaxis.set_major_locator(mdates.DayLocator())

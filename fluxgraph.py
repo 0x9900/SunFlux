@@ -112,11 +112,11 @@ def graph(data, filenames):
   # pylint: disable=invalid-name, too-many-locals
   arr = np.array(data)
   dstart = mdates.date2num(data[-1][0] - timedelta(days=15))
-  arr[:,0] = mdates.date2num(arr[:,0])
-  x, y = arr[:,0].astype(np.float64), arr[:,1].astype(np.int32)
+  arr[:, 0] = mdates.date2num(arr[:, 0])
+  x, y = arr[:, 0].astype(np.float64), arr[:, 1].astype(np.int32)
   idx = x[:] > dstart
   poly = np.poly1d(np.polyfit(x[idx], y[idx], 1))
-  avg = moving_average(arr[:,1], 7)
+  avg = moving_average(arr[:, 1], 7)
 
   date = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
   fig = plt.figure(figsize=(12, 5))
