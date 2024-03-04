@@ -31,8 +31,7 @@ NOAA_URL = "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
 NB_DAYS = 5
 
 WWV_REQUEST = "SELECT wwv.time, wwv.k FROM wwv WHERE wwv.time > ?"
-WWV_CONDITIONS = ("SELECT conditions FROM wwv "
-                  "WHERE time > ? and conditions != '' "
+WWV_CONDITIONS = ("SELECT conditions FROM wwv WHERE time > ? "
                   "ORDER BY time DESC LIMIT 1")
 
 
@@ -50,9 +49,8 @@ def bucket(dtm, size=4):
 
 def get_conditions(config):
   db_name = config['db_name']
-  start_time = datetime.utcnow() - timedelta(days=1)
-  conn = sqlite3.connect(db_name, timeout=5,
-                         detect_types=sqlite3.PARSE_DECLTYPES)
+  start_time = datetime.utcnow() - timedelta(hours=12)
+  conn = sqlite3.connect(db_name, timeout=5, detect_types=sqlite3.PARSE_DECLTYPES)
   with conn:
     curs = conn.cursor()
     result = curs.execute(WWV_CONDITIONS, (start_time,)).fetchone()
