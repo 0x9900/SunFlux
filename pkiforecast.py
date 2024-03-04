@@ -93,7 +93,6 @@ class PKIForecast:
         continue
       color = 'red' if rect.get_height() > 5 else 'black'
       fweight = 'bold' if rect.get_height() > 5 else 'normal'
-      print(label, rect.get_height(), color)
       axgc.text(rect.get_x() + rect.get_width() / 2., .3, label, alpha=1,
                 color=color, fontweight=fweight, fontsize="10", ha='center')
 
