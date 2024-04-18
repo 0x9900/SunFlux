@@ -26,7 +26,6 @@ adapters.install_adapters()
 
 plt.style.use(['classic', 'tableau-colorblind10'])
 
-TMPDIR = '/tmp'
 DPI = 100
 NB_DAYS = 15
 
@@ -60,7 +59,7 @@ def read_data(config, days=15):
   return data
 
 
-def graph(data, imgname):
+def graph(data, imgnames):
   now = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
   xdate = np.array(list(data.keys()))
   modes = sorted({k for d in data.values() for k in d})
@@ -86,10 +85,10 @@ def graph(data, imgname):
     prev += value
 
   ax1.legend(loc='upper left', fontsize=10)
-  graphname = os.path.join(TMPDIR, imgname)
   fig.autofmt_xdate(rotation=10, ha="center")
-  plt.savefig(graphname, transparent=False, dpi=DPI)
-  logging.info('Generate graph: %s', graphname)
+  for graphname in imgnames:
+    plt.savefig(graphname, transparent=False, dpi=DPI)
+    logging.info('Generate graph: %s', graphname)
 
 
 def main():
@@ -100,7 +99,8 @@ def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('-D', '--days', default=NB_DAYS, type=int,
                       help='Number of days to graph [Default: %(default)s]')
-  parser.add_argument('name', help='Name of the graph', nargs="*", default=['/tmp/modes.png'])
+  parser.add_argument('graph_names', help='Name of the graphs', nargs="*",
+                      default=['/tmp/modes.png'])
   opts = parser.parse_args()
 
   try:
@@ -112,7 +112,7 @@ def main():
     return os.EX_CONFIG
 
   data = read_data(config, opts.days)
-  graph(data, opts.name.pop(0))
+  graph(data, opts.graph_names)
   return os.EX_OK
 
 
