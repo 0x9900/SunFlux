@@ -131,7 +131,7 @@ class ProtonFlux:
               label=f'>={_energy} MeV')
       _max = max(data.max(), _max)
 
-    magnitude = 1 + int(math.log(_max, 10))
+    magnitude = 2 + int(math.log(_max, 10))
     ax.set_ylim((0.1, 10**magnitude))
 
     if magnitude > WARNING_THRESHOLD:
