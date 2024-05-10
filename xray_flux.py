@@ -12,12 +12,14 @@ import json
 import logging
 import math
 import os
+import pathlib
 import pickle
 import sys
 import time
 import urllib.request
 import warnings
 from datetime import datetime
+from urllib.parse import urlparse
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
@@ -36,7 +38,8 @@ logger = logging.getLogger('XRayFlux')
 # This 2 lines will have to be removed in future versions of numpy
 warnings.filterwarnings('ignore')
 
-NOAA_XRAY = 'https://services.swpc.noaa.gov/json/goes/primary/xrays-3-day.json'
+NOAA_XRAY3 = 'https://services.swpc.noaa.gov/json/goes/primary/xrays-3-day.json'
+NOAA_XRAY7 = 'https://services.swpc.noaa.gov/json/goes/primary/xrays-7-day.json'
 NOAA_FLARE = 'https://services.swpc.noaa.gov/json/goes/primary/xray-flares-7-day.json'
 
 
@@ -51,8 +54,12 @@ def remove_outlier(points, low=25, high=95):
 
 
 class XRayFlux:
-  def __init__(self, cache_file, cache_time=900):
-    self.cachefile = cache_file
+  def __init__(self, source, cache_path, cache_time=900):
+    self.source = source
+    parsed_url = urlparse(source)
+    cache_file = pathlib.Path(parsed_url.path).stem
+    self.cachefile = pathlib.Path(cache_path).joinpath(cache_file + '.pkl')
+
     self.data = None
     logger.debug('Import XRay Flux')
     now = time.time()
@@ -67,9 +74,9 @@ class XRayFlux:
       self.readcache()
 
   def download(self):
-    logger.info('Downloading XRayFlux data from NOAA')
+    logger.info('Downloading XRayFlux data from NOAA into %s', self.cachefile)
 
-    with urllib.request.urlopen(NOAA_XRAY) as res:
+    with urllib.request.urlopen(self.source) as res:
       webdata = res.read()
       encoding = res.info().get_content_charset('utf-8')
       _data = json.loads(webdata.decode(encoding), object_hook=noaa_date_hook)
@@ -134,13 +141,13 @@ class XRayFlux:
       try:
         start = noaa_date(flare['begin_time'])
         end = noaa_date(flare['end_time'])
-        fclass = flare.get('max_class')[0]
         if end < dates.min():
           continue
+        fclass = (flare.get('max_class') or flare.get('end_class'))[0]
         ax.axvspan(mdates.date2num(start), mdates.date2num(end), color=class_colors[fclass],
                    label=f'{fclass} Class Flare', alpha=0.25)
       except TypeError as err:
-        logging.error("Data error: %s Ignoring", err)
+        logger.warning("Data error: %s Ignoring", err)
 
     handles, labels = ax.get_legend_handles_labels()
     unique = dict(zip(labels, handles))
@@ -161,17 +168,25 @@ class XRayFlux:
 def main():
   logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config().get('xray_flux', {})
+  cache_path = config.get('cache_path', '/tmp')
+  graph_name = config.get('graph_name', '/tmp/xray_flux.png')
+  cache_time = config.get('cache_time', 900)
 
-  parser = argparse.ArgumentParser()
-  parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/pkindex.png'])
+  days = {
+    "3": NOAA_XRAY3,
+    "7": NOAA_XRAY7,
+  }
+
+  parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
+  parser.add_argument('-d', '--days', choices=days.keys(),
+                      help="Number of days to graph")
+  parser.add_argument('graph_names', nargs="*", default=[graph_name],
+                      help=("Name of the graph to generate (default: %(default)s)\n"
+                            "Formats can be 'png', 'jpeg', 'webp', 'svg', or 'sgvz'"))
   opts = parser.parse_args()
 
-  config = Config()
-
-  cache_file = config.get('cache_file', '/tmp/xrayflux.pkl')
-  cache_time = config.get('cache_time', 900)
-  xray = XRayFlux(cache_file, cache_time)
-  xray.graph(opts.names)
+  xray = XRayFlux(days[opts.days], cache_path, cache_time)
+  xray.graph(opts.graph_names)
 
 
 if __name__ == "__main__":
