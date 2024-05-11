@@ -22,6 +22,7 @@ from urllib.request import urlretrieve
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.ticker import MultipleLocator
 
 import adapters
 from config import Config
@@ -156,8 +157,9 @@ def graph(data, condition, filenames):
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
   axgc.xaxis.set_major_locator(loc)
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
+  axgc.yaxis.set_major_locator(MultipleLocator(1))
 
-  axgc.set_ylim(0, 9)
+  axgc.set_ylim(0, 9.5)
   axgc.set_ylabel('K-Index')
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)

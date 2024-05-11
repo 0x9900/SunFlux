@@ -20,6 +20,7 @@ from datetime import datetime, timedelta
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.ticker import MultipleLocator
 
 from config import Config
 
@@ -100,7 +101,9 @@ class PKIForecast:
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.HourLocator(interval=6))
-    axgc.set_ylim(0, 9)
+    axgc.yaxis.set_major_locator(MultipleLocator(1))
+
+    axgc.set_ylim(0, 9.5)
     axgc.set_ylabel('K-Index')
 
     axgc.axhspan(0, 0, facecolor='lightgrey', alpha=1, label='Estimated')
