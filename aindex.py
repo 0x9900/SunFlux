@@ -17,7 +17,7 @@ import sqlite3
 import sys
 import time
 import urllib.request
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
@@ -60,7 +60,7 @@ def color_complement(hue, saturation, value, alpha):
 
 def get_conditions(config):
   db_name = config['db_name']
-  start_time = datetime.utcnow() - timedelta(days=1)
+  start_time = datetime.now(timezone.utc) - timedelta(days=1)
   conn = sqlite3.connect(db_name, timeout=5,
                          detect_types=sqlite3.PARSE_DECLTYPES)
   with conn:
@@ -85,6 +85,7 @@ def download_aindex(cache_file):
         continue
       try:
         date = datetime.strptime(f"{line[0:10]}", "%Y %m %d")
+        date = date.replace(tzinfo=timezone.utc)
         aindex = sorted([float(line[11:17]), float(line[33:40]), float(line[57:63])])
         data[date] = tuple([max(aindex), sum(aindex) / len(aindex), min(aindex)])
       except ValueError:
@@ -99,7 +100,7 @@ def get_noaa(config):
   cache_time = config.get('cache_time', 3600 * 12)
   days = config.get('nb_days', NB_DAYS)
   now = time.time()
-  start_date = datetime.utcnow() - timedelta(days=days)
+  start_date = datetime.now(timezone.utc) - timedelta(days=days)
 
   try:
     filest = os.stat(cache_file)
@@ -121,7 +122,7 @@ def get_noaa(config):
 def get_wwv(config):
   db_name = config.get('db_name')
   days = config.get('nb_days', NB_DAYS)
-  start_date = datetime.utcnow() - timedelta(days=days)
+  start_date = datetime.now(timezone.utc) - timedelta(days=days)
   data = {}
 
   conn = sqlite3.connect(db_name, timeout=5,
@@ -132,6 +133,7 @@ def get_wwv(config):
     for res in results:
       try:
         date = datetime.strptime(res[-1], '%Y-%m-%d')
+        date = date.replace(tzinfo=timezone.utc)
         data[date] = res[:-1]
       except TypeError:
         pass
@@ -163,14 +165,13 @@ def graph(data, condition, filenames):
     elif val >= 100:
       colors[pos] = 'darkmagenta'
 
-  today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
+  today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('A-Index', fontsize=14, fontweight='bold')
   fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
   if condition:
-    fig.text(0.15, 0.8, "Forecast: " + condition, fontsize=12, zorder=4,
-             bbox={'boxstyle': 'round', 'linewidth': 1, 'facecolor': 'linen', 'alpha': 1,
-                   'pad': 0.8})
+    fig.text(0.22, 0.82, "Forecast: " + condition, fontsize=10,
+             color='red', fontweight='bold', zorder=4)
 
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
@@ -194,7 +195,7 @@ def graph(data, condition, filenames):
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
 
-  axgc.legend(['Max', 'Min'], loc='upper right', fontsize='10',
+  axgc.legend(['Max', 'Min'], loc='best', fontsize='10', framealpha=0.75,
               facecolor='linen', borderaxespad=1)
 
   fig.autofmt_xdate(rotation=10, ha="center")
