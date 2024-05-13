@@ -7,7 +7,7 @@
 #
 #
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 import numpy as np
 
@@ -23,7 +23,10 @@ def remove_outliers(points, low=25, high=95):
 
 
 def noaa_date(field):
-  return datetime.strptime(field, '%Y-%m-%dT%H:%M:%SZ')
+  """Convert the noaa date into a datetime object and make sure the timezone is utc"""
+  _date = datetime.strptime(field, '%Y-%m-%dT%H:%M:%S%z')
+  _date = _date.replace(tzinfo=timezone.utc)
+  return _date
 
 
 def noaa_date_hook(dct):

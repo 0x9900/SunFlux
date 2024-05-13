@@ -13,7 +13,7 @@ import os
 import sys
 import time
 from collections import namedtuple
-from datetime import datetime
+from datetime import datetime, timezone
 from urllib.request import urlretrieve
 
 import matplotlib.dates as mdates
@@ -74,7 +74,7 @@ class OutLook:
     flux = data[:, 1]
     aindex = data[:, 2]
     kindex = data[:, 3]
-    now = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
+    now = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
 
     fig = plt.figure(figsize=(12, 5))
     ax1 = plt.subplot(222)

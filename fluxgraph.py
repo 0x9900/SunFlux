@@ -16,7 +16,7 @@ import sqlite3
 import sys
 import time
 import urllib.request
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
@@ -72,7 +72,7 @@ def get_noaa_flux(config):
   cache_time = config.get('cache_time', 3600 * 2)
   days = config.get('nb_days', NB_DAYS)
   now = time.time()
-  start_date = datetime.utcnow() - timedelta(days=days)
+  start_date = datetime.now(timezone.utc) - timedelta(days=days)
 
   try:
     filest = os.stat(cache_file)
@@ -93,7 +93,7 @@ def get_noaa_flux(config):
 def get_flux(config):
   db_name = config.get('db_name')
   days = config.get('nb_days', NB_DAYS)
-  start_date = datetime.utcnow() - timedelta(days=days)
+  start_date = datetime.now(timezone.utc) - timedelta(days=days)
   data = {}
 
   conn = sqlite3.connect(db_name, timeout=5,
@@ -103,6 +103,7 @@ def get_flux(config):
     results = curs.execute(WWV_REQUEST, (start_date,))
     for elem in results:
       date = elem[0]
+      date = date.replace(tzinfo=timezone.utc)
       data[date] = float(elem[1])
 
   return data
@@ -118,7 +119,7 @@ def graph(data, filenames):
   poly = np.poly1d(np.polyfit(x[idx], y[idx], 1))
   avg = moving_average(arr[:, 1], 7)
 
-  date = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
+  date = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('Daily 10cm Flux Index', fontsize=14, fontweight='bold')
   axgc = plt.gca()
