@@ -16,8 +16,8 @@ __version__ = '0.1.5'
 __license__ = 'BSD'
 
 py_version = sys.version_info[:2]
-if py_version < (3, 9):
-  raise RuntimeError('SunFlux Bot requires Python 3.9 or later')
+if py_version < (3, 10):
+  raise RuntimeError('SunFlux Bot requires Python 3.10 or later')
 
 setup(
   name='SunFluxBot',
@@ -76,7 +76,7 @@ setup(
     'Operating System :: OS Independent',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.10',
     'Topic :: Communications :: Ham Radio',
   ],
 )

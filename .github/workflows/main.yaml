@@ -24,10 +24,10 @@ jobs:
       run: |
         isort --check $(git ls-files "*.py")
     - name: Check syntax
-      continue-on-error: true
+      continue-on-error: false
       run: |
         flake8 $(git ls-files '*.py')
     - name: Analysing code with pylint
-      continue-on-error: true
+      continue-on-error: false
       run: |
-        for file in $(git ls-files '*.py'); do pylint $file; done
+        for file in $(git ls-files '*.py'); do echo $file; pylint $file; done
