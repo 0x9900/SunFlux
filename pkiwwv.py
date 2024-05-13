@@ -16,7 +16,7 @@ import sqlite3
 import sys
 import time
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from urllib.request import urlretrieve
 
 import matplotlib.dates as mdates
@@ -50,7 +50,7 @@ def bucket(dtm, size=4):
 
 def get_conditions(config):
   db_name = config['db_name']
-  start_time = datetime.utcnow() - timedelta(hours=12)
+  start_time = datetime.now(timezone.utc) - timedelta(hours=12)
   conn = sqlite3.connect(db_name, timeout=5, detect_types=sqlite3.PARSE_DECLTYPES)
   with conn:
     curs = conn.cursor()
@@ -69,7 +69,7 @@ def get_pkindex(config):
   cache_file = config.get('cache_file', '/tmp/pkiwwv-noaa.json')
   cache_time = config.get('cache_time', 10800)
   days = config.get('nb_days', NB_DAYS)
-  start_date = datetime.utcnow() - timedelta(days=days)
+  start_date = datetime.now(timezone.utc) - timedelta(days=days)
   now = time.time()
 
   try:
@@ -85,7 +85,8 @@ def get_pkindex(config):
   for rec in _data:
     try:
       date = datetime.strptime(rec[0], '%Y-%m-%d %H:%M:%S.%f')
-      date = date.replace(hour=bucket(date), minute=0, second=0, microsecond=0)
+      date = date.replace(hour=bucket(date), minute=0, second=0, microsecond=0,
+                          tzinfo=timezone.utc)
       if date >= start_date:
         data[date].append(float(rec[1]))
     except ValueError:
@@ -137,7 +138,7 @@ def graph(data, condition, filenames):
     elif val >= 8:
       colors[pos] = '#582a2d'
 
-  today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
+  today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('Planetary K-Index', fontsize=14, fontweight='bold')
   fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')

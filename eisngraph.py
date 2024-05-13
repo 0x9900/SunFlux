@@ -14,7 +14,7 @@ import os
 import pickle
 import sys
 import time
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from urllib.request import urlopen
 
 import matplotlib.dates as mdates
@@ -70,7 +70,8 @@ class EISN:
         ftmp.append(float(field))
       else:
         ftmp.append(0)
-    return (date(*ftmp[:3]), *ftmp[3:])
+    day = dict(zip(['year', 'month', 'day'], ftmp[:3]))
+    return [date(**day)] + ftmp[3:]
 
   @staticmethod
   def read_cache(cache_file):
@@ -107,7 +108,7 @@ class EISN:
     vdata = data[:, 4].astype(np.float64)
     cdata = data[:, 5].astype(np.float64)
 
-    today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
+    today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
     fig = plt.figure(figsize=(12, 5))
     fig.suptitle('Estimated International Sunspot Number (EISN)', fontsize=14, fontweight='bold')
     fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')

@@ -15,7 +15,7 @@ import pickle
 import sys
 import time
 import urllib.request
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
@@ -56,8 +56,8 @@ class PKIForecast:
 
   def graph(self, filenames):
     # pylint: disable=too-many-locals,too-many-statements
-    start_date = datetime.utcnow() - timedelta(days=3, hours=4)
-    end_date = datetime.utcnow() + timedelta(days=1, hours=3)
+    start_date = datetime.now(timezone.utc) - timedelta(days=3, hours=4)
+    end_date = datetime.now(timezone.utc) + timedelta(days=1, hours=3)
     xdates = np.array([d[0] for d in self.data if start_date < d[0] < end_date])
     yvalues = np.array([d[1] for d in self.data if start_date < d[0] < end_date])
     observ = [d[2] for d in self.data if start_date < d[0] < end_date]
@@ -80,7 +80,7 @@ class PKIForecast:
       elif obs == "predicted":
         colors[pos] = 'darkgrey'
 
-    date = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
+    date = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
     plt.rc('xtick', labelsize=10)
     plt.rc('ytick', labelsize=10)
     fig = plt.figure(figsize=(12, 5))
@@ -134,6 +134,7 @@ class PKIForecast:
       _data = json.loads(webdata.decode(encoding))
       for elem in _data[1:]:
         date = datetime.strptime(elem[0], '%Y-%m-%d %H:%M:%S')
+        date = date.replace(tzinfo=timezone.utc)
         data.append((date, float(elem[1]), *elem[2:]))
 
     self.data = sorted(data)

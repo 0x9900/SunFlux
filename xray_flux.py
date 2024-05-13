@@ -178,8 +178,8 @@ def main():
   }
 
   parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
-  parser.add_argument('-d', '--days', choices=days.keys(),
-                      help="Number of days to graph")
+  parser.add_argument('-d', '--days', choices=days.keys(), default='3',
+                      help="Number of days to graph (default: %(default)s)")
   parser.add_argument('graph_names', nargs="*", default=[graph_name],
                       help=("Name of the graph to generate (default: %(default)s)\n"
                             "Formats can be 'png', 'jpeg', 'webp', 'svg', or 'sgvz'"))

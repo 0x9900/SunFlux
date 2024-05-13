@@ -17,17 +17,17 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install pylint flake8 isort
+        python -m pip install setuptools pylint flake8 isort
         python -m pip install numpy matplotlib PyYAML
     - name: Checking imports
       continue-on-error: false
       run: |
         isort --check $(git ls-files "*.py")
     - name: Check syntax
-      continue-on-error: true
+      continue-on-error: false
       run: |
         flake8 $(git ls-files '*.py')
     - name: Analysing code with pylint
-      continue-on-error: true
+      continue-on-error: false
       run: |
-        for file in $(git ls-files '*.py'); do pylint $file; done
+        for file in $(git ls-files '*.py'); do echo $file; pylint $file; done
