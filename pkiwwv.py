@@ -98,7 +98,7 @@ def get_pkindex(config):
 def get_wwv(config):
   data = defaultdict(list)
   days = config.get('nb_days', NB_DAYS)
-  start_date = datetime.utcnow() - timedelta(days=days)
+  start_date = datetime.now(timezone.utc) - timedelta(days=days)
 
   conn = sqlite3.connect(config['db_name'], timeout=5,
                          detect_types=sqlite3.PARSE_DECLTYPES)
@@ -107,7 +107,8 @@ def get_wwv(config):
     results = curs.execute(WWV_REQUEST, (start_date,))
     for elem in results:
       date = elem[0]
-      date = date.replace(hour=bucket(date), minute=0, second=0, microsecond=0)
+      date = date.replace(hour=bucket(date), minute=0, second=0,
+                          microsecond=0, tzinfo=timezone.utc)
       data[date].append(elem[1])
 
   return data
