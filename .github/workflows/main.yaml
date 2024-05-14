@@ -18,7 +18,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install setuptools pylint flake8 isort
-        python -m pip install numpy matplotlib PyYAML
+        python -m pip install numpy matplotlib matplotlib-inline PyYAML
     - name: Checking imports
       continue-on-error: false
       run: |
