@@ -13,7 +13,7 @@ import os
 import sqlite3
 import sys
 from collections import deque
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -31,7 +31,7 @@ class ShowDXCC:
 
   def __init__(self, config, zone_name, zone, date=None):
     self.config = config
-    self.date = date if date else datetime.utcnow()
+    self.date = date if date else datetime.now(timezone.utc)
     self.data = []
     self.zone_name = zone_name
     try:
@@ -115,7 +115,7 @@ class ShowDXCC:
                    fontsize=16, fontweight='bold')
     fig.text(0.02, .03, f'(c){self.date.year} W6BSD https://bsdworld.org/', fontsize=14,
              style='italic')
-    fig.text(0.72, .95, f'{self.date.strftime("%a %b %d %Y - %H:%M")} GMT', fontsize=14)
+    fig.text(0.72, .95, f'{self.date.strftime("%a %b %d %Y - %H:%M %Z")}', fontsize=14)
     fig.tight_layout()
     logging.info('Save "%s"', filename)
     fig.savefig(filename, transparent=False, dpi=100)
@@ -132,12 +132,16 @@ class ShowDXCC:
 
 def type_date(parg):
   if parg == 'now':
-    date = datetime.utcnow()
+    date = datetime.now(timezone.utc)
     date = date.replace(second=0, microsecond=0)
     return date
 
+  if len(parg) != 10:
+    raise argparse.ArgumentTypeError('The date format should be YYYYMMDDHHMM') from None
+
   try:
     date = datetime.strptime(parg, '%Y%m%d%H%M')
+    date = date.replace(tzinfo=timezone.utc)
   except ValueError:
     raise argparse.ArgumentTypeError from None
   return date
