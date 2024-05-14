@@ -15,8 +15,7 @@ import pickle
 import sys
 import time
 import urllib.request
-import warnings
-from datetime import datetime
+from datetime import datetime, timezone
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
@@ -24,10 +23,6 @@ import numpy as np
 from matplotlib import ticker
 
 from config import Config
-
-# Older versions of numpy are too verbose when arrays contain np.nan values
-# This 2 lines will have to be removed in future versions of numpy
-warnings.filterwarnings('ignore')
 
 logging.basicConfig(
   format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
@@ -97,7 +92,7 @@ class SolarWind:
     # pylint: disable=too-many-locals
     colors = {0: "gray", 1: "orange", 2: "plum"}
     labels = {0: r"Density $1/cm^3$", 1: r"Speed $km/S$", 2: r"Temp $^{\circ}K$"}
-    limits = {0: [0, 12], 1: [250, 750]}  # , 2: [10**3, 10**6]}
+    limits = {0: [0, 12], 1: [250, 750], 2: [10**3, 10**6]}
     fig, ax = plt.subplots(3, 1, figsize=(12, 5))
     fig.suptitle('Solar Wind (plasma)', fontsize=14, fontweight='bold')
 
@@ -107,7 +102,7 @@ class SolarWind:
     loc = mdates.HourLocator(interval=6)
 
     for i in range(3):
-      data = self.data[0:, i + 1]
+      data = self.data[0:, i + 1].astype(np.float64)
       ax[i].plot(self.data[0:, 0], data, color=colors[i], linewidth=.5,
                  marker='.', markersize=.5)
       ax[i].grid(color='tab:gray', linestyle='dotted', linewidth=.3)
@@ -115,7 +110,7 @@ class SolarWind:
       if i in limits:
         _min, _max = limits[i]
         ax[i].axhline(_max, linewidth=1, zorder=1, color='lightgray')
-        _max = _max if np.max(data) < _max else np.max(data) * 1.10
+        _max = _max if np.nanmax(data) < _max else np.nanmax(data) * 1.1
         ax[i].set_ylim((_min, _max))
       ax[i].yaxis.offsetText.set_fontsize(10)
       if np.min(data) > 1000:
@@ -125,7 +120,7 @@ class SolarWind:
       ax[i].xaxis.set_major_formatter(mdates.DateFormatter('%m/%d %HH'))
       ax[i].xaxis.set_major_locator(loc)
 
-    today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
+    today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
     plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {today}', fontsize=10)
     for name in image_names:
       try:

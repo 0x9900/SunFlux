@@ -12,7 +12,7 @@ import json
 import logging
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from urllib import request
 
 import matplotlib.dates as mdates
@@ -45,7 +45,8 @@ def _history_cache(cache_file):
   with open(cache_file, 'r', encoding='ASCII') as cfd:
     data = json.load(cfd)
   for item in data:
-    item['time-tag'] = datetime.strptime(item['time-tag'], '%Y-%m')
+    date = datetime.strptime(item['time-tag'], '%Y-%m')
+    item['time-tag'] = date.replace(tzinfo=timezone.utc)
   return data
 
 
@@ -53,7 +54,8 @@ def _predictions_cache(cache_file):
   with open(cache_file, 'r', encoding='ASCII') as cfd:
     data = json.load(cfd)
   for item in data:
-    item['time-tag'] = datetime.strptime(item['time-tag'], '%Y-%m')
+    date = datetime.strptime(item['time-tag'], '%Y-%m')
+    item['time-tag'] = date.replace(tzinfo=timezone.utc)
     if item['smoothed_ssn_min'] < 0.0:
       item['smoothed_ssn_min'] = 0.0
     item['ssn'] = np.average([item['smoothed_ssn_min'], item['smoothed_ssn_max']])
@@ -86,10 +88,10 @@ def download_predictions(cache_file, cache_time=86400):
   return data
 
 
-def graph(histo, predic, image_names, year=1970):
+def graph(histo, predic, image_names, year=1961):
   # pylint: disable=too-many-locals
-  start_date = datetime(year, 1, 1)
-  end_date = datetime.utcnow() + timedelta(days=365 * 12)
+  start_date = datetime(year, 1, 1, tzinfo=timezone.utc)
+  end_date = datetime.now(timezone.utc) + timedelta(days=365 * 12)
   last_date = histo[-1]['time-tag'].strftime("%m-%Y")
 
   xdates = np.array([d['time-tag'] for d in histo if d['time-tag'] > start_date])
@@ -101,7 +103,7 @@ def graph(histo, predic, image_names, year=1970):
   hvals = np.array([d['smoothed_ssn_max'] for d in predic if d['time-tag'] < end_date])
   pavg = np.array([d['ssn'] for d in predic if d['time-tag'] < end_date])
 
-  today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
+  today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle(f'SunSpot Numbers from {year} to {last_date}', fontsize=14, fontweight='bold')
   plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
@@ -151,13 +153,13 @@ def main():
   opts = parser.parse_args()
 
   cache_histo = config.get('cache_history', '/tmp/ssnhist.json')
-  cache_predict = config.get('cache_precictions', '/tmp/ssnpredict.json')
+  cache_predic = config.get('cache_precictions', '/tmp/ssnpredict.json')
   cache_time = config.get('cache_time', 86400 * 10)
 
   histo = download_history(cache_histo, cache_time)
-  predict = download_predictions(cache_predict, cache_time)
+  predic = download_predictions(cache_predic, cache_time)
 
-  graph(histo, predict, opts.names, 1975)
+  graph(histo, predic, opts.names, 1961)
 
 
 if __name__ == "__main__":
