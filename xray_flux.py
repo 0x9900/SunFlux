@@ -18,7 +18,7 @@ import sys
 import time
 import urllib.request
 import warnings
-from datetime import datetime
+from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 import matplotlib.dates as mdates
@@ -154,7 +154,7 @@ class XRayFlux:
     ax.legend(unique.values(), unique.keys(), loc='upper left', fontsize="12",
               facecolor="linen", borderpad=1, borderaxespad=1)
 
-    today = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
+    today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
     plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {today}', fontsize=12)
     for name in image_names:
       try:
