@@ -71,7 +71,7 @@ class EISN:
       else:
         ftmp.append(0)
     day = dict(zip(['year', 'month', 'day'], ftmp[:3]))
-    return [date(**day)] + ftmp[3:]
+    return tuple([date(**day)] + ftmp[3:])
 
   @staticmethod
   def read_cache(cache_file):
