@@ -12,7 +12,7 @@ import logging
 import os
 import sqlite3
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from itertools import product
 
 import matplotlib.pyplot as plt
@@ -40,7 +40,7 @@ def read_data(config, days=15):
     timeout=5,
     detect_types=sqlite3.PARSE_DECLTYPES
   )
-  today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+  today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
   today -= timedelta(hours=24)
   start = today - timedelta(hours=24 * days)
   with conn:
@@ -48,6 +48,7 @@ def read_data(config, days=15):
     results = curs.execute(SQL_REQ.format(start.timestamp(),))
     for date, mode, count in results:
       date = datetime.strptime(date, '%Y%m%d')
+      date = date.replace(tzinfo=timezone.utc)
       if not start < date <= today:
         continue
       if mode is None:
@@ -60,7 +61,7 @@ def read_data(config, days=15):
 
 
 def graph(data, imgnames):
-  now = datetime.utcnow().strftime('%Y/%m/%d %H:%M UTC')
+  now = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
   xdate = np.array(list(data.keys()))
   modes = sorted({k for d in data.values() for k in d})
   ydata = defaultdict(list)
