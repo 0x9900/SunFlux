@@ -151,11 +151,11 @@ class XRayFlux:
 
     handles, labels = ax.get_legend_handles_labels()
     unique = dict(zip(labels, handles))
-    ax.legend(unique.values(), unique.keys(), loc='upper left', fontsize="12",
+    ax.legend(unique.values(), unique.keys(), loc='upper left', fontsize=12,
               facecolor="linen", borderpad=1, borderaxespad=1)
 
     today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
-    plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {today}', fontsize=12)
+    plt.figtext(0.01, 0.02, f'SunFlux By W6BSD {today}', fontsize=10)
     for name in image_names:
       try:
         fig.savefig(name, transparent=False, dpi=100)

@@ -95,7 +95,7 @@ class PKIForecast:
       color = 'red' if rect.get_height() > 5 else 'black'
       fweight = 'bold' if rect.get_height() > 5 else 'normal'
       axgc.text(rect.get_x() + rect.get_width() / 2., .3, label, alpha=1,
-                color=color, fontweight=fweight, fontsize="10", ha='center')
+                color=color, fontweight=fweight, fontsize=10, ha='center')
 
     loc = mdates.DayLocator(interval=1)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
@@ -115,7 +115,7 @@ class PKIForecast:
 
     fig.autofmt_xdate(rotation=10, ha="center")
 
-    plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {date}')
+    plt.figtext(0.01, 0.02, f'SunFlux By W6BSD {date}', fontsize=10)
     for filename in filenames:
       try:
         plt.savefig(filename, transparent=False, dpi=100)

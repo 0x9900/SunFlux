@@ -73,7 +73,7 @@ def graph(data, imgnames):
 
   fig, ax1 = plt.subplots(figsize=(12, 5))
   fig.suptitle('Band Activity / Modes', fontsize=14, fontweight='bold')
-  fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {now}')
+  fig.text(0.01, 0.02, f'SunFlux By W6BSD {now}', fontsize=10)
   ax1.set_ylabel('Sports / Day', fontsize=12)
   ax1.margins(x=0.01, y=0.02)
   colors = cm.Set2(np.linspace(0, 1, len(modes)))  # pylint: disable=no-member

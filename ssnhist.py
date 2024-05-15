@@ -106,7 +106,7 @@ def graph(histo, predic, image_names, year=1961):
   today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle(f'SunSpot Numbers from {year} to {last_date}', fontsize=14, fontweight='bold')
-  plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
+  plt.figtext(0.01, 0.02, f'SunFlux By W6BSD {today}', fontsize=10)
 
   axis = plt.gca()
   axis.plot(xdates, mavg, label='Average', zorder=5, color="navy", linewidth=1.5)
@@ -127,7 +127,7 @@ def graph(histo, predic, image_names, year=1961):
   axis.yaxis.set_major_locator(MultipleLocator(25))
   axis.yaxis.set_minor_locator(MultipleLocator(5))
 
-  legend = axis.legend(facecolor="linen", fontsize="12", loc='best')
+  legend = axis.legend(facecolor="linen", fontsize=12, loc='best')
   for line in legend.get_lines():
     line.set_linewidth(4.0)
 

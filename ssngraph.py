@@ -119,7 +119,7 @@ class SSN:
     today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
     fig = plt.figure(figsize=(12, 5))
     fig.suptitle('Sunspot Number (SSN)', fontsize=14, fontweight='bold')
-    fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
+    fig.text(0.01, 0.02, f'SunFlux By W6BSD {today}', fontsize=10)
     axgc = plt.gca()
     axgc.tick_params(labelsize=10)
     axgc.plot(xtime, ssn, marker='o', markersize=7, color="darkolivegreen", linewidth=1)
@@ -142,7 +142,7 @@ class SSN:
                    ha='center', fontsize=8,
                    arrowprops={"arrowstyle": "->", "color": 'green'})
 
-    axgc.legend(['Sun spot', '5day average', '10.7cm Flux'], facecolor="linen", fontsize="10",
+    axgc.legend(['Sun spot', '5day average', '10.7cm Flux'], facecolor="linen", fontsize=10,
                 loc='best')
     axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
 

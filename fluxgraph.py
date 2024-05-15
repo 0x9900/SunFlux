@@ -27,6 +27,7 @@ import tools
 from config import Config
 
 NB_DAYS = 92
+TREND_WK = 3
 MIN_TICKS = 55
 
 WWV_REQUEST = "SELECT wwv.time, wwv.SFI FROM wwv WHERE wwv.time > ?"
@@ -109,10 +110,11 @@ def get_flux(config):
   return data
 
 
-def graph(data, filenames):
+def graph(data, filenames, trend_week=3):
   # pylint: disable=invalid-name, too-many-locals
+  trend_days = trend_week * 7
   arr = np.array(data)
-  dstart = mdates.date2num(data[-1][0] - timedelta(days=15))
+  dstart = mdates.date2num(data[-1][0] - timedelta(days=trend_days))
   arr[:, 0] = mdates.date2num(arr[:, 0])
   x, y = arr[:, 0].astype(np.float64), arr[:, 1].astype(np.int32)
   idx = x[:] > dstart
@@ -123,9 +125,9 @@ def graph(data, filenames):
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('Daily 10cm Flux Index', fontsize=14, fontweight='bold')
   axgc = plt.gca()
-  axgc.plot(x, y, linewidth=1, label='Flux', color="royalblue")
+  axgc.plot(x, y, linewidth=1, label='Flux', color="gray")
   mave, = axgc.plot(x, avg, linewidth=1.75, label='Daily Average', color="indigo")
-  trend, = axgc.plot(x[idx], poly(x[idx]), label='Trend (3 weeks)', linestyle='--',
+  trend, = axgc.plot(x[idx], poly(x[idx]), label=f'Trend ({trend_week} weeks)', linestyle='--',
                      color="red", linewidth=2)
   axgc.tick_params(labelsize=10)
 
@@ -159,7 +161,7 @@ def graph(data, filenames):
   axgc.margins(x=.015)
 
   fig.autofmt_xdate(rotation=10, ha="center")
-  plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {date}')
+  plt.figtext(0.01, 0.02, f'SunFlux By W6BSD {date}', fontsize=10)
   for name in filenames:
     try:
       plt.savefig(name, transparent=False, dpi=100)
@@ -177,6 +179,8 @@ def main():
   parser = argparse.ArgumentParser()
   parser.add_argument('-D', '--days', default=config.get('nb_days', NB_DAYS), type=int,
                       help='Number of days to graph [Default: %(default)s]')
+  parser.add_argument('-T', '--trend', default=config.get('trend_weeks', TREND_WK), type=int,
+                      help='Number of trend days [Default: %(default)s]')
   parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/flux.png'])
   opts = parser.parse_args()
 
@@ -190,7 +194,7 @@ def main():
     return os.EX_DATAERR
 
   logger.debug('Dataset size: %d', len(data))
-  graph(data, opts.names)
+  graph(data, opts.names, opts.trend)
   return os.EX_OK
 
 

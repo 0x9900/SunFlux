@@ -111,7 +111,7 @@ class ProtonFlux:
     fig.suptitle('Proton Flux', fontsize=14, fontweight='bold')
     ax = plt.gca()
     ax.set_yscale("log")
-    ax.tick_params(axis='x', which='both', labelsize=12, rotation=10)
+    ax.tick_params(axis='x', which='both', labelsize=10, rotation=10)
 
     formatter = ticker.ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
@@ -138,7 +138,7 @@ class ProtonFlux:
       ax.axhline(WARNING_THRESHOLD, linewidth=1.5, linestyle="--", zorder=0, color='tab:red',
                  label='Warning Threshold')
 
-    legend = ax.legend(loc='upper left', fontsize="12", facecolor="linen",
+    legend = ax.legend(loc='upper left', fontsize=10, facecolor="linen",
                        borderpad=1.25, borderaxespad=1)
     for line in legend.get_lines():
       if line.get_label().startswith('>'):
@@ -147,7 +147,7 @@ class ProtonFlux:
         line.set_linewidth(2)
 
     today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
-    plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {today}', fontsize=12)
+    plt.figtext(0.01, 0.02, f'SunFlux By W6BSD {today}', fontsize=10)
     for name in image_names:
       try:
         fig.savefig(name, transparent=False, dpi=100)

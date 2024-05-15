@@ -111,7 +111,7 @@ class EISN:
     today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
     fig = plt.figure(figsize=(12, 5))
     fig.suptitle('Estimated International Sunspot Number (EISN)', fontsize=14, fontweight='bold')
-    fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
+    fig.text(0.01, 0.02, f'SunFlux By W6BSD {today}', fontsize=10)
     axgc = plt.gca()
     axgc.tick_params(labelsize=10)
     axgc.plot(x, y, color="blue")
@@ -125,7 +125,7 @@ class EISN:
                       linewidth=.75, edgecolor='b')
 
     axgc.legend(['EISN', 'Average', 'Valid Data', 'Entries'], loc='best',
-                fontsize="10", facecolor="linen", borderaxespad=1, ncol=2)
+                fontsize=10, facecolor="linen", borderaxespad=1, ncol=2)
 
     loc = mdates.DayLocator(interval=int(1 + len(x) / 11))
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))

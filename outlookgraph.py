@@ -111,7 +111,7 @@ class OutLook:
 
     plt.subplots_adjust(top=0.91, bottom=0.15)
 
-    plt.figtext(0.01, 0.02, f'SunFluxBot By W6BSD {now}')
+    plt.figtext(0.01, 0.02, f'SunFlux By W6BSD {now}', fontsize=10)
     for filename in filenames:
       try:
         plt.savefig(filename, transparent=False, dpi=100)
@@ -124,7 +124,7 @@ class OutLook:
   def draw_aindex(axe, dates, aindex):
     bars = axe.bar(dates, aindex, color='springgreen', label='AIndex', zorder=2)
     axe.set_ylim([0, aindex.max() * 1.15])
-    axe.legend(loc='upper right', fontsize="10")
+    axe.legend(loc='upper right', fontsize=10)
     axe.grid(color="gray", linewidth=.5)
 
     for hbar in bars:
@@ -140,7 +140,7 @@ class OutLook:
   def draw_kindex(axe, dates, kindex):
     bars = axe.bar(dates, kindex, color="springgreen", label='Max KP-index', zorder=2)
     axe.set_ylim([0, kindex.max() * 1.25])
-    axe.legend(loc='upper right', fontsize="10")
+    axe.legend(loc='upper right', fontsize=10)
     axe.grid(color="black", linewidth=.5)
 
     for hbar in bars:
@@ -156,7 +156,7 @@ class OutLook:
   def draw_flux(axe, dates, flux):
     axe.plot(dates, flux, "navy", marker='.', linewidth=1.5, label='Flux')
     axe.set_ylim([min(flux) / 1.2, max(flux) * 1.05])
-    axe.legend(loc='upper right', fontsize="10")
+    axe.legend(loc='upper right', fontsize=10)
     axe.axhspan(90, axe.get_yticks().max(), facecolor='springgreen', alpha=ALPHA / 2, label='Good')
     axe.axhspan(70, 90, facecolor='orange', alpha=ALPHA / 2, label='Ok')
     axe.axhspan(40, 70, facecolor='tomato', alpha=ALPHA / 2, label='Bad')

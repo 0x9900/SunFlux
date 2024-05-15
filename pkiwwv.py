@@ -142,7 +142,7 @@ def graph(data, condition, filenames):
   today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('Planetary K-Index', fontsize=14, fontweight='bold')
-  fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
+  fig.text(0.01, 0.02, f'SunFlux By W6BSD {today}', fontsize=10)
   if condition:
     box = {"facecolor": 'white', "alpha": 0.75, "linewidth": 0}
     fig.text(0.136, 0.68, "Forecast: " + condition, fontsize=10, zorder=4,
@@ -167,7 +167,7 @@ def graph(data, condition, filenames):
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
 
-  axgc.legend(['Min', 'Max', 'Storm Threshold'], loc='upper left', fontsize='10',
+  axgc.legend(['Min', 'Max', 'Storm Threshold'], loc='upper left', fontsize=10,
               facecolor='linen', borderaxespad=1)
 
   fig.autofmt_xdate(rotation=10, ha="center")

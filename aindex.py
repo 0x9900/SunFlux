@@ -146,7 +146,7 @@ def autolabel(ax, rects):
     height = rect.get_height()
     color = rect.get_facecolor()
     ax.text(rect.get_x() + rect.get_width() / 2., 1, f'{int(height)}',
-            color=color_complement(*color), fontsize="10", ha='center')
+            color=color_complement(*color), fontsize=10, ha='center')
 
 
 def graph(data, condition, filenames):
@@ -168,7 +168,7 @@ def graph(data, condition, filenames):
   today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('A-Index', fontsize=14, fontweight='bold')
-  fig.text(0.01, 0.02, f'SunFluxBot By W6BSD {today}')
+  fig.text(0.01, 0.02, f'SunFlux By W6BSD {today}', fontsize=10)
   if condition:
     fig.text(0.22, 0.82, "Forecast: " + condition, fontsize=10,
              color='red', fontweight='bold', zorder=4)
@@ -195,7 +195,7 @@ def graph(data, condition, filenames):
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
 
-  axgc.legend(['Max', 'Min'], loc='best', fontsize='10', framealpha=0.75,
+  axgc.legend(['Max', 'Min'], loc='best', fontsize=10, framealpha=0.75,
               facecolor='linen', borderaxespad=1)
 
   fig.autofmt_xdate(rotation=10, ha="center")
