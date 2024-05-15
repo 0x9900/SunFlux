@@ -195,7 +195,7 @@ def graph(data, condition, filenames):
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
 
-  axgc.legend(['Max', 'Min'], loc='best', fontsize=10, framealpha=0.75,
+  axgc.legend(['Max', 'Min'], loc='upper left', fontsize=10, framealpha=0.75,
               facecolor='linen', borderaxespad=1)
 
   fig.autofmt_xdate(rotation=10, ha="center")
