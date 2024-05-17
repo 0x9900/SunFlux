@@ -81,22 +81,25 @@ class Drap:
       pickle.dump([lon, lat, data], fd_cache)
 
   def plot(self, image_path):
+    # pylint: disable=too-many-locals
     today = datetime.now(timezone.utc)
     color_map = Drap.mk_colormap()
     fig, axgc = plt.subplots(figsize=(12, 8), facecolor='white')
 
     dmap = Basemap(projection='cyl', resolution='c',
-                   llcrnrlat=-90, urcrnrlat=90, llcrnrlon=-180, urcrnrlon=180)
+                   llcrnrlat=-80, urcrnrlat=90, llcrnrlon=-175, urcrnrlon=175)
 
     # Draw map elements
-    dmap.drawcoastlines(linewidth=.6, color='w')
+    dmap.drawcoastlines(linewidth=.6, color='brown')
+    dmap.drawlsmask(land_color='#F4A460',ocean_color='aqua',lakes=True)
 
     lon, lat = np.meshgrid(self.lon, self.lat)
+    clevels = np.arange(self.data.min() + 1, self.data.max() + 1, .1)
+    dmap.contourf(lon, lat, self.data, clevels, cmap=color_map)
+    # dmap.pcolormesh(lon, lat, self.data, cmap=color_map)
 
-    dmap.pcolormesh(lon, lat, self.data, cmap=color_map)
-
-    cbar = dmap.colorbar()
-    cbar.set_label('Frequency (MHz)', size=12)
+    cbar = dmap.colorbar(size="2.5%", pad="2%", format=lambda x, _: f"{int(round(x)):d}")
+    cbar.set_label('Frequency (MHz)', weight='bold', size=10)
 
     axgc.set_title('DLayer Absorption', fontsize=16, fontweight='bold')
     date = today.strftime("%a %b %d %Y - %H:%M %Z")
@@ -121,8 +124,9 @@ class Drap:
 
   @staticmethod
   def mk_colormap():
-    colors = ["#5f2372", "#e0e0e0", "#e75a1f",]
-    pos = [0.0, 0.33, 1.0]
+    colors = ['#f0f0f0', '#2989d8', '#c1614a']
+    # colors = ["#5f2372", "yellow", "#e75a1f",]
+    pos = [0.0, 0.5, 1.0]
     cmap_name = 'my_cmap'
     n_bins = 24
     cmap = LinearSegmentedColormap.from_list(cmap_name, list(zip(pos, colors)), N=n_bins)
