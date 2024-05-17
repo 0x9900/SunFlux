@@ -84,7 +84,7 @@ class Drap:
     # pylint: disable=too-many-locals
     today = datetime.now(timezone.utc)
     color_map = Drap.mk_colormap()
-    fig, axgc = plt.subplots(figsize=(12, 8), facecolor='white')
+    fig, axgc = plt.subplots(figsize=(10, 5), facecolor='white')
 
     dmap = Basemap(projection='cyl', resolution='c',
                    llcrnrlat=-80, urcrnrlat=90, llcrnrlon=-175, urcrnrlon=175)
@@ -103,10 +103,9 @@ class Drap:
 
     axgc.set_title('DLayer Absorption', fontsize=16, fontweight='bold')
     date = today.strftime("%a %b %d %Y - %H:%M %Z")
-    fig.text(0.72, .03, f'{date}', fontsize=12)
+    fig.text(0.72, .03, f'{date}', fontsize=10)
     fig.text(0.02, .03, f'(c){today.year} W6BSD https://bsdworld.org/', fontsize=10,
              style='italic')
-    fig.tight_layout()
 
     path = pathlib.Path(image_path)
     try:
@@ -145,7 +144,7 @@ def mk_latest(image_name):
 def mk_thumnail(image_name):
   path = image_name.parents[0]
   image = Image.open(image_name)
-  image.thumbnail((600, 400))
+  image.thumbnail((600, 250))
   for fmt in ('png', 'webp'):
     try:
       tn_file = path.joinpath(f'tn_latest.{fmt}')
