@@ -118,6 +118,7 @@ class Drap:
     filename = path.joinpath(name)
     fig.savefig(filename, transparent=False, dpi=100)
     logging.info('Dlayer graph "%s" saved', filename)
+
     plt.close()
     return filename
 
@@ -144,11 +145,12 @@ def mk_latest(image_name):
 def mk_thumnail(image_name):
   path = image_name.parents[0]
   image = Image.open(image_name)
+  image = image.convert('RGB')
   image.thumbnail((600, 250))
-  for fmt in ('png', 'webp'):
+  for fmt in ('jpg', 'png', 'webp'):
     try:
       tn_file = path.joinpath(f'tn_latest.{fmt}')
-      image.save(tn_file, format=fmt, dpi=(100, 100))
+      image.save(tn_file, format=fmt if fmt != 'jpg' else 'jpeg', dpi=(100, 100))
       logging.info('Thumbnail "%s" saved', tn_file)
     except ValueError as err:
       logging.warning(err)
