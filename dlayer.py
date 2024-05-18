@@ -27,6 +27,7 @@ from PIL import Image
 from config import Config
 
 DRAP_URL = 'https://services.swpc.noaa.gov/text/drap_global_frequencies.txt'
+MAX_FREQUENCY = 35
 
 
 class Drap:
@@ -88,11 +89,11 @@ class Drap:
 
     # Draw map elements
     dmap.drawcoastlines(linewidth=.6, color='brown')
-    dmap.drawlsmask(land_color='#F4A460', ocean_color='aqua', lakes=False)
+    dmap.drawlsmask(land_color='#F4A460', ocean_color='azure', lakes=False)
 
     lon, lat = np.meshgrid(self.lon, self.lat)
     clevels = np.arange(self.data.min() + 1, self.data.max() + 1, .1)
-    dmap.contourf(lon, lat, self.data, clevels, cmap=color_map)
+    dmap.contourf(lon, lat, self.data, clevels, vmax=MAX_FREQUENCY, cmap=color_map)
     # dmap.pcolormesh(lon, lat, self.data, cmap=color_map)
 
     cbar = dmap.colorbar(size="2.5%", pad="2%", format=lambda x, _: f"{int(round(x)):d}")
