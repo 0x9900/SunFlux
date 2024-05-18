@@ -16,7 +16,6 @@ import pathlib
 import pickle
 import time
 from datetime import datetime, timezone
-from urllib.parse import urlparse
 from urllib.request import urlopen
 
 import matplotlib.pyplot as plt
@@ -32,9 +31,7 @@ DRAP_URL = 'https://services.swpc.noaa.gov/text/drap_global_frequencies.txt'
 
 class Drap:
   def __init__(self, cache_path, cache_time):
-    parsed_url = urlparse(DRAP_URL)
-    cache_file = pathlib.Path(parsed_url.path).stem
-    self.cache_file = pathlib.Path(cache_path).joinpath(cache_file + '.pkl')
+    self.cache_file = pathlib.Path(cache_path).joinpath('dlayer.pkl')
     self.cache_time = cache_time
     self.lon, self.lat, self.data = self.get_drap()
 
@@ -134,19 +131,18 @@ class Drap:
 
 
 def mk_latest(image_name):
-  path = image_name.parents[0]
-  latest = path.joinpath('latest.png')
+  latest = image_name.with_name('latest.png')
   if latest.exists():
     latest.unlink()
   os.link(image_name, latest)
-  logging.info('Lint to %s created', latest)
+  logging.info('Lint %s ->  %s', image_name, latest)
 
 
 def mk_thumnail(image_name):
-  path = image_name.parents[0]
   image = Image.open(image_name)
   image = image.convert('RGB')
   image.thumbnail((600, 250))
+  path = image_name.parents[0]
   for fmt in ('jpg', 'png', 'webp'):
     try:
       tn_file = path.joinpath(f'tn_latest.{fmt}')
