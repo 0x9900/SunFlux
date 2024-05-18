@@ -91,7 +91,7 @@ class Drap:
 
     # Draw map elements
     dmap.drawcoastlines(linewidth=.6, color='brown')
-    dmap.drawlsmask(land_color='#F4A460',ocean_color='aqua',lakes=True)
+    dmap.drawlsmask(land_color='#F4A460', ocean_color='aqua', lakes=False)
 
     lon, lat = np.meshgrid(self.lon, self.lat)
     clevels = np.arange(self.data.min() + 1, self.data.max() + 1, .1)
