@@ -99,7 +99,7 @@ class Drap:
     # dmap.pcolormesh(lon, lat, self.data, cmap=color_map)
 
     cbar = dmap.colorbar(size="2.5%", pad="2%", format=lambda x, _: f"{int(round(x)):d}")
-    cbar.set_label('Frequency (MHz)', weight='bold', size=10)
+    cbar.set_label('Affected Frequency (MHz)', weight='bold', size=10)
 
     axgc.set_title('DLayer Absorption', fontsize=16, fontweight='bold')
     date = today.strftime("%a %b %d %Y - %H:%M %Z")
