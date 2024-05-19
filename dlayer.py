@@ -83,27 +83,28 @@ class Drap:
     today = datetime.now(timezone.utc)
     color_map = Drap.mk_colormap()
     fig, axgc = plt.subplots(figsize=(10, 5), facecolor='white')
+    axgc.set_title('DLayer Absorption', fontsize=16, fontweight='bold')
+    date = today.strftime("%a %b %d %Y - %H:%M %Z")
+    fig.text(0.72, .03, f'{date}', fontsize=10)
+    fig.text(0.02, .03, f'(c){today.year} W6BSD https://bsdworld.org/', fontsize=10,
+             style='italic')
 
     dmap = Basemap(projection='cyl', resolution='c',
                    llcrnrlat=-80, urcrnrlat=90, llcrnrlon=-175, urcrnrlon=175)
 
     # Draw map elements
     dmap.drawcoastlines(linewidth=.6, color='brown')
-    dmap.drawlsmask(land_color='#F4A460', ocean_color='azure', lakes=False)
+    dmap.drawlsmask(land_color='tan', ocean_color='azure', lakes=False)
 
+    # Draw the data
     lon, lat = np.meshgrid(self.lon, self.lat)
-    clevels = np.arange(self.data.min() + 1, self.data.max() + 1, .1)
+    clevels = np.arange(self.data.min() + 1, MAX_FREQUENCY + 1)
     dmap.contourf(lon, lat, self.data, clevels, vmax=MAX_FREQUENCY, cmap=color_map)
-    # dmap.pcolormesh(lon, lat, self.data, cmap=color_map)
 
+    # Draw the colorbar
     cbar = dmap.colorbar(size="2.5%", pad="2%", format=lambda x, _: f"{int(round(x)):d}")
     cbar.set_label('Affected Frequency (MHz)', weight='bold', size=10)
-
-    axgc.set_title('DLayer Absorption', fontsize=16, fontweight='bold')
-    date = today.strftime("%a %b %d %Y - %H:%M %Z")
-    fig.text(0.72, .03, f'{date}', fontsize=10)
-    fig.text(0.02, .03, f'(c){today.year} W6BSD https://bsdworld.org/', fontsize=10,
-             style='italic')
+    cbar.set_ticks(np.linspace(1, MAX_FREQUENCY, 9))
 
     path = pathlib.Path(image_path)
     try:
@@ -126,7 +127,7 @@ class Drap:
     # colors = ["#5f2372", "yellow", "#e75a1f",]
     pos = [0.0, 0.5, 1.0]
     cmap_name = 'my_cmap'
-    n_bins = 24
+    n_bins = 35
     cmap = LinearSegmentedColormap.from_list(cmap_name, list(zip(pos, colors)), N=n_bins)
     return cmap
 
