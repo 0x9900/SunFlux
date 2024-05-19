@@ -27,7 +27,7 @@ from PIL import Image
 from config import Config
 
 DRAP_URL = 'https://services.swpc.noaa.gov/text/drap_global_frequencies.txt'
-MAX_FREQUENCY = 35
+MAX_FREQUENCY = 36
 
 
 class Drap:
@@ -104,7 +104,7 @@ class Drap:
     # Draw the colorbar
     cbar = dmap.colorbar(size="2.5%", pad="2%", format=lambda x, _: f"{int(round(x)):d}")
     cbar.set_label('Affected Frequency (MHz)', weight='bold', size=10)
-    cbar.set_ticks(np.linspace(1, MAX_FREQUENCY, 9))
+    cbar.set_ticks(np.linspace(1, MAX_FREQUENCY, 6))
 
     path = pathlib.Path(image_path)
     try:
