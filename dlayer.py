@@ -168,9 +168,12 @@ def main():
 
   cache_path = config.get('dlayer.cache_path', '/tmp')
   cache_time = config.get('dlayer.cache_time', 120)
-  default_logfile = config.get('dlayer.log_filename', '/tmp/dlayer.lob')
 
-  log_file = None if os.isatty(sys.stdout.fileno()) else default_logfile
+  if os.isatty(sys.stdout.fileno()):
+    log_file = None
+  else:
+    log_file = config.get('dlayer.log_filename', '/tmp/dlayer.log')
+
   logging.basicConfig(
     format='%(asctime)s %(name)s:%(lineno)3d %(levelname)s - %(message)s', datefmt='%x %X',
     level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO')),
