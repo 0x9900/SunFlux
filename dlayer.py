@@ -123,12 +123,10 @@ class Drap:
 
   @staticmethod
   def draw_elements(fig):
-    equator_lons = range(-180, 181)
-    equator_lats = [0] * len(equator_lons)
+    fig.drawparallels([-66.33, -23.5, 0, 23.5, 66.33], linewidth=.5, color='gray', dashes=[2, 2])
+    fig.drawmeridians([-90, 0, 90], linewidth=.5, color='gray', dashes=[2, 2])
     fig.drawcoastlines(linewidth=.6, color='brown')
     fig.drawlsmask(land_color='tan', ocean_color='azure', lakes=False)
-    fig.plot(equator_lons, equator_lats, latlon=True, linewidth=.5,
-             linestyle='--', color='darkgrey')
 
   @staticmethod
   def mk_colormap():
