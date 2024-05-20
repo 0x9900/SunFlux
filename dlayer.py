@@ -85,7 +85,7 @@ class Drap:
     fig, axgc = plt.subplots(figsize=(10, 5), facecolor='white')
     axgc.set_title('DLayer Absorption', fontsize=16, fontweight='bold')
     date = today.strftime("%a %b %d %Y - %H:%M %Z")
-    fig.text(0.72, .03, f'{date}', fontsize=10)
+    fig.text(0.697, .11, f'{date}', fontsize=8)
     fig.text(0.02, .03, f'(c){today.year} W6BSD https://bsdworld.org/', fontsize=10,
              style='italic')
 
