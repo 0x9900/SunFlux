@@ -79,9 +79,8 @@ class Drap:
       pickle.dump([lon, lat, data], fd_cache)
 
   def plot(self, image_path):
-    # pylint: disable=too-many-locals
     today = datetime.now(timezone.utc)
-    color_map = Drap.mk_colormap()
+    color_map = self.mk_colormap()
     fig, axgc = plt.subplots(figsize=(10, 5), facecolor='white')
     axgc.set_title('DLayer Absorption', fontsize=16, fontweight='bold')
     date = today.strftime("%a %b %d %Y - %H:%M %Z")
@@ -92,19 +91,13 @@ class Drap:
     dmap = Basemap(projection='cyl', resolution='c',
                    llcrnrlat=-80, urcrnrlat=90, llcrnrlon=-175, urcrnrlon=175)
 
-    # Draw map elements
-    dmap.drawcoastlines(linewidth=.6, color='brown')
-    dmap.drawlsmask(land_color='tan', ocean_color='azure', lakes=False)
-
     # Draw the data
     lon, lat = np.meshgrid(self.lon, self.lat)
     clevels = np.arange(self.data.min() + 1, MAX_FREQUENCY + 1)
     dmap.contourf(lon, lat, self.data, clevels, vmax=MAX_FREQUENCY, cmap=color_map)
 
-    # Draw the colorbar
-    cbar = dmap.colorbar(size="2.5%", pad="2%", format=lambda x, _: f"{int(round(x)):d}")
-    cbar.set_label('Affected Frequency (MHz)', weight='bold', size=10)
-    cbar.set_ticks(np.linspace(1, MAX_FREQUENCY, 6))
+    self.draw_colorbar(dmap)
+    self.draw_elements(dmap)
 
     path = pathlib.Path(image_path)
     try:
@@ -120,6 +113,21 @@ class Drap:
 
     plt.close()
     return filename
+
+  @staticmethod
+  def draw_colorbar(fig):
+    cbar = fig.colorbar(size="2.5%", pad="2%", format=lambda x, _: f"{int(round(x)):d}")
+    cbar.set_label('Affected Frequency (MHz)', weight='bold', size=10)
+    cbar.set_ticks(np.linspace(1, MAX_FREQUENCY, 6))
+
+  @staticmethod
+  def draw_elements(fig):
+    equator_lons = range(-180, 181)
+    equator_lats = [0] * len(equator_lons)
+    fig.drawcoastlines(linewidth=.6, color='brown')
+    fig.drawlsmask(land_color='tan', ocean_color='azure', lakes=False)
+    fig.plot(equator_lons, equator_lats, latlon=True, linewidth=.5,
+             linestyle='--', color='darkgrey')
 
   @staticmethod
   def mk_colormap():
