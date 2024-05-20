@@ -48,7 +48,7 @@ class Drap:
     return self.read_cache()
 
   def read_cache(self):
-    logging.info('Read from cache')
+    logging.debug('Read from cache')
     with open(self.cache_file, 'rb') as fd_cache:
       return pickle.load(fd_cache)
 
