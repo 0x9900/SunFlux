@@ -14,6 +14,7 @@ import logging
 import os
 import pathlib
 import pickle
+import sys
 import time
 from datetime import datetime, timezone
 from urllib.request import urlopen
@@ -165,17 +166,21 @@ def mk_thumnail(image_name):
 def main():
   config = Config()
 
+  cache_path = config.get('dlayer.cache_path', '/tmp')
+  cache_time = config.get('dlayer.cache_time', 120)
+  default_logfile = config.get('dlayer.log_filename', '/tmp/dlayer.lob')
+
+  log_file = None if os.isatty(sys.stdout.fileno()) else default_logfile
   logging.basicConfig(
     format='%(asctime)s %(name)s:%(lineno)3d %(levelname)s - %(message)s', datefmt='%x %X',
-    level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
+    level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO')),
+    filename=log_file
   )
 
   parser = argparse.ArgumentParser(description="DLayer absorption graph")
   parser.add_argument('-t', '--target', default='/var/tmp/drap', help='Image path')
   opts = parser.parse_args()
 
-  cache_path = config.get('dlayer.cache_path', '/tmp')
-  cache_time = config.get('dlayer.cache_time', 120)
   drap = Drap(cache_path, cache_time)
   image_name = drap.plot(opts.target)
   mk_latest(image_name)
