@@ -167,7 +167,7 @@ def main():
   opts = parser.parse_args()
 
   cache_path = config.get('dlayer.cache_path', '/tmp')
-  cache_time = config.get('dlayer.cache_time', 900)
+  cache_time = config.get('dlayer.cache_time', 120)
   drap = Drap(cache_path, cache_time)
   image_name = drap.plot(opts.target)
   mk_latest(image_name)
