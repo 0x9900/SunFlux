@@ -117,11 +117,13 @@ class Drap:
 
   @staticmethod
   def draw_colorbar(fig, fmax=None):
-    cbar = fig.colorbar(size="2.5%", pad="2%", format=lambda x, _: f"{int(round(x)):d}")
+    cbar = fig.colorbar(size="3.5%", pad="2%", format=lambda x, _: f"{int(round(x)):d}")
     cbar.set_label('Affected Frequency (MHz)', weight='bold', size=10)
     cbar.set_ticks(np.linspace(1, MAX_FREQUENCY, 6))
     if fmax:
       cbar.ax.arrow(0.1, fmax, 0.6, 0, width=0.03, head_width=0.6, head_length=0.2, fc='k', ec='k')
+      lpos = fmax - 1 if fmax > 22 else fmax + .5
+      cbar.ax.annotate('Max', xy=(0, lpos), xytext=(0, lpos), fontsize=8)
 
   @staticmethod
   def draw_elements(fig):
