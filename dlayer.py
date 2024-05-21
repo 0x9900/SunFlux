@@ -97,7 +97,7 @@ class Drap:
     clevels = np.arange(self.data.min() + 1, MAX_FREQUENCY + 1)
     dmap.contourf(lon, lat, self.data, clevels, vmax=MAX_FREQUENCY, cmap=color_map)
 
-    self.draw_colorbar(dmap)
+    self.draw_colorbar(dmap, self.data.max())
     self.draw_elements(dmap)
 
     path = pathlib.Path(image_path)
@@ -116,10 +116,12 @@ class Drap:
     return filename
 
   @staticmethod
-  def draw_colorbar(fig):
+  def draw_colorbar(fig, fmax=None):
     cbar = fig.colorbar(size="2.5%", pad="2%", format=lambda x, _: f"{int(round(x)):d}")
     cbar.set_label('Affected Frequency (MHz)', weight='bold', size=10)
     cbar.set_ticks(np.linspace(1, MAX_FREQUENCY, 6))
+    if fmax:
+      cbar.ax.arrow(0.1, fmax, 0.6, 0, width=0.03, head_width=0.6, head_length=0.2, fc='k', ec='k')
 
   @staticmethod
   def draw_elements(fig):
