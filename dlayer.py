@@ -23,12 +23,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 from mpl_toolkits.basemap import Basemap
-from PIL import Image
 
 from config import Config
 
 DRAP_URL = 'https://services.swpc.noaa.gov/text/drap_global_frequencies.txt'
 MAX_FREQUENCY = 36
+EXTENTIONS = ('.svgz', '.png')
 
 
 class Drap:
@@ -107,10 +107,11 @@ class Drap:
       logging.error(err)
       return None
 
-    name = f'dlayer-{today.strftime("%Y%m%d%H%M")}.png'
-    filename = path.joinpath(name)
-    fig.savefig(filename, transparent=False, dpi=100)
-    logging.info('Dlayer graph "%s" saved', filename)
+    filename = path.joinpath(f'dlayer-{today.strftime("%Y%m%d%H%M")}')
+    for ext in EXTENTIONS:
+      fig.savefig(filename.with_suffix(ext), transparent=False, dpi=100,
+                  metadata={'Creator': 'https://bsdworld.org/'})
+      logging.info('Dlayer graph "%s%s" saved', filename, ext)
 
     plt.close()
     return filename
@@ -144,34 +145,13 @@ class Drap:
 
 
 def mk_latest(image_name):
-  latest = image_name.with_name('latest.png')
-  if latest.exists():
-    latest.unlink()
-  os.link(image_name, latest)
-  logging.info('Lint %s ->  %s', image_name, latest)
-
-
-def mk_webp(image_name):
-  workfile = image_name.with_name('_latest.webp')
-  image = Image.open(image_name)
-  image.save(workfile, format='webp', dpi=(100, 100), quality=100, alpha_quality=100)
-  webpfile = workfile.with_name('latest.webp')
-  workfile.rename(webpfile)
-  logging.info('File "%s" saved', webpfile)
-
-
-def mk_thumnail(image_name):
-  image = Image.open(image_name)
-  image = image.convert('RGB')
-  image.thumbnail((600, 250))
-  path = image_name.parents[0]
-  for fmt in ('jpg', 'png', 'webp'):
-    try:
-      tn_file = path.joinpath(f'tn_latest.{fmt}')
-      image.save(tn_file, format=fmt if fmt != 'jpg' else 'jpeg', dpi=(100, 100))
-      logging.info('Thumbnail "%s" saved', tn_file)
-    except ValueError as err:
-      logging.warning(err)
+  for ext in EXTENTIONS:
+    src_img = image_name.with_suffix(ext)
+    dst_img = image_name.with_name('latest').with_suffix(ext)
+    if dst_img.exists():
+      dst_img.unlink()
+    os.link(src_img, dst_img)
+    logging.info('Lint %s ->  %s', src_img, dst_img)
 
 
 def main():
@@ -198,8 +178,6 @@ def main():
   drap = Drap(cache_path, cache_time)
   image_name = drap.plot(opts.target)
   mk_latest(image_name)
-  mk_webp(image_name)
-  mk_thumnail(image_name)
 
 
 if __name__ == "__main__":
