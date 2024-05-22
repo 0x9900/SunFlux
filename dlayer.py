@@ -151,6 +151,15 @@ def mk_latest(image_name):
   logging.info('Lint %s ->  %s', image_name, latest)
 
 
+def mk_webp(image_name):
+  workfile = image_name.with_name('_latest.webp')
+  image = Image.open(image_name)
+  image.save(workfile, format='webp', dpi=(100, 100), quality=100, alpha_quality=100)
+  webpfile = workfile.with_name('latest.webp')
+  workfile.rename(webpfile)
+  logging.info('File "%s" saved', webpfile)
+
+
 def mk_thumnail(image_name):
   image = Image.open(image_name)
   image = image.convert('RGB')
@@ -189,6 +198,7 @@ def main():
   drap = Drap(cache_path, cache_time)
   image_name = drap.plot(opts.target)
   mk_latest(image_name)
+  mk_webp(image_name)
   mk_thumnail(image_name)
 
 
