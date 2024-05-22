@@ -30,12 +30,16 @@ DRAP_URL = 'https://services.swpc.noaa.gov/text/drap_global_frequencies.txt'
 MAX_FREQUENCY = 36
 EXTENTIONS = ('.svgz', '.png')
 
+logging.getLogger('matplotlib').setLevel(logging.WARNING)
+
 
 class Drap:
   def __init__(self, cache_path, cache_time):
-    self.cache_file = pathlib.Path(cache_path).joinpath('dlayer.pkl')
+    cache_name = pathlib.Path(__file__).with_suffix('.pkl').name
+    self.cache_file = pathlib.Path(cache_path).joinpath(cache_name)
     self.cache_time = cache_time
     self.lon, self.lat, self.data = self.get_drap()
+    logging.debug('Cache: %s', self.cache_file)
 
   def get_drap(self):
     now = time.time()
