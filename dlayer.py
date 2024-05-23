@@ -30,6 +30,7 @@ DRAP_URL = 'https://services.swpc.noaa.gov/text/drap_global_frequencies.txt'
 MAX_FREQUENCY = 36
 EXTENTIONS = ('.svgz', '.png')
 
+# Silence matplotlib debug messages
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
 
@@ -85,7 +86,6 @@ class Drap:
 
   def plot(self, image_path):
     today = datetime.now(timezone.utc)
-    color_map = self.mk_colormap()
     fig, axgc = plt.subplots(figsize=(10, 5), facecolor='white')
     axgc.set_title('DLayer Absorption', fontsize=16, fontweight='bold')
     date = today.strftime("%a %b %d %Y - %H:%M %Z")
@@ -99,7 +99,7 @@ class Drap:
     # Draw the data
     lon, lat = np.meshgrid(self.lon, self.lat)
     clevels = np.arange(self.data.min() + 1, MAX_FREQUENCY + 1)
-    dmap.contourf(lon, lat, self.data, clevels, vmax=MAX_FREQUENCY, cmap=color_map)
+    dmap.contourf(lon, lat, self.data, clevels, vmax=MAX_FREQUENCY, cmap=self.mk_colormap())
 
     self.draw_colorbar(dmap, self.data.max())
     self.draw_elements(dmap)
@@ -112,9 +112,13 @@ class Drap:
       return None
 
     filename = path.joinpath(f'dlayer-{today.strftime("%Y%m%d%H%M")}')
+    metadata = {
+      'Title': 'D-Layer Absorption',
+      'Description': f'D-Layer Absorption for {date}',
+      'Source': 'Data source NOAA',
+    }
     for ext in EXTENTIONS:
-      fig.savefig(filename.with_suffix(ext), transparent=False, dpi=100,
-                  metadata={'Creator': 'https://bsdworld.org/'})
+      fig.savefig(filename.with_suffix(ext), transparent=False, dpi=100, metadata=metadata)
       logging.info('Dlayer graph "%s%s" saved', filename, ext)
 
     plt.close()
