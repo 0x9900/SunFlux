@@ -2,7 +2,7 @@
 #
 # BSD 3-Clause License
 #
-# Copyright (c) 2023 Fred W6BSD
+# Copyright (c)2023 Fred W6BSD
 # All rights reserved.
 #
 #
@@ -147,7 +147,7 @@ class ProtonFlux:
         line.set_linewidth(2)
 
     today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
-    plt.figtext(0.01, 0.02, f'SunFlux By W6BSD {today}', fontsize=10)
+    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {today}', fontsize=8, style='italic')
     for name in image_names:
       try:
         fig.savefig(name, transparent=False, dpi=100)

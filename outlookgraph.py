@@ -2,7 +2,7 @@
 #
 # BSD 3-Clause License
 #
-# Copyright (c) 2022-2023 Fred W6BSD
+# Copyright (c)2022-2023 Fred W6BSD
 # All rights reserved.
 #
 #
@@ -111,7 +111,7 @@ class OutLook:
 
     plt.subplots_adjust(top=0.91, bottom=0.15)
 
-    plt.figtext(0.01, 0.02, f'SunFlux By W6BSD {now}', fontsize=10)
+    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {now}', fontsize=8, style='italic')
     for filename in filenames:
       try:
         plt.savefig(filename, transparent=False, dpi=100)

@@ -1,7 +1,7 @@
 #
 # BSD 3-Clause License
 #
-# Copyright (c) 2022-2023 Fred W6BSD
+# Copyright (c)2022-2023 Fred W6BSD
 # All rights reserved.
 #
 #

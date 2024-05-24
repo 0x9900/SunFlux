@@ -2,7 +2,7 @@
 #
 # BSD 3-Clause License
 #
-# Copyright (c) 2022-2023 Fred W6BSD
+# Copyright (c)2022-2023 Fred W6BSD
 # All rights reserved.
 #
 #
@@ -161,7 +161,7 @@ def graph(data, filenames, trend_week=3):
   axgc.margins(x=.015)
 
   fig.autofmt_xdate(rotation=10, ha="center")
-  plt.figtext(0.01, 0.02, f'SunFlux By W6BSD {date}', fontsize=10)
+  fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {date}', fontsize=8, style='italic')
   for name in filenames:
     try:
       plt.savefig(name, transparent=False, dpi=100)

@@ -90,8 +90,7 @@ class Drap:
     axgc.set_title('DLayer Absorption', fontsize=16, fontweight='bold')
     date = today.strftime("%a %b %d %Y - %H:%M %Z")
     fig.text(0.697, .11, f'{date}', fontsize=8)
-    fig.text(0.02, .03, f'(c){today.year} W6BSD https://bsdworld.org/', fontsize=10,
-             style='italic')
+    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {date}', fontsize=8, style='italic')
 
     dmap = Basemap(projection='cyl', resolution='c',
                    llcrnrlat=-80, urcrnrlat=90, llcrnrlon=-175, urcrnrlon=175)

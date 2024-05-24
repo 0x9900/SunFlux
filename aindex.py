@@ -2,7 +2,7 @@
 #
 # BSD 3-Clause License
 #
-# Copyright (c) 2022-2023 Fred W6BSD
+# Copyright (c)2022-2023 Fred W6BSD
 # All rights reserved.
 #
 #
@@ -168,7 +168,7 @@ def graph(data, condition, filenames):
   today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('A-Index', fontsize=14, fontweight='bold')
-  fig.text(0.01, 0.02, f'SunFlux By W6BSD {today}', fontsize=10)
+  fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {today}', fontsize=8, style='italic')
   if condition:
     fig.text(0.22, 0.82, "Forecast: " + condition, fontsize=10,
              color='red', fontweight='bold', zorder=4)

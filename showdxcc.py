@@ -2,7 +2,7 @@
 #
 # BSD 3-Clause License
 #
-# Copyright (c) 2022-2023 Fred W6BSD
+# Copyright (c)2022-2023 Fred W6BSD
 # All rights reserved.
 #
 #
@@ -32,6 +32,7 @@ class ShowDXCC:
   def __init__(self, config, zone_name, zone, date=None):
     self.config = config
     self.date = date if date else datetime.now(timezone.utc)
+    self.today = self.date.strftime('%Y/%m/%d %H:%M %Z')
     self.data = []
     self.zone_name = zone_name
     try:
@@ -113,8 +114,7 @@ class ShowDXCC:
     axgc.grid(color="cyan", linestyle="dashed", linewidth=.5, alpha=.75)
     axgc.set_title(f"HF Propagation from {self.zone_name} = {self.zone}",
                    fontsize=16, fontweight='bold')
-    fig.text(0.02, .03, f'(c){self.date.year} W6BSD https://bsdworld.org/', fontsize=14,
-             style='italic')
+    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {self.today}', fontsize=8, style='italic')
     fig.text(0.72, .95, f'{self.date.strftime("%a %b %d %Y - %H:%M %Z")}', fontsize=14)
     fig.tight_layout()
     logging.info('Save "%s"', filename)
