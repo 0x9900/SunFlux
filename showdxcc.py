@@ -114,7 +114,7 @@ class ShowDXCC:
     axgc.grid(color="cyan", linestyle="dashed", linewidth=.5, alpha=.75)
     axgc.set_title(f"HF Propagation from {self.zone_name} = {self.zone}",
                    fontsize=16, fontweight='bold')
-    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {self.today}', fontsize=8, style='italic')
+    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {self.today}', fontsize=10, style='italic')
     fig.text(0.72, .95, f'{self.date.strftime("%a %b %d %Y - %H:%M %Z")}', fontsize=14)
     fig.tight_layout()
     logging.info('Save "%s"', filename)
