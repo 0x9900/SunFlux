@@ -143,9 +143,8 @@ class Drap:
 
   @staticmethod
   def mk_colormap():
-    colors = ['#f0f0f0', '#2989d8', '#c1614a']
-    # colors = ["#5f2372", "yellow", "#e75a1f",]
-    pos = [0.0, 0.5, 1.0]
+    colors = ['#f0f0f0', '#2989d8', '#99aaaa', '#ffff00', '#bb0000']
+    pos = [0.0, 0.2, 0.4, 0.6, 1.0]
     cmap_name = 'my_cmap'
     n_bins = 35
     cmap = LinearSegmentedColormap.from_list(cmap_name, list(zip(pos, colors)), N=n_bins)
