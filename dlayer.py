@@ -93,7 +93,7 @@ class Drap:
     fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {date}', fontsize=8, style='italic')
 
     dmap = Basemap(projection='cyl', resolution='c',
-                   llcrnrlat=-80, urcrnrlat=90, llcrnrlon=-175, urcrnrlon=175)
+                   llcrnrlat=-75, urcrnrlat=90, llcrnrlon=-175, urcrnrlon=175)
 
     # Draw the data
     lon, lat = np.meshgrid(self.lon, self.lat)
@@ -145,7 +145,7 @@ class Drap:
     colors = ['#f0f0f0', '#2989d8', '#99aaaa', '#ffff00', '#bb0000']
     pos = [0.0, 0.2, 0.4, 0.6, 1.0]
     cmap_name = 'my_cmap'
-    n_bins = 35
+    n_bins = MAX_FREQUENCY
     cmap = LinearSegmentedColormap.from_list(cmap_name, list(zip(pos, colors)), N=n_bins)
     return cmap
 
