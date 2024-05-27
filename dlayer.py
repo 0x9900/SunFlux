@@ -39,8 +39,9 @@ class Drap:
     cache_name = pathlib.Path(__file__).with_suffix('.pkl').name
     self.cache_file = pathlib.Path(cache_path).joinpath(cache_name)
     self.cache_time = cache_time
-    self.lon, self.lat, self.data = self.get_drap()
     logging.debug('Cache: %s', self.cache_file)
+    self.lon, self.lat, self.data = self.get_drap()
+    self.data[self.data > MAX_FREQUENCY] = MAX_FREQUENCY
 
   def get_drap(self):
     now = time.time()
