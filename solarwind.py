@@ -45,7 +45,8 @@ class SolarWind:
       if now - filest.st_mtime > cache_time:
         raise FileNotFoundError
     except FileNotFoundError:
-      self.download() and self.writecache()
+      if self.download():
+        self.writecache()
     self.readcache()
 
   def download(self):
