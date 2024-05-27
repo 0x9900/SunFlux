@@ -45,23 +45,26 @@ class SolarWind:
       if now - filest.st_mtime > cache_time:
         raise FileNotFoundError
     except FileNotFoundError:
-      self.download()
-      self.writecache()
-    else:
-      self.readcache()
+      self.download() and self.writecache()
+    self.readcache()
 
   def download(self):
     logger.info('Downloading data from NOAA')
-    with urllib.request.urlopen(NOAA_URL) as res:
-      webdata = res.read()
-      encoding = res.info().get_content_charset('utf-8')
-      _data = json.loads(webdata.decode(encoding))
+    try:
+      with urllib.request.urlopen(NOAA_URL) as res:
+        webdata = res.read()
+        encoding = res.info().get_content_charset('utf-8')
+        _data = json.loads(webdata.decode(encoding))
+    except (urllib.request.URLError, urllib.request.HTTPError) as err:
+      logging.warning(err)
+      return False
 
     data = []
     for elem in _data[1:]:
       date = datetime.strptime(elem[0], '%Y-%m-%d %H:%M:%S.%f')
       data.append([date, *[self.float(e) for e in elem[1:]]])
     self.data = np.array(sorted(data))
+    return True
 
   def readcache(self):
     """Read data from the cache"""
