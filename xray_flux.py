@@ -38,6 +38,7 @@ logger = logging.getLogger('XRayFlux')
 # This 2 lines will have to be removed in future versions of numpy
 warnings.filterwarnings('ignore')
 
+NOAA_XRAY1 = 'https://services.swpc.noaa.gov/json/goes/primary/xrays-1-day.json'
 NOAA_XRAY3 = 'https://services.swpc.noaa.gov/json/goes/primary/xrays-3-day.json'
 NOAA_XRAY7 = 'https://services.swpc.noaa.gov/json/goes/primary/xrays-7-day.json'
 NOAA_FLARE = 'https://services.swpc.noaa.gov/json/goes/primary/xray-flares-7-day.json'
@@ -173,6 +174,7 @@ def main():
   cache_time = config.get('cache_time', 900)
 
   days = {
+    "1": NOAA_XRAY1,
     "3": NOAA_XRAY3,
     "7": NOAA_XRAY7,
   }
