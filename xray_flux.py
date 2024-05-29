@@ -18,6 +18,7 @@ import sys
 import time
 import urllib.request
 import warnings
+from collections import OrderedDict
 from datetime import datetime, timezone
 from urllib.parse import urlparse
 
@@ -151,7 +152,8 @@ class XRayFlux:
         logger.warning("Data error: %s Ignoring", err)
 
     handles, labels = ax.get_legend_handles_labels()
-    unique = dict(zip(labels, handles))
+
+    unique = OrderedDict(sorted(zip(labels, handles), key=lambda x: x[0]))
     ax.legend(unique.values(), unique.keys(), loc='upper left', fontsize=12,
               facecolor="linen", borderpad=1, borderaxespad=1)
 
