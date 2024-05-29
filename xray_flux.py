@@ -62,7 +62,6 @@ class XRayFlux:
     cache_file = pathlib.Path(parsed_url.path).stem
     self.cachefile = pathlib.Path(cache_path).joinpath(cache_file + '.pkl')
 
-    self.data = None
     logger.debug('Import XRay Flux')
     now = time.time()
     try:
