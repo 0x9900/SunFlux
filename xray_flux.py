@@ -45,16 +45,6 @@ NOAA_XRAY7 = 'https://services.swpc.noaa.gov/json/goes/primary/xrays-7-day.json'
 NOAA_FLARE = 'https://services.swpc.noaa.gov/json/goes/primary/xray-flares-7-day.json'
 
 
-def remove_outlier(points, low=25, high=95):
-  percent_lo = np.percentile(points, low, interpolation='midpoint')
-  percent_hi = np.percentile(points, high, interpolation='midpoint')
-  iqr = percent_hi - percent_lo
-  lower_bound = points <= (percent_lo - 5 * iqr)
-  upper_bound = points >= (percent_hi + 5 * iqr)
-  points[lower_bound | upper_bound] = np.nan
-  return points
-
-
 class XRayFlux:
   def __init__(self, source, cache_path, cache_time=900):
     self.source = source
@@ -110,7 +100,6 @@ class XRayFlux:
     # pylint: disable=too-many-locals
     dates = np.array(list(self.xray_data.keys()))
     data = np.array([d['flux'] for d in self.xray_data.values()])
-    data = remove_outlier(data)
     data[data < 10**-7] = np.nan
 
     fig = plt.figure(figsize=(12, 5))
