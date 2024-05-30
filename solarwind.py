@@ -65,6 +65,11 @@ class SolarWind:
       date = datetime.strptime(elem[0], '%Y-%m-%d %H:%M:%S.%f')
       data.append([date, *[self.float(e) for e in elem[1:]]])
     self.data = np.array(sorted(data))
+
+    # Quick and dirty way to remove outliers.
+    max_val = np.nanpercentile(self.data[:,1], 75) ** 2
+    mask = self.data[:,1] > max_val
+    self.data[mask,1] = max_val
     return True
 
   def readcache(self):
