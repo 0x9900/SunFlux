@@ -15,6 +15,7 @@ import pickle
 import sys
 import time
 import urllib.request
+import warnings
 from datetime import datetime, timezone
 
 import matplotlib.dates as mdates
@@ -24,6 +25,8 @@ from matplotlib import ticker
 
 from config import Config
 
+warnings.filterwarnings('ignore')
+
 logging.basicConfig(
   format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
 )
@@ -32,6 +35,16 @@ logger = logging.getLogger('SolarWind')
 plt.style.use(['classic', 'fast'])
 
 NOAA_URL = 'https://services.swpc.noaa.gov/products/solar-wind/plasma-3-day.json'
+
+
+def remove_outlier(points, low=25, high=95):
+  percent_lo = np.percentile(points, low, interpolation='midpoint')
+  percent_hi = np.percentile(points, high, interpolation='midpoint')
+  iqr = percent_hi - percent_lo
+  lower_bound = points <= (percent_lo - 5 * iqr)
+  upper_bound = points >= (percent_hi + 5 * iqr)
+  points[lower_bound | upper_bound] = np.nan
+  return points
 
 
 class SolarWind:
@@ -65,6 +78,7 @@ class SolarWind:
       date = datetime.strptime(elem[0], '%Y-%m-%d %H:%M:%S.%f')
       data.append([date, *[self.float(e) for e in elem[1:]]])
     self.data = np.array(sorted(data))
+    self.data[:,1] = remove_outlier(self.data[:,1])
     return True
 
   def readcache(self):
