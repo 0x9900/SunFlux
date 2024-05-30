@@ -128,6 +128,7 @@ class XRayFlux:
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
     ax.xaxis.set_major_locator(mdates.DayLocator())
     ax.xaxis.set_minor_locator(mdates.HourLocator())
+    ax.set_ylabel(r'$Watts \cdot M^{-2}$')
 
     max_mag = int(math.log(data[data > 0.0].max(), 10)) + 1
     min_mag = int(math.log(data[data > 0.0].min(), 10)) - 1
