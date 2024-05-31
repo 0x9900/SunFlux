@@ -116,7 +116,8 @@ class SolarWind:
 
     formatter = ticker.ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
-    formatter.set_powerlimits((-1, 1))
+    formatter.set_useOffset(False)
+    formatter.set_powerlimits((3, 3))
     loc = mdates.HourLocator(interval=6)
 
     for i in range(3):
@@ -131,7 +132,7 @@ class SolarWind:
         _max = _max if np.nanmax(data) < _max else np.nanmax(data) * 1.1
         ax[i].set_ylim((_min, _max))
       ax[i].yaxis.offsetText.set_fontsize(10)
-      if np.min(data) > 1000:
+      if np.nanmean(data) > 10000:
         ax[i].yaxis.set_major_formatter(formatter)
       ax[i].tick_params(axis='y', labelsize=8)
       ax[i].tick_params(axis='x', labelsize=9)
