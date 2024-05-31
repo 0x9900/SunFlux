@@ -78,7 +78,7 @@ class SolarWind:
       date = datetime.strptime(elem[0], '%Y-%m-%d %H:%M:%S.%f')
       data.append([date, *[self.float(e) for e in elem[1:]]])
     self.data = np.array(sorted(data))
-    self.data[:,1] = remove_outlier(self.data[:,1])
+    self.data[:, 1] = remove_outlier(self.data[:, 1])
     return True
 
   def readcache(self):
