@@ -94,7 +94,7 @@ class Drap:
     fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {date}', fontsize=8, style='italic')
 
     dmap = Basemap(projection='cyl', resolution='c',
-                   llcrnrlat=-75, urcrnrlat=90, llcrnrlon=-175, urcrnrlon=175)
+                   llcrnrlat=-75, urcrnrlat=89, llcrnrlon=-175, urcrnrlon=175)
 
     # Draw the data
     lon, lat = np.meshgrid(self.lon, self.lat)
