@@ -10,10 +10,12 @@ Generate a world image with the ionosphere D layer absorption
 """
 
 import argparse
+import io
 import logging
 import os
 import pathlib
 import pickle
+import re
 import sys
 import time
 from datetime import datetime, timezone
@@ -36,11 +38,19 @@ logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
 class Drap:
   def __init__(self, cache_path, cache_time):
+    self.data = np.array([])
+    self.prod_date = None
+    self.lat = None
+    self.lon = None
+    self.xray = None
+
     cache_name = pathlib.Path(__file__).with_suffix('.pkl').name
     self.cache_file = pathlib.Path(cache_path).joinpath(cache_name)
     self.cache_time = cache_time
     logging.debug('Cache: %s', self.cache_file)
-    self.lon, self.lat, self.data = self.get_drap()
+
+    for key, val in self.get_drap().items():
+      setattr(self, key, val)
     self.data[self.data > MAX_FREQUENCY] = MAX_FREQUENCY
 
   def get_drap(self):
@@ -59,6 +69,30 @@ class Drap:
     with open(self.cache_file, 'rb') as fd_cache:
       return pickle.load(fd_cache)
 
+  def read_header(self, lines):
+    headers = {}
+    r_date = re.compile(
+      r'# Product Valid.*\s(?P<prod_date>\d+-\d+-\d+\s\d+:\d+\sUTC)|'
+      r'#\s+X-RAY Message\s:\s(?P<xray>.*)|'
+      r'#\s+Proton Message\s:\s(?P<proton>.*)'
+    ).match
+    while True:
+      pos = lines.tell()
+      line = lines.readline().rstrip()
+      if match := r_date(line):
+        if match.lastgroup == 'prod_date':
+          prod_date = match.group(match.lastgroup)
+          prod_date = datetime.strptime(prod_date, '%Y-%m-%d %H:%M %Z')
+          prod_date.replace(tzinfo=timezone.utc)
+          headers['prod_date'] = prod_date
+        else:
+          headers[match.lastgroup] = match[match.lastgroup]
+      elif not line.startswith('#'):
+        lines.seek(pos)
+        break
+
+    return headers
+
   def _download_drap(self):
     logging.info('Download from %s', DRAP_URL)
     lat = []
@@ -66,33 +100,40 @@ class Drap:
     data = []
     with urlopen(DRAP_URL) as _res:
       encoding = _res.info().get_content_charset('utf-8')
-      res = (r.decode(encoding).strip() for r in _res if not r.startswith(b'#'))
-      for line in res:
-        lon = [float(d) for d in line.split()]
-        break
-      for line in res:
-        if line.startswith('-------'):
-          break
-      for line in res:
-        _lat, flux = line.split('|')
-        lat.append(float(_lat))
-        data.append([float(f) for f in flux.split()])
+      content = io.StringIO(_res.read().decode(encoding))
 
-    lon = np.array(lon, dtype=np.float16)
-    lat = np.array(lat, dtype=np.float16)
-    data = np.array(data, dtype=np.float16)
+    dlayer = self.read_header(content)
+    for line in content:
+      lon = [float(d) for d in line.split()]
+      break
+    for line in content:
+      if line.startswith('-' * 10):
+        break
+    for line in content:
+      _lat, flux = line.split('|')
+      lat.append(float(_lat))
+      data.append([float(f) for f in flux.split()])
+
+    dlayer['lon'] = np.array(lon, dtype=np.float16)
+    dlayer['lat'] = np.array(lat, dtype=np.float16)
+    dlayer['data'] = np.array(data, dtype=np.float16)
 
     with open(self.cache_file, 'wb') as fd_cache:
-      pickle.dump([lon, lat, data], fd_cache)
+      pickle.dump(dlayer, fd_cache)
+
+  def print_info(self, fig):
+    fig.text(0.72, .11, f'{self.prod_date.strftime("%a %b %d %Y - %H:%M %Z")}', fontsize=8)
+    fig.text(0.01, 0.02, f'SunFlux (c) {self.prod_date.strftime("%Y")} W6BSD',
+             fontsize=8, style='italic')
+    for nbr, key in enumerate(("proton", "xray")):
+      if msg := getattr(self, key):
+        fig.text(0.125, 0.12 - (0.03 * nbr), msg, fontsize=8, color='black')
 
   def plot(self, image_path):
     today = datetime.now(timezone.utc)
     fig, axgc = plt.subplots(figsize=(10, 5), facecolor='white')
     axgc.set_title('DLayer Absorption', fontsize=16, fontweight='bold')
-    date = today.strftime("%a %b %d %Y - %H:%M %Z")
-    fig.text(0.697, .11, f'{date}', fontsize=8)
-    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {date}', fontsize=8, style='italic')
-
+    self.print_info(fig)
     dmap = Basemap(projection='cyl', resolution='c',
                    llcrnrlat=-75, urcrnrlat=89, llcrnrlon=-175, urcrnrlon=175)
 
@@ -114,7 +155,7 @@ class Drap:
     filename = path.joinpath(f'dlayer-{today.strftime("%Y%m%d%H%M")}')
     metadata = {
       'Title': 'D-Layer Absorption',
-      'Description': f'D-Layer Absorption for {date}',
+      'Description': f'D-Layer Absorption for {self.prod_date.isoformat()}',
       'Source': 'Data source NOAA',
     }
     for ext in EXTENTIONS:
