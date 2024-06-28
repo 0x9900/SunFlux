@@ -136,7 +136,7 @@ def type_date(parg):
     date = date.replace(second=0, microsecond=0)
     return date
 
-  if len(parg) != 10:
+  if len(parg) != 12:
     raise argparse.ArgumentTypeError('The date format should be YYYYMMDDHHMM') from None
 
   try:
@@ -213,7 +213,7 @@ def main():
     if zone:
       break
 
-  now = opts.date.strftime('%Y%m%d%H%M')
+  now = opts.date.strftime("%Y%m%dT%H%M%S")
   if not filename:
     target_root = config.get('showdxcc.target_dir', '/var/tmp/dxcc')
     target_dir = os.path.join(target_root, zone_name, zone)
