@@ -152,7 +152,7 @@ class Drap:
       logging.error(err)
       return None
 
-    filename = path.joinpath(f'dlayer-{today.strftime("%Y%m%d%H%M")}')
+    filename = path.joinpath(f'dlayer-{today.strftime("%Y%m%dT%H%M%S")}')
     metadata = {
       'Title': 'D-Layer Absorption',
       'Description': f'D-Layer Absorption for {self.prod_date.isoformat()}',
