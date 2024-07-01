@@ -11,6 +11,7 @@ import argparse
 import colorsys
 import logging
 import os
+import pathlib
 import pickle
 import re
 import sqlite3
@@ -24,9 +25,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import adapters
+import tools
 from config import Config
-
-plt.style.use(['classic', 'fast'])
 
 logging.basicConfig(
   format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
@@ -149,7 +149,7 @@ def autolabel(ax, rects):
             color=color_complement(*color), fontsize=10, ha='center')
 
 
-def graph(data, condition, filenames):
+def graph(data, condition, filename):
   values = np.row_stack([d[1] for d in data])
   keys_column = np.array([d[0] for d in data]).reshape((-1, 1))
   data = np.hstack((keys_column, values))
@@ -195,28 +195,23 @@ def graph(data, condition, filenames):
   axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
 
-  axgc.legend(['Max', 'Min'], loc='upper left', fontsize=10, framealpha=0.75,
-              facecolor='linen', borderaxespad=1)
+  axgc.legend(['Max', 'Min'], loc='upper left', fontsize=10, framealpha=0.75, borderaxespad=1)
 
   fig.autofmt_xdate(rotation=10, ha="center")
-  for filename in filenames:
-    try:
-      plt.savefig(filename, transparent=False, dpi=100)
-      logger.info('Graph "%s" saved', filename)
-    except ValueError as err:
-      logger.error(err)
+  tools.save_plot(plt, filename)
   plt.close()
 
 
 def main():
   adapters.install_adapters()
-  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config().get('aindex', {})
+  target_dir = config.get('target_dir', '/var/www/html')
 
   parser = argparse.ArgumentParser()
   parser.add_argument('-D', '--days', default=config.get('nb_days', NB_DAYS), type=int,
                       help='Number of days to graph [Default: %(default)s]')
-  parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/aindex.png'])
+  parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
+                      help='Image path')
   opts = parser.parse_args()
 
   config['nb_days'] = opts.days
@@ -226,10 +221,16 @@ def main():
   data = sorted(list(data.items()))
   condition = get_conditions(config)
 
-  if data:
-    graph(data, condition, opts.names)
-  else:
+  if not data:
     logger.warning('No data collected')
+    return
+
+  for theme_name, set_theme in tools.THEMES.items():
+    set_theme()
+    filename = opts.target.joinpath(f'aindex-{theme_name}')
+    graph(data, condition, filename)
+    if theme_name == 'light':
+      tools.mk_link(filename, opts.target.joinpath('aindex'))
 
 
 if __name__ == "__main__":

@@ -11,6 +11,7 @@ import argparse
 import json
 import logging
 import os
+import pathlib
 import time
 from datetime import datetime, timedelta, timezone
 from urllib import request
@@ -20,9 +21,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import MultipleLocator
 
+import tools
 from config import Config
-
-plt.style.use(['classic', 'fast'])
 
 logging.basicConfig(
   format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
@@ -88,7 +88,7 @@ def download_predictions(cache_file, cache_time=86400):
   return data
 
 
-def graph(histo, predic, image_names, year=1961):
+def graph(histo, predic, filename, year=1961):
   # pylint: disable=too-many-locals
   start_date = datetime(year, 1, 1, tzinfo=timezone.utc)
   end_date = datetime.now(timezone.utc) + timedelta(days=365 * 12)
@@ -115,7 +115,7 @@ def graph(histo, predic, image_names, year=1961):
   axis.fill_between(pdates, lvals, hvals, label='Predicted', zorder=0, facecolor='powderblue',
                     alpha=0.9, linewidth=.75, edgecolor='lightblue')
 
-  axis.axhline(y=yvals.mean(), label='All time mean', zorder=1, color='blue', linewidth=.5,
+  axis.axhline(y=yvals.mean(), label='All time mean', zorder=1, color='orange', linewidth=.75,
                linestyle='dashed')
 
   axis.set_xlabel('Years')
@@ -127,39 +127,37 @@ def graph(histo, predic, image_names, year=1961):
   axis.yaxis.set_major_locator(MultipleLocator(25))
   axis.yaxis.set_minor_locator(MultipleLocator(5))
 
-  legend = axis.legend(facecolor="linen", fontsize=12, loc='best')
+  legend = axis.legend(fontsize=10, loc='upper left')
   for line in legend.get_lines():
     line.set_linewidth(4.0)
 
   axis.grid(color="gray", linestyle="dotted", linewidth=.5)
-
   plt.subplots_adjust(bottom=0.15)
-
-  for image in image_names:
-    try:
-      plt.savefig(image, transparent=False, dpi=100)
-      logger.info('Graph "%s" saved', image)
-    except ValueError as err:
-      logger.error(err)
+  tools.save_plot(plt, filename)
   plt.close()
 
 
 def main():
-  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config().get('aindex', {})
+  cache_predic = config.get('cache_precictions', '/tmp/ssnpredict.json')
+  cache_histo = config.get('cache_history', '/tmp/ssnhist.json')
+  cache_time = config.get('cache_time', 86400 * 10)
+  target_dir = config.get('target_dir', '/var/www/html')
 
   parser = argparse.ArgumentParser()
-  parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/ssnhist.png'])
+  parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
+                      help='Image path')
   opts = parser.parse_args()
-
-  cache_histo = config.get('cache_history', '/tmp/ssnhist.json')
-  cache_predic = config.get('cache_precictions', '/tmp/ssnpredict.json')
-  cache_time = config.get('cache_time', 86400 * 10)
 
   histo = download_history(cache_histo, cache_time)
   predic = download_predictions(cache_predic, cache_time)
 
-  graph(histo, predic, opts.names, 1961)
+  for theme_name, set_theme in tools.THEMES.items():
+    set_theme()
+    filename = opts.target.joinpath(f'proton_flux-{theme_name}')
+    graph(histo, predic, filename, 1961)
+    if theme_name == 'light':
+      tools.mk_link(filename, opts.target.joinpath('proton_flux'))
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@
 import argparse
 import logging
 import os
+import pathlib
 import pickle
 import sys
 import time
@@ -22,12 +23,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import MultipleLocator
 
+import tools
 from config import Config
-
-plt.style.use(['classic', 'fast'])
 
 logging.basicConfig(
   format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
+  level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
 )
 logger = logging.getLogger('SSN')
 
@@ -107,7 +108,7 @@ class SSN:
   def is_data(self):
     return bool(self.data)
 
-  def graph(self, image_names):
+  def graph(self, filename):
     # pylint: disable=too-many-locals
     data = np.array(self.data)
 
@@ -142,38 +143,37 @@ class SSN:
                    ha='center', fontsize=8,
                    arrowprops={"arrowstyle": "->", "color": 'green'})
 
-    axgc.legend(['Sun spot', '5day average', '10.7cm Flux'], facecolor="linen", fontsize=10,
-                loc='best')
+    axgc.legend(['Sun spot', '5day average', '10.7cm Flux'], fontsize=10, loc='best')
     axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
 
     axgc.margins(.01)
     fig.autofmt_xdate(rotation=10, ha="center")
-    for name in image_names:
-      try:
-        plt.savefig(name, transparent=False, dpi=100)
-        logger.info('Graph "%s" saved', name)
-      except ValueError as err:
-        logger.error(err)
+    tools.save_plot(plt, filename)
     plt.close()
 
 
 def main():
-  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config().get('ssngraph', {})
-
-  parser = argparse.ArgumentParser()
-  parser.add_argument('names', help='Name of the graph', nargs="*",
-                      default=['/tmp/solarwind.png'])
-  opts = parser.parse_args()
-
   cache_file = config.get('cache_file', '/tmp/ssn.pkl')
   cache_time = config.get('cache_time', 43200)
+  target_dir = config.get('target_dir', '/var/www/html')
+
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
+                      help='Image path')
+  opts = parser.parse_args()
+
   ssn = SSN(cache_file, cache_time)
   if not ssn.is_data():
     logger.error('No data to graph')
     return os.EX_DATAERR
 
-  ssn.graph(opts.names)
+  for theme_name, set_theme in tools.THEMES.items():
+    set_theme()
+    filename = opts.target.joinpath(f'proton_flux-{theme_name}')
+    ssn.graph(filename)
+    if theme_name == 'light':
+      tools.mk_link(filename, opts.target.joinpath('proton_flux'))
   return os.EX_OK
 
 

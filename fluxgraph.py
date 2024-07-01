@@ -11,6 +11,7 @@ import argparse
 import json
 import logging
 import os
+import pathlib
 import pickle
 import sqlite3
 import sys
@@ -36,10 +37,9 @@ NOAA_URL = 'https://services.swpc.noaa.gov/json/f107_cm_flux.json'
 
 logging.basicConfig(
   format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
+  level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
 )
 logger = logging.getLogger('fluxgraph')
-
-plt.style.use(['classic', 'fast'])
 
 
 def moving_average(data, window=5):
@@ -110,7 +110,7 @@ def get_flux(config):
   return data
 
 
-def graph(data, filenames, trend_week=3):
+def graph(data, filename, trend_week=3):
   # pylint: disable=invalid-name, too-many-locals
   trend_days = trend_week * 7
   arr = np.array(data)
@@ -162,12 +162,8 @@ def graph(data, filenames, trend_week=3):
 
   fig.autofmt_xdate(rotation=10, ha="center")
   fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {date}', fontsize=8, style='italic')
-  for name in filenames:
-    try:
-      plt.savefig(name, transparent=False, dpi=100)
-      logger.info('Graph "%s" saved', name)
-    except ValueError as err:
-      logger.error(err)
+
+  tools.save_plot(plt, filename)
   plt.close()
 
 
@@ -175,13 +171,15 @@ def main():
   adapters.install_adapters()
   logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config().get('fluxgraph', {})
+  target_dir = config.get('target_dir', '/var/www/html')
 
   parser = argparse.ArgumentParser()
   parser.add_argument('-D', '--days', default=config.get('nb_days', NB_DAYS), type=int,
                       help='Number of days to graph [Default: %(default)s]')
   parser.add_argument('-T', '--trend', default=config.get('trend_weeks', TREND_WK), type=int,
                       help='Number of trend days [Default: %(default)s]')
-  parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/flux.png'])
+  parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
+                      help='Image path')
   opts = parser.parse_args()
 
   config['nb_days'] = opts.days
@@ -194,7 +192,13 @@ def main():
     return os.EX_DATAERR
 
   logger.debug('Dataset size: %d', len(data))
-  graph(data, opts.names, opts.trend)
+  for theme_name, set_theme in tools.THEMES.items():
+    set_theme()
+    filename = opts.target.joinpath(f'flux-{theme_name}')
+    graph(data, filename, opts.trend)
+    if theme_name == 'light':
+      tools.mk_link(filename, opts.target.joinpath('flux'))
+
   return os.EX_OK
 
 

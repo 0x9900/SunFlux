@@ -12,6 +12,7 @@ import json
 import logging
 import math
 import os
+import pathlib
 import pickle
 import re
 import sys
@@ -25,6 +26,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import ticker
 
+import tools
 from config import Config
 from tools import noaa_date_hook, remove_outliers
 
@@ -34,6 +36,7 @@ warnings.filterwarnings('ignore')
 
 logging.basicConfig(
   format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
+  level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
 )
 logger = logging.getLogger('ProtonFlux')
 
@@ -101,7 +104,7 @@ class ProtonFlux:
   def is_data(self):
     return bool(self.data)
 
-  def graph(self, image_names):
+  def graph(self, filename):
     # pylint: disable=too-many-locals
     energy = (10, 30, 50, 100)  # Graphs to plot
     colors = {10: "tab:orange", 30: "tab:olive", 50: "tab:blue", 100: "tab:cyan"}
@@ -138,8 +141,7 @@ class ProtonFlux:
       ax.axhline(WARNING_THRESHOLD, linewidth=1.5, linestyle="--", zorder=0, color='tab:red',
                  label='Warning Threshold')
 
-    legend = ax.legend(loc='upper left', fontsize=10, facecolor="linen",
-                       borderpad=1.25, borderaxespad=1)
+    legend = ax.legend(loc='upper left', fontsize=10, borderpad=1.25, borderaxespad=1)
     for line in legend.get_lines():
       if line.get_label().startswith('>'):
         line.set_linewidth(5.0)
@@ -148,34 +150,32 @@ class ProtonFlux:
 
     today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
     fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {today}', fontsize=8, style='italic')
-    for name in image_names:
-      try:
-        fig.savefig(name, transparent=False, dpi=100)
-        logger.info('Saved "%s"', name)
-      except ValueError as err:
-        logger.error(err)
-
+    tools.save_plot(plt, filename)
     plt.close()
 
 
 def main():
-  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config().get("proton_flux", {})
-
-  parser = argparse.ArgumentParser()
-  parser.add_argument('names', help='Name of the graph', nargs="*",
-                      default=['/tmp/proton_flux.png'])
-  opts = parser.parse_args()
-
   cache_file = config.get('cache_file', '/tmp/proton_flux.pkl')
   cache_time = config.get('cache_time', 900)
+  target_dir = config.get('target_dir', '/var/www/html')
+
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
+                      help='Image path')
+  opts = parser.parse_args()
 
   p_f = ProtonFlux(cache_file, cache_time)
   if not p_f.is_data():
     logger.error('No data collected')
     return os.EX_DATAERR
 
-  p_f.graph(opts.names)
+  for theme_name, set_theme in tools.THEMES.items():
+    set_theme()
+    filename = opts.target.joinpath(f'proton_flux-{theme_name}')
+    p_f.graph(filename)
+    if theme_name == 'light':
+      tools.mk_link(filename, opts.target.joinpath('proton_flux'))
   return os.EX_OK
 
 

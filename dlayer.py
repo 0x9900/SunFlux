@@ -26,11 +26,11 @@ import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 from mpl_toolkits.basemap import Basemap
 
+import tools
 from config import Config
 
 DRAP_URL = 'https://services.swpc.noaa.gov/text/drap_global_frequencies.txt'
 MAX_FREQUENCY = 36
-EXTENTIONS = ('.svgz', '.png')
 
 # Silence matplotlib debug messages
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
@@ -127,11 +127,10 @@ class Drap:
              fontsize=8, style='italic')
     for nbr, key in enumerate(("proton", "xray")):
       if msg := getattr(self, key):
-        fig.text(0.125, 0.12 - (0.03 * nbr), msg, fontsize=8, color='black')
+        fig.text(0.125, 0.12 - (0.03 * nbr), msg, fontsize=8)
 
-  def plot(self, image_path):
-    today = datetime.now(timezone.utc)
-    fig, axgc = plt.subplots(figsize=(10, 5), facecolor='white')
+  def plot(self, filename):
+    fig, axgc = plt.subplots(figsize=(10, 5))
     axgc.set_title('DLayer Absorption', fontsize=16, fontweight='bold')
     self.print_info(fig)
     dmap = Basemap(projection='cyl', resolution='c',
@@ -145,25 +144,16 @@ class Drap:
     self.draw_colorbar(dmap, self.data.max())
     self.draw_elements(dmap)
 
-    path = pathlib.Path(image_path)
-    try:
-      path.mkdir(parents=True, exist_ok=True)
-    except FileExistsError as err:
-      logging.error(err)
-      return None
-
-    filename = path.joinpath(f'dlayer-{today.strftime("%Y%m%dT%H%M%S")}')
     metadata = {
       'Title': 'D-Layer Absorption',
       'Description': f'D-Layer Absorption for {self.prod_date.isoformat()}',
       'Source': 'Data source NOAA',
     }
-    for ext in EXTENTIONS:
+    for ext in tools.EXTENTIONS:
       fig.savefig(filename.with_suffix(ext), transparent=False, dpi=100, metadata=metadata)
       logging.info('Dlayer graph "%s%s" saved', filename, ext)
 
     plt.close()
-    return filename
 
   @staticmethod
   def draw_colorbar(fig, fmax=None):
@@ -192,10 +182,10 @@ class Drap:
     return cmap
 
 
-def mk_latest(image_name):
-  for ext in EXTENTIONS:
-    src_img = image_name.with_suffix(ext)
-    dst_img = image_name.with_name('latest').with_suffix(ext)
+def mk_link(src, dst):
+  for ext in tools.EXTENTIONS:
+    src_img = src.with_suffix(ext)
+    dst_img = dst.with_suffix(ext)
     if dst_img.exists():
       dst_img.unlink()
     os.link(src_img, dst_img)
@@ -220,12 +210,27 @@ def main():
   )
 
   parser = argparse.ArgumentParser(description="DLayer absorption graph")
-  parser.add_argument('-t', '--target', default='/var/tmp/drap', help='Image path')
+  parser.add_argument('-t', '--target', type=pathlib.Path, default='/var/tmp/drap',
+                      help='Image path')
   opts = parser.parse_args()
-
   drap = Drap(cache_path, cache_time)
-  image_name = drap.plot(opts.target)
-  mk_latest(image_name)
+
+  today = datetime.now(timezone.utc)
+  path = opts.target
+  try:
+    path.mkdir(parents=True, exist_ok=True)
+  except FileExistsError as err:
+    logging.error(err)
+    raise SystemExit(err)
+
+  for theme_name, set_theme in tools.THEMES.items():
+    set_theme()
+    filename = path.joinpath(f'dlayer-{today.strftime("%Y%m%dT%H%M%S")}-{theme_name}')
+    drap.plot(filename)
+    mk_link(filename, path.joinpath(f'latest-{theme_name}'))
+    if theme_name == 'light':
+      mk_link(filename, path.joinpath(f'dlayer-{today.strftime("%Y%m%dT%H%M%S")}'))
+      mk_link(filename, path.joinpath('latest'))
 
 
 if __name__ == "__main__":

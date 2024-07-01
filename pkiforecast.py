@@ -11,6 +11,7 @@ import argparse
 import json
 import logging
 import os
+import pathlib
 import pickle
 import sys
 import time
@@ -22,14 +23,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import MultipleLocator
 
+import tools
 from config import Config
 
 NOAA_URL = 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json'
 
-plt.style.use(['classic', 'fast'])
-
 logging.basicConfig(
   format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
+  level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
 )
 logger = logging.getLogger('pkiforecast')
 
@@ -54,7 +55,7 @@ class PKIForecast:
   def is_data(self):
     return bool(self.data)
 
-  def graph(self, filenames):
+  def graph(self, filename):
     # pylint: disable=too-many-locals,too-many-statements
     start_date = datetime.now(timezone.utc) - timedelta(days=3, hours=4)
     end_date = datetime.now(timezone.utc) + timedelta(days=1, hours=3)
@@ -108,20 +109,14 @@ class PKIForecast:
 
     axgc.axhspan(0, 0, facecolor='lightgrey', alpha=1, label='Estimated')
     axgc.axhspan(0, 0, facecolor='darkgrey', alpha=1, label='Predicted')
-    axgc.legend(fontsize=10, loc="best", facecolor="linen", borderaxespad=1)
+    axgc.legend(fontsize=10, loc="best", borderaxespad=1)
 
     axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
     axgc.margins(x=.01)
-
     fig.autofmt_xdate(rotation=10, ha="center")
-
     fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {date}', fontsize=8, style='italic')
-    for filename in filenames:
-      try:
-        plt.savefig(filename, transparent=False, dpi=100)
-        logger.info('Graph "%s" saved', filename)
-      except ValueError as err:
-        logger.error(err)
+
+    tools.save_plot(plt, filename)
     plt.close()
 
   def download(self):
@@ -157,21 +152,28 @@ class PKIForecast:
 
 
 def main():
-  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config().get('pkiforecast', {})
-
-  parser = argparse.ArgumentParser()
-  parser.add_argument('names', help='Name of the graph', nargs="*",
-                      default=['/tmp/pkiforecast.png'])
-  opts = parser.parse_args()
-
   cache_file = config.get('cache_file', '/tmp/pkiforecast.pkl')
   cache_time = config.get('cache_time', 21600)
+  target_dir = config.get('target_dir', '/var/www/html')
+
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
+                      help='Image path')
+  opts = parser.parse_args()
+
   pki = PKIForecast(cache_file, cache_time)
   if not pki.is_data():
     logger.warning('No data to graph')
     return os.EX_DATAERR
-  pki.graph(opts.names)
+
+  for theme_name, set_theme in tools.THEMES.items():
+    set_theme()
+    filename = opts.target.joinpath(f'pki-forecast-{theme_name}')
+    pki.graph(filename)
+    if theme_name == 'light':
+      tools.mk_link(filename, opts.target.joinpath('pki-forecast'))
+
   return os.EX_OK
 
 

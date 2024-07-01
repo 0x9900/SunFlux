@@ -11,6 +11,7 @@ import argparse
 import json
 import logging
 import os
+import pathlib
 import re
 import sqlite3
 import sys
@@ -25,6 +26,7 @@ import numpy as np
 from matplotlib.ticker import MultipleLocator
 
 import adapters
+import tools
 from config import Config
 
 NOAA_URL = "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
@@ -36,10 +38,9 @@ WWV_CONDITIONS = ("SELECT conditions FROM wwv WHERE time > ? "
                   "ORDER BY time DESC LIMIT 1")
 
 
-plt.style.use(['classic', 'fast'])
-
 logging.basicConfig(
   format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
+  level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
 )
 logger = logging.getLogger('pkiwwv')
 
@@ -114,7 +115,7 @@ def get_wwv(config):
   return data
 
 
-def graph(data, condition, filenames):
+def graph(data, condition, filename):
   # pylint: disable=too-many-locals
   values = np.full((len(data), 3), np.nan, dtype=object)
   for i, row in enumerate(data.values()):
@@ -168,29 +169,25 @@ def graph(data, condition, filenames):
   axgc.margins(.01)
 
   axgc.legend(['Min', 'Max', 'Storm Threshold'], loc='upper left', fontsize=10,
-              facecolor='linen', borderaxespad=1)
-
+              borderaxespad=1)
   fig.autofmt_xdate(rotation=10, ha="center")
-  for filename in filenames:
-    try:
-      plt.savefig(filename, transparent=False, dpi=100)
-      logger.info('Graph "%s" saved', filename)
-    except ValueError as err:
-      logger.error(err)
+
+  tools.save_plot(plt, filename)
   plt.close()
 
 
 def main():
   adapters.install_adapters()
-  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config().get('pkiwwv', {})
+  target_dir = config.get('target_dir', '/var/www/html')
 
   parser = argparse.ArgumentParser()
   parser.add_argument('-D', '--days', default=config.get('nb_days', NB_DAYS), type=int,
                       help='Number of days to graph [Default: %(default)s]')
   parser.add_argument('-c', '--cluster', action="store_true", default=False,
                       help='Add data coming from the cluster network [Default: %(default)s]')
-  parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/pkindex.png'])
+  parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
+                      help='Image path')
   opts = parser.parse_args()
 
   config['nb_days'] = opts.days
@@ -199,10 +196,17 @@ def main():
   if opts.cluster:
     data.update(get_wwv(config))
   condition = get_conditions(config)
-  if data:
-    graph(data, condition, opts.names)
-  else:
+
+  if not data:
     logger.warning('No data collected')
+    return os.EX_DATAERR
+
+  for theme_name, set_theme in tools.THEMES.items():
+    set_theme()
+    filename = opts.target.joinpath(f'pkindex-{theme_name}')
+    graph(data, condition, filename)
+    if theme_name == 'light':
+      tools.mk_link(filename, opts.target.joinpath('pkindex'))
 
 
 if __name__ == "__main__":

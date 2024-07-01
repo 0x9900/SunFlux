@@ -10,6 +10,7 @@
 import argparse
 import logging
 import os
+import pathlib
 import sys
 import time
 from collections import namedtuple
@@ -20,12 +21,12 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 
+import tools
 from config import Config
-
-plt.style.use(['classic', 'fast'])
 
 logging.basicConfig(
   format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
+  level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
 )
 logger = logging.getLogger('outloot')
 
@@ -67,7 +68,7 @@ class OutLook:
   def is_data(self):
     return bool(self.data)
 
-  def graph(self, filenames):
+  def graph(self, filename):
     # pylint: disable=too-many-locals
     data = np.array(self.data)
     dates = data[:, 0]
@@ -108,16 +109,10 @@ class OutLook:
                 bbox={"boxstyle": "round", "color": "orange", "alpha": ALPHA})
     plt.figtext(0.93, 0.03, "Bad", size=12,
                 bbox={"boxstyle": "round", "color": "tomato", "alpha": ALPHA})
-
     plt.subplots_adjust(top=0.91, bottom=0.15)
-
     fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {now}', fontsize=8, style='italic')
-    for filename in filenames:
-      try:
-        plt.savefig(filename, transparent=False, dpi=100)
-        logger.info('Graph "%s" saved', filename)
-      except ValueError as err:
-        logger.error(err)
+
+    tools.save_plot(plt, filename)
     plt.close()
 
   @staticmethod
@@ -164,20 +159,28 @@ class OutLook:
 
 
 def main():
-  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config().get('outlookgraph', {})
-
-  parser = argparse.ArgumentParser()
-  parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/outlook.png'])
-  opts = parser.parse_args()
-
   cache_file = config.get('outlookgraph.cache_file', '/tmp/outlook.dat')
   cache_time = config.get('outlookgraph.cache_time', 43200)
+  target_dir = config.get('target_dir', '/var/www/html')
+
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
+                      help='Image path')
+  opts = parser.parse_args()
+
   outlook = OutLook(cache_file, cache_time)
   if not outlook.is_data():
     logger.warning('No data to graph')
     return os.EX_DATAERR
-  outlook.graph(opts.names)
+
+  for theme_name, set_theme in tools.THEMES.items():
+    set_theme()
+    filename = opts.target.joinpath(f'outlook-{theme_name}')
+    outlook.graph(filename)
+    if theme_name == 'light':
+      tools.mk_link(filename, opts.target.joinpath('outlook'))
+
   return os.EX_OK
 
 

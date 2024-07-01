@@ -11,6 +11,7 @@ import argparse
 import json
 import logging
 import os
+import pathlib
 import pickle
 import sys
 import time
@@ -23,16 +24,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import ticker
 
+import tools
 from config import Config
 
 warnings.filterwarnings('ignore')
 
 logging.basicConfig(
   format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
+  level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
 )
 logger = logging.getLogger('SolarWind')
-
-plt.style.use(['classic', 'fast'])
 
 NOAA_URL = 'https://services.swpc.noaa.gov/products/solar-wind/plasma-3-day.json'
 
@@ -106,7 +107,7 @@ class SolarWind:
   def is_data(self):
     return bool(self.data.size)
 
-  def graph(self, image_names):
+  def graph(self, filename):
     # pylint: disable=too-many-locals
     colors = {0: "gray", 1: "orange", 2: "plum"}
     labels = {0: r"Density $1/cm^3$", 1: r"Speed $km/S$", 2: r"Temp $^{\circ}K$"}
@@ -128,7 +129,7 @@ class SolarWind:
       ax[i].set_ylabel(labels[i], fontsize=10)
       if i in limits:
         _min, _max = limits[i]
-        ax[i].axhline(_max, linewidth=1, zorder=1, color='lightgray')
+        ax[i].axhline(_max, linewidth=1, zorder=1, color='#999999')
         _max = _max if np.nanmax(data) < _max else np.nanmax(data) * 1.1
         ax[i].set_ylim((_min, _max))
       ax[i].yaxis.offsetText.set_fontsize(10)
@@ -141,32 +142,32 @@ class SolarWind:
 
     today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
     fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {today}', fontsize=8, style='italic')
-    for name in image_names:
-      try:
-        fig.savefig(name, transparent=False, dpi=100)
-        logger.info('Save "%s"', name)
-      except ValueError as err:
-        logger.error(err)
+    tools.save_plot(plt, filename)
     plt.close()
 
 
 def main():
-  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config().get('solarwind', {})
-
-  parser = argparse.ArgumentParser()
-  parser.add_argument('names', help='Name of the graph', nargs="*",
-                      default=['/tmp/solarwind.png'])
-  opts = parser.parse_args()
-
   cache_file = config.get('cache_file', '/tmp/solarwind.pkl')
   cache_time = config.get('cache_time', 900)
+  target_dir = config.get('target_dir', '/var/www/html')
+
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
+                      help='Image path')
+  opts = parser.parse_args()
+
   wind = SolarWind(cache_file, cache_time)
   if not wind.is_data():
     logger.error('No data to plot')
     return os.EX_DATAERR
 
-  wind.graph(opts.names)
+  for theme_name, set_theme in tools.THEMES.items():
+    set_theme()
+    filename = opts.target.joinpath(f'solarwind-{theme_name}')
+    wind.graph(filename)
+    if theme_name == 'light':
+      tools.mk_link(filename, opts.target.joinpath('solarwind'))
   return os.EX_OK
 
 

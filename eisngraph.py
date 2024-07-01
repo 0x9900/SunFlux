@@ -11,6 +11,7 @@ import argparse
 import csv
 import logging
 import os
+import pathlib
 import pickle
 import sys
 import time
@@ -21,12 +22,12 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 
+import tools
 from config import Config
-
-plt.style.use(['classic', 'fast'])
 
 logging.basicConfig(
   format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
+  level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
 )
 logger = logging.getLogger('EISN')
 
@@ -100,7 +101,7 @@ class EISN:
   def is_data(self):
     return bool(self.data)
 
-  def graph(self, filenames):
+  def graph(self, filename):
     data = np.array(self.data)
     x = data[:, 0]
     y = data[:, 2].astype(np.float64)
@@ -124,8 +125,8 @@ class EISN:
     axgc.fill_between(x, y - error, y + error, facecolor='plum', alpha=1.0,
                       linewidth=.75, edgecolor='b')
 
-    axgc.legend(['EISN', 'Average', 'Valid Data', 'Entries'], loc='best',
-                fontsize=10, facecolor="linen", borderaxespad=1, ncol=2)
+    axgc.legend(['EISN', 'Average', 'Valid Data', 'Entries'], loc='best', fontsize=10,
+                borderaxespad=1, ncol=2)
 
     loc = mdates.DayLocator(interval=int(1 + len(x) / 11))
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
@@ -136,33 +137,35 @@ class EISN:
     axgc.margins(.01)
     fig.autofmt_xdate(rotation=10, ha="center")
 
-    for filename in filenames:
-      try:
-        plt.savefig(filename, transparent=False, dpi=100)
-        logger.info('Graph "%s" saved', filename)
-      except ValueError as err:
-        logger.error(err)
+    tools.save_plot(plt, filename)
     plt.close()
 
 
 def main():
-  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config().get('eisn', {})
+  target_dir = config.get('target_dir', '/var/www/html')
+  cache_file = config.get('cache_file', '/tmp/eisn.pkl')
+  cache_time = config.get('cache_time', 43200)
 
   parser = argparse.ArgumentParser()
   parser.add_argument('-D', '--days', default=config.get('nb_days', NB_DAYS), type=int,
                       help='Number of days to graph [Default: %(default)s]')
-  parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/eisn.png'])
+  parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
+                      help='Image path')
   opts = parser.parse_args()
 
-  cache_file = config.get('cache_file', '/tmp/eisn.pkl')
-  cache_time = config.get('cache_time', 43200)
   eisn = EISN(cache_file, opts.days, cache_time)
   if not eisn.is_data():
     logger.warning('No data to graph')
     return os.EX_DATAERR
 
-  eisn.graph(opts.names)
+  for theme_name, set_theme in tools.THEMES.items():
+    set_theme()
+    filename = opts.target.joinpath(f'eisn-{theme_name}')
+    eisn.graph(filename)
+    if theme_name == 'light':
+      tools.mk_link(filename, opts.target.joinpath('eisn'))
+
   return os.EX_OK
 
 
