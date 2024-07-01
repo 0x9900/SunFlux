@@ -138,7 +138,7 @@ class XRayFlux:
         ax.axvspan(mdates.date2num(start), mdates.date2num(end), color=class_colors[fclass],
                    label=f'{fclass} Class Flare', alpha=0.25)
       except TypeError as err:
-        logger.warning("Data error: %s Ignoring", err)
+        logger.debug("Missing data: %s Ignoring", err)
 
     handles, labels = ax.get_legend_handles_labels()
 
