@@ -98,7 +98,7 @@ class XRayFlux:
       pickle.dump(self.xray_data, fd_cache)
       pickle.dump(self.flare_data, fd_cache)
 
-  def graph(self, filename):
+  def graph(self, filename, style):
     # pylint: disable=too-many-locals
     dates = np.array(list(self.xray_data.keys()))
     data = np.array([d['flux'] for d in self.xray_data.values()])
@@ -107,15 +107,14 @@ class XRayFlux:
     fig = plt.figure(figsize=(12, 5))
     fig.subplots_adjust(bottom=0.15)
 
-    fig.suptitle('XRay Flux', fontsize=14, fontweight='bold')
+    fig.suptitle('XRay Flux')
     ax = plt.gca()
     ax.set_yscale("log")
-    ax.tick_params(axis='x', which='both', labelsize=12, rotation=10)
+    ax.tick_params(axis='x', which='both', rotation=10)
 
     formatter = ticker.ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
     formatter.set_powerlimits((-1, 1))
-    ax.grid(color='brown', linestyle='dotted', linewidth=.3)
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d/%Y'))
     ax.xaxis.set_major_locator(mdates.DayLocator())
     ax.xaxis.set_minor_locator(mdates.HourLocator())
@@ -126,10 +125,15 @@ class XRayFlux:
     ax.set_ylim((10**min_mag, 10**max_mag))
 
     data[data == 0.0] = np.nan
-    ax.plot(dates, data, linewidth=1.5, color="tab:blue", zorder=2, label='X-Ray Flux')
+    ax.plot(dates, data, linewidth=1.5, zorder=2, label='X-Ray Flux')
 
-    class_colors = {'X': 'tab:red', 'M': 'tab:orange', 'C': 'tab:blue',
-                    'B': 'tab:olive', 'A': 'tab:cyan'}
+    class_colors = {
+      'X': style.colors[3],
+      'M': style.colors[6],
+      'C': 'darkgray',
+      'B': 'darkgray',
+      'A': 'darkgray',
+    }
     for flare in self.flare_data:
       try:
         start = noaa_date(flare['begin_time'])
@@ -137,16 +141,17 @@ class XRayFlux:
         if end < dates.min():
           continue
         fclass = (flare.get('max_class') or flare.get('end_class'))[0]
+        if fclass in ('A', 'B', 'C'):
+          continue
         ax.axvspan(mdates.date2num(start), mdates.date2num(end), color=class_colors[fclass],
-                   label=f'{fclass} Class Flare', alpha=0.25)
+                   label=f'{fclass} Class Flare', alpha=0.33)
       except TypeError as err:
         logger.debug("Missing data: %s Ignoring", err)
 
     handles, labels = ax.get_legend_handles_labels()
 
     unique = OrderedDict(sorted(zip(labels, handles), key=lambda x: x[0]))
-    ax.legend(unique.values(), unique.keys(), loc='upper left', fontsize=10,
-              borderpad=1, borderaxespad=1)
+    ax.legend(unique.values(), unique.keys(), loc='upper left', borderpad=1, borderaxespad=1)
 
     today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
     fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {today}', fontsize=8, style='italic')
@@ -174,12 +179,15 @@ def main():
   opts = parser.parse_args()
 
   xray = XRayFlux(days[opts.days], cache_path, cache_time)
-  for theme_name, set_theme in tools.THEMES.items():
-    set_theme()
-    filename = opts.target.joinpath(f'proton_flux-{opts.days}-{theme_name}')
-    xray.graph(filename)
-    if theme_name == 'light' and opts.days == '3':
-      tools.mk_link(filename, opts.target.joinpath('proton_flux'))
+
+  for style in tools.STYLES:
+    with plt.style.context(style.style):
+      filename = opts.target.joinpath(f'xray_flux{opts.days}-{style.name}')
+      xray.graph(filename, style)
+      if style.name == 'light' and opts.days == '3':
+        tools.mk_link(filename, opts.target.joinpath('xray_flux'))
+
+  return os.EX_OK
 
 
 if __name__ == "__main__":

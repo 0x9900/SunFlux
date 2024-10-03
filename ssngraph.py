@@ -108,7 +108,7 @@ class SSN:
   def is_data(self):
     return bool(self.data)
 
-  def graph(self, filename):
+  def graph(self, filename, style):
     # pylint: disable=too-many-locals
     data = np.array(self.data)
 
@@ -119,13 +119,12 @@ class SSN:
 
     today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
     fig = plt.figure(figsize=(12, 5))
-    fig.suptitle('Sunspot Number (SSN)', fontsize=14, fontweight='bold')
+    fig.suptitle('Sunspot Number (SSN)')
     fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {today}', fontsize=8, style='italic')
     axgc = plt.gca()
-    axgc.tick_params(labelsize=10)
-    axgc.plot(xtime, ssn, marker='o', markersize=7, color="darkolivegreen", linewidth=1)
-    axgc.plot(xtime, avg, color="blue", linewidth=2, zorder=5)
-    axgc.plot(xtime, flux, linestyle='-.', color="blue", linewidth=1)
+    axgc.plot(xtime, ssn, marker='o', markersize=7, linewidth=1)
+    axgc.plot(xtime, flux, linestyle='-.', linewidth=1)
+    axgc.plot(xtime, avg, linewidth=2, zorder=5)
     loc = mdates.DayLocator(interval=int(1 + len(xtime) / 11))
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
     axgc.xaxis.set_major_locator(loc)
@@ -140,14 +139,13 @@ class SSN:
     sign = cycle([-1, 1])
     for _x, _y, _s in zip(xtime, ssn, sign):
       plt.annotate(f"{_y:d}", (_x, _y), textcoords="offset points", xytext=(0, 20 * _s),
-                   ha='center', fontsize=8,
-                   arrowprops={"arrowstyle": "->", "color": 'green'})
+                   ha='center', fontsize=8, color=style.arrows[0],
+                   arrowprops={"arrowstyle": "->", "color": style.arrows[0]})
 
-    axgc.legend(['Sun spot', '5day average', '10.7cm Flux'], fontsize=10, loc='best')
-    axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
-
+    axgc.legend(['Sun spot', '5day average', '10.7cm Flux'], loc='best')
     axgc.margins(.01)
     fig.autofmt_xdate(rotation=10, ha="center")
+
     tools.save_plot(plt, filename)
     plt.close()
 
@@ -168,12 +166,13 @@ def main():
     logger.error('No data to graph')
     return os.EX_DATAERR
 
-  for theme_name, set_theme in tools.THEMES.items():
-    set_theme()
-    filename = opts.target.joinpath(f'proton_flux-{theme_name}')
-    ssn.graph(filename)
-    if theme_name == 'light':
-      tools.mk_link(filename, opts.target.joinpath('proton_flux'))
+  for style in tools.STYLES:
+    with plt.style.context(style.style):
+      filename = opts.target.joinpath(f'ssn-{style.name}')
+      ssn.graph(filename, style)
+      if style.name == 'light':
+        tools.mk_link(filename, opts.target.joinpath('ssn'))
+
   return os.EX_OK
 
 

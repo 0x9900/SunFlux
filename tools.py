@@ -8,14 +8,77 @@
 #
 import logging
 import os
+from dataclasses import dataclass
 from datetime import datetime, timezone
 
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 
 EXTENTIONS = ('.svgz', '.png')
 
 logger = logging.getLogger('tools')
+
+
+COLOR_MAPS = {
+  'dark': [
+    '#76c7c0',  # (Soft Teal)
+    '#ffcc66',  # (Warm Amber)
+    '#99cc99',  # (Muted Green)
+    '#ff6666',  # (Soft Red)
+    '#6699cc',  # (Soft Blue)
+    '#c594c5',  # (Muted Purple)
+    '#e6b3b3',  # (Dusty Rose)
+    '#999999',  # (Muted Gray)
+  ],
+  'light': [
+    '#1f77b4',
+    '#ff7f0e',
+    '#2ca02c',
+    '#d62728',
+    '#9467bd',
+    '#8c564b',
+    '#e377c2',
+    '#7f7f7f',
+  ],
+}
+
+
+def mk_colormap(map_name, nb_colors=8):
+  reverse = False
+  if map_name[0] == '-':
+    map_name = map_name[1:]
+    reverse = True
+
+  cmap = plt.get_cmap(map_name)
+  if cmap.N > 32:
+    indices = np.linspace(0, 1, nb_colors)
+    colors = cmap(indices)
+  else:
+    colors = cmap.colors[:nb_colors]
+  hex_colors = [mcolors.rgb2hex(color) for color in colors]
+  return hex_colors[::-1] if reverse else hex_colors
+
+
+@dataclass(frozen=True, slots=True)
+class GraphStyle:
+  name: str
+  style: str
+  cmap: str | None
+  arrows: list
+  colors: list | None = None
+
+  def __post_init__(self):
+    if self.cmap in COLOR_MAPS:
+      object.__setattr__(self, 'colors', COLOR_MAPS[self.cmap])
+    else:
+      object.__setattr__(self, 'colors', mk_colormap(self.cmap))
+
+
+STYLES = [
+  GraphStyle('light', './light.mplstyle', 'light', ['#444444', '#4169e1']),
+  GraphStyle('dark', './dark.mplstyle', 'dark',  ['#81b1d2', '#bc82bd']),
+]
 
 
 def remove_outliers(points, low=25, high=95):
@@ -62,37 +125,3 @@ def save_plot(plt, filename):
       logger.info('Graph "%s" saved', fname)
     except (FileNotFoundError, ValueError) as err:
       logger.error(err)
-
-
-def set_dark_theme():
-  plt.rcParams.update({
-    'figure.facecolor': '#050505',
-    'axes.facecolor': '#050505',
-    'axes.edgecolor': '#eaeaea',
-    'axes.labelcolor': '#eaeaea',
-    'xtick.color': '#eaeaea',
-    'ytick.color': '#eaeaea',
-    'grid.color': '#333333',
-    'text.color': '#eaeaea',
-  })
-  return 'dark'
-
-
-# Function to set the light theme
-def set_light_theme():
-  plt.rcParams.update({
-    'figure.facecolor': 'white',
-    'axes.facecolor': 'white',
-    'axes.edgecolor': 'black',
-    'axes.labelcolor': 'black',
-    'xtick.color': 'black',
-    'ytick.color': 'black',
-    'grid.color': 'gray'
-  })
-  return 'light'
-
-
-THEMES = {
-  'light': set_light_theme,
-  'dark': set_dark_theme,
-}

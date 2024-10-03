@@ -110,7 +110,7 @@ def get_flux(config):
   return data
 
 
-def graph(data, filename, trend_week=3):
+def graph(data, filename, style, trend_week=3):
   # pylint: disable=invalid-name, too-many-locals
   trend_days = trend_week * 7
   arr = np.array(data)
@@ -123,41 +123,41 @@ def graph(data, filename, trend_week=3):
 
   date = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
   fig = plt.figure(figsize=(12, 5))
-  fig.suptitle('Daily 10cm Flux Index', fontsize=14, fontweight='bold')
+  fig.suptitle('Daily 10cm Flux Index')
   axgc = plt.gca()
-  axgc.plot(x, y, linewidth=1, label='Flux', color="gray")
-  mave, = axgc.plot(x, avg, linewidth=1.75, label='Daily Average', color="indigo")
+  axgc.plot(x, y, linewidth=1, label='Flux', color=style.colors[4])
+  mave, = axgc.plot(x, avg, linewidth=1.5, linestyle=":", label='Daily Average',
+                    color=style.colors[5])
   trend, = axgc.plot(x[idx], poly(x[idx]), label=f'Trend ({trend_week} weeks)', linestyle='--',
-                     color="red", linewidth=2)
+                     color=style.colors[6], linewidth=1)
   axgc.tick_params(labelsize=10)
 
   for pos in set([y.argmax(), y.argmin(), x.size - 1]):
     xytext = (20, 20) if pos == x.size - 1 else (20, -20)
     plt.annotate(f"{int(y[pos]):d}", (x[pos], y[pos]), textcoords="offset points", xytext=xytext,
-                 ha='center', fontsize=10,
-                 arrowprops={'arrowstyle': 'wedge', 'color': 'dimgray'},
+                 ha='center', fontsize=10, color=style.colors[6],
+                 arrowprops={'arrowstyle': 'wedge', 'color': style.colors[4]},
                  bbox={'boxstyle': 'square,pad=0.2', 'fc': 'white'})
 
   loc = mdates.DayLocator(interval=10)
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
   axgc.xaxis.set_major_locator(loc)
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
-  axgc.set_ylabel('SFU at 2800 MHz', fontsize=12)
+  axgc.set_ylabel('SFU at 2800 MHz')
   # axgc.set_ylim([MIN_TICKS, y.max() * 1.15])
 
   ticks = np.array([MIN_TICKS, 70])
   ticks = np.append(ticks, np.arange(90, int(y.max() * 1.15), 20))
   axgc.set_yticks(ticks)
 
-  zone1 = axgc.axhspan(90, round(axgc.axis()[-1]), facecolor='lightgreen', alpha=0.3, label='Good')
-  zone2 = axgc.axhspan(70, 90, facecolor='orange', alpha=0.3, label='Ok')
-  zone3 = axgc.axhspan(MIN_TICKS, 70, facecolor='red', alpha=0.3, label='Bad')
+  zone1 = axgc.axhspan(90, round(axgc.axis()[-1]), facecolor=style.colors[0],
+                       alpha=0.3, label='Good')
+  zone2 = axgc.axhspan(70, 90, facecolor=style.colors[1], alpha=0.3, label='Ok')
+  zone3 = axgc.axhspan(MIN_TICKS, 70, facecolor=style.colors[2], alpha=0.3, label='Bad')
 
-  trend_legend = axgc.legend(handles=[trend, mave], fontsize=10, loc='lower left')
+  trend_legend = axgc.legend(handles=[trend, mave], loc='lower left')
   axgc.add_artist(trend_legend)
-  axgc.legend(handles=[zone1, zone2, zone3], fontsize=10, loc="upper left")
-
-  axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
+  axgc.legend(handles=[zone1, zone2, zone3], loc="upper left")
   axgc.margins(x=.015)
 
   fig.autofmt_xdate(rotation=10, ha="center")
@@ -192,12 +192,13 @@ def main():
     return os.EX_DATAERR
 
   logger.debug('Dataset size: %d', len(data))
-  for theme_name, set_theme in tools.THEMES.items():
-    set_theme()
-    filename = opts.target.joinpath(f'flux-{theme_name}')
-    graph(data, filename, opts.trend)
-    if theme_name == 'light':
-      tools.mk_link(filename, opts.target.joinpath('flux'))
+  styles = tools.STYLES
+  for style in styles:
+    with plt.style.context(style.style):
+      filename = opts.target.joinpath(f'flux-{style.name}')
+      graph(data, filename, style, opts.trend)
+      if style.name == 'light':
+        tools.mk_link(filename, opts.target.joinpath('flux'))
 
   return os.EX_OK
 

@@ -109,34 +109,34 @@ class SolarWind:
 
   def graph(self, filename):
     # pylint: disable=too-many-locals
-    colors = {0: "gray", 1: "orange", 2: "plum"}
+    colors = ["gray", "orange", "plum"]
     labels = {0: r"Density $1/cm^3$", 1: r"Speed $km/S$", 2: r"Temp $^{\circ}K$"}
     limits = {0: [0, 12], 1: [250, 750], 2: [10**3, 10**6]}
     fig, ax = plt.subplots(3, 1, figsize=(12, 5))
-    fig.suptitle('Solar Wind (plasma)', fontsize=14, fontweight='bold')
+    fig.suptitle('Solar Wind (plasma)')
 
     formatter = ticker.ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
     formatter.set_useOffset(False)
-    formatter.set_powerlimits((3, 3))
+    formatter.set_powerlimits((3, 6))
     loc = mdates.HourLocator(interval=6)
 
     for i in range(3):
       data = self.data[0:, i + 1].astype(np.float64)
-      ax[i].plot(self.data[0:, 0], data, color=colors[i], linewidth=.5,
-                 marker='.', markersize=.5)
-      ax[i].grid(color='tab:gray', linestyle='dotted', linewidth=.3)
-      ax[i].set_ylabel(labels[i], fontsize=10)
+      ax[i].plot(self.data[0:, 0], data, color=colors[i], linewidth=.5)
+      ax[i].set_ylabel(labels[i], fontsize=8)
       if i in limits:
         _min, _max = limits[i]
-        ax[i].axhline(_max, linewidth=1, zorder=1, color='#999999')
+        ax[i].axhline(_max, linewidth=0.5, zorder=5, color='red')
         _max = _max if np.nanmax(data) < _max else np.nanmax(data) * 1.1
         ax[i].set_ylim((_min, _max))
-      ax[i].yaxis.offsetText.set_fontsize(10)
-      if np.nanmean(data) > 10000:
+      if np.nanmean(data) > 10**3:
         ax[i].yaxis.set_major_formatter(formatter)
-      ax[i].tick_params(axis='y', labelsize=8)
-      ax[i].tick_params(axis='x', labelsize=9)
+        offset_text = ax[i].yaxis.get_offset_text()
+        offset_text.set_fontsize(8)
+        offset_text.set_position((-0.04, 0))
+
+      ax[i].tick_params(axis='both', which='major', labelsize=8)
       ax[i].xaxis.set_major_formatter(mdates.DateFormatter('%m/%d %HH'))
       ax[i].xaxis.set_major_locator(loc)
 
@@ -162,12 +162,13 @@ def main():
     logger.error('No data to plot')
     return os.EX_DATAERR
 
-  for theme_name, set_theme in tools.THEMES.items():
-    set_theme()
-    filename = opts.target.joinpath(f'solarwind-{theme_name}')
-    wind.graph(filename)
-    if theme_name == 'light':
-      tools.mk_link(filename, opts.target.joinpath('solarwind'))
+  styles = tools.STYLES
+  for style in styles:
+    with plt.style.context(style.style):
+      filename = opts.target.joinpath(f'solarwind-{style.name}')
+      wind.graph(filename)
+      if style.name == 'light':
+        tools.mk_link(filename, opts.target.joinpath('solarwind'))
   return os.EX_OK
 
 

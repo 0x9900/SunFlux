@@ -55,7 +55,7 @@ class PKIForecast:
   def is_data(self):
     return bool(self.data)
 
-  def graph(self, filename):
+  def graph(self, filename, style):
     # pylint: disable=too-many-locals,too-many-statements
     start_date = datetime.now(timezone.utc) - timedelta(days=3, hours=4)
     end_date = datetime.now(timezone.utc) + timedelta(days=1, hours=3)
@@ -64,8 +64,8 @@ class PKIForecast:
     observ = [d[2] for d in self.data if start_date < d[0] < end_date]
     labels = [d[3] for d in self.data if start_date < d[0] < end_date]
 
-    # colors #6efa7b #a7bb36 #aa7f28 #8c4d30 #582a2d
-    colors = ['#6efa7b'] * len(observ)
+    # colors #6efa7b #a7bbb36 #aa7f28 #8c4d30 #582a2d
+    colors = ['#8EBA42'] * len(observ)
     for pos, (obs, val) in enumerate(zip(observ, yvalues)):
       if obs == 'observed':
         if 4 <= val < 5:
@@ -79,16 +79,14 @@ class PKIForecast:
       elif obs == "estimated":
         colors[pos] = 'lightgrey'
       elif obs == "predicted":
-        colors[pos] = 'darkgrey'
+        colors[pos] = 'grey'
 
     date = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
-    plt.rc('xtick', labelsize=10)
-    plt.rc('ytick', labelsize=10)
     fig = plt.figure(figsize=(12, 5))
-    fig.suptitle('Planetary K-Index Predictions', fontsize=14, fontweight='bold')
+    fig.suptitle('Planetary K-Index Predictions')
     axgc = plt.gca()
     bars = axgc.bar(xdates, yvalues, width=.1, linewidth=0.75, zorder=2, color=colors)
-    axgc.axhline(y=4, linewidth=1.5, zorder=1.5, color='red', label='Storm Threshold')
+    axgc.axhline(y=4, linewidth=1.5, zorder=1, color='red', label='Storm Threshold')
 
     for rect, label in ((a, b) for a, b in zip(*(bars, labels)) if labels):
       if not label:
@@ -96,7 +94,7 @@ class PKIForecast:
       color = 'red' if rect.get_height() > 5 else 'black'
       fweight = 'bold' if rect.get_height() > 5 else 'normal'
       axgc.text(rect.get_x() + rect.get_width() / 2., .3, label, alpha=1,
-                color=color, fontweight=fweight, fontsize=10, ha='center')
+                color=color, fontweight=fweight, ha='center')
 
     loc = mdates.DayLocator(interval=1)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
@@ -109,9 +107,8 @@ class PKIForecast:
 
     axgc.axhspan(0, 0, facecolor='lightgrey', alpha=1, label='Estimated')
     axgc.axhspan(0, 0, facecolor='darkgrey', alpha=1, label='Predicted')
-    axgc.legend(fontsize=10, loc="best", borderaxespad=1)
+    axgc.legend(loc="best", borderaxespad=1)
 
-    axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
     axgc.margins(x=.01)
     fig.autofmt_xdate(rotation=10, ha="center")
     fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {date}', fontsize=8, style='italic')
@@ -167,12 +164,13 @@ def main():
     logger.warning('No data to graph')
     return os.EX_DATAERR
 
-  for theme_name, set_theme in tools.THEMES.items():
-    set_theme()
-    filename = opts.target.joinpath(f'pki-forecast-{theme_name}')
-    pki.graph(filename)
-    if theme_name == 'light':
-      tools.mk_link(filename, opts.target.joinpath('pki-forecast'))
+  styles = tools.STYLES
+  for style in styles:
+    with plt.style.context(style.style):
+      filename = opts.target.joinpath(f'pki-forecast-{style.name}')
+      pki.graph(filename, style)
+      if style.name == 'light':
+        tools.mk_link(filename, opts.target.joinpath('pki-forecast'))
 
   return os.EX_OK
 

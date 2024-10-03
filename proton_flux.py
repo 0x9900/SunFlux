@@ -104,22 +104,21 @@ class ProtonFlux:
   def is_data(self):
     return bool(self.data)
 
-  def graph(self, filename):
+  def graph(self, filename, style):
     # pylint: disable=too-many-locals
     energy = (10, 30, 50, 100)  # Graphs to plot
     colors = {10: "tab:orange", 30: "tab:olive", 50: "tab:blue", 100: "tab:cyan"}
     fig = plt.figure(figsize=(12, 5))
     fig.subplots_adjust(bottom=0.15)
 
-    fig.suptitle('Proton Flux', fontsize=14, fontweight='bold')
+    fig.suptitle('Proton Flux')
     ax = plt.gca()
     ax.set_yscale("log")
-    ax.tick_params(axis='x', which='both', labelsize=10, rotation=10)
+    ax.tick_params(axis='x', which='both', rotation=10)
 
     formatter = ticker.ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
     formatter.set_powerlimits((-1, 1))
-    ax.grid(color='brown', linestyle='dotted', linewidth=.3)
     ax.xaxis.set_major_formatter(mdates.DateFormatter('%m/%d %HH'))
     ax.xaxis.set_major_locator(mdates.HourLocator(interval=12))
     ax.xaxis.set_minor_locator(mdates.HourLocator())
@@ -141,7 +140,7 @@ class ProtonFlux:
       ax.axhline(WARNING_THRESHOLD, linewidth=1.5, linestyle="--", zorder=0, color='tab:red',
                  label='Warning Threshold')
 
-    legend = ax.legend(loc='upper left', fontsize=10, borderpad=1.25, borderaxespad=1)
+    legend = ax.legend(loc='upper left', borderpad=1, borderaxespad=1)
     for line in legend.get_lines():
       if line.get_label().startswith('>'):
         line.set_linewidth(5.0)
@@ -170,12 +169,13 @@ def main():
     logger.error('No data collected')
     return os.EX_DATAERR
 
-  for theme_name, set_theme in tools.THEMES.items():
-    set_theme()
-    filename = opts.target.joinpath(f'proton_flux-{theme_name}')
-    p_f.graph(filename)
-    if theme_name == 'light':
-      tools.mk_link(filename, opts.target.joinpath('proton_flux'))
+  styles = tools.STYLES
+  for style in styles:
+    with plt.style.context(style.style):
+      filename = opts.target.joinpath(f'proton_flux-{style.name}')
+      p_f.graph(filename, style)
+      if style.name == 'light':
+        tools.mk_link(filename, opts.target.joinpath('proton_flux'))
   return os.EX_OK
 
 

@@ -144,30 +144,28 @@ def autolabel(ax, rects):
   """Attach a text label above each bar displaying its height"""
   for rect in rects:
     height = rect.get_height()
-    color = rect.get_facecolor()
     ax.text(rect.get_x() + rect.get_width() / 2., 1, f'{int(height)}',
-            color=color_complement(*color), fontsize=10, ha='center')
+            color='black', fontsize=8, ha='center')
 
 
-def graph(data, condition, filename):
+def graph(data, condition, filename, style):
   values = np.row_stack([d[1] for d in data])
   keys_column = np.array([d[0] for d in data]).reshape((-1, 1))
   data = np.hstack((keys_column, values))
-
-  colors = ['lightgreen'] * data[:, 0].size
+  colors = [style.colors[1]] * data[:, 0].size
   for pos, val in enumerate(data[:, AVG]):
     if 20 < val < 30:
-      colors[pos] = 'darkorange'
+      colors[pos] = style.colors[3]
     elif 30 < val < 50:
-      colors[pos] = 'red'
+      colors[pos] = style.colors[4]
     elif 50 < val < 100:
-      colors[pos] = 'darkred'
+      colors[pos] = style.colors[6]
     elif val >= 100:
-      colors[pos] = 'darkmagenta'
+      colors[pos] = style.colors[7]
 
   today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
   fig = plt.figure(figsize=(12, 5))
-  fig.suptitle('A-Index', fontsize=14, fontweight='bold')
+  fig.suptitle('A-Index')
   fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {today}', fontsize=8, style='italic')
   if condition:
     fig.text(0.22, 0.82, "Forecast: " + condition, fontsize=10,
@@ -176,15 +174,15 @@ def graph(data, condition, filename):
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
   bars = axgc.bar(data[:, 0], data[:, AVG], linewidth=0.75, zorder=2, color=colors)
-  axgc.plot(data[:, 0], data[:, MAX], marker='v', linewidth=0, color="steelblue")
-  axgc.plot(data[:, 0], data[:, MIN], marker='^', linewidth=0, color="navy")
+  axgc.plot(data[:, 0], data[:, MAX], marker='v', linewidth=0, color=style.arrows[0])
+  axgc.plot(data[:, 0], data[:, MIN], marker='^', linewidth=0, color=style.arrows[1])
   autolabel(axgc, bars)
 
-  axgc.axhline(y=20, linewidth=1.5, zorder=1, color='green')
-  axgc.axhline(y=30, linewidth=1.5, zorder=1, color='darkorange')
-  axgc.axhline(y=40, linewidth=1.5, zorder=1, color='red')
-  axgc.axhline(y=50, linewidth=1.5, zorder=1, color='darkred')
-  axgc.axhline(y=100, linewidth=1.5, zorder=1, color='darkmagenta')
+  axgc.axhline(y=20, linewidth=1.5, zorder=1, color=style.colors[1])
+  axgc.axhline(y=30, linewidth=1.5, zorder=1, color=style.colors[3])
+  axgc.axhline(y=40, linewidth=1.5, zorder=1, color=style.colors[4])
+  axgc.axhline(y=50, linewidth=1.5, zorder=1, color=style.colors[6])
+  axgc.axhline(y=100, linewidth=1.5, zorder=1, color=style.colors[7])
 
   loc = mdates.DayLocator(interval=2)
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
@@ -192,10 +190,9 @@ def graph(data, condition, filename):
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
   axgc.set_ylim(0, data[:, MAX].max() * 1.1)
   axgc.set_ylabel('A-Index')
-  axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
 
-  axgc.legend(['Max', 'Min'], loc='upper left', fontsize=10, framealpha=0.75, borderaxespad=1)
+  axgc.legend(['Max', 'Min'], loc='upper left')
 
   fig.autofmt_xdate(rotation=10, ha="center")
   tools.save_plot(plt, filename)
@@ -225,12 +222,13 @@ def main():
     logger.warning('No data collected')
     return
 
-  for theme_name, set_theme in tools.THEMES.items():
-    set_theme()
-    filename = opts.target.joinpath(f'aindex-{theme_name}')
-    graph(data, condition, filename)
-    if theme_name == 'light':
-      tools.mk_link(filename, opts.target.joinpath('aindex'))
+  styles = tools.STYLES
+  for style in styles:
+    with plt.style.context(style.style):
+      filename = opts.target.joinpath(f'aindex-{style.name}')
+      graph(data, condition, filename, style)
+      if style.name == 'light':
+        tools.mk_link(filename, opts.target.joinpath('aindex'))
 
 
 if __name__ == "__main__":

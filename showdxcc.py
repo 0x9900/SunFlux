@@ -164,6 +164,8 @@ def webp(filename, theme_name):
   image = image.resize((800, 530))
   image.save(webpfile, format='webp')
   logging.info('Image "%s" created', webpfile)
+  if theme_name == 'light':
+    create_link(webpfile, path.joinpath('latest.png'))
 
 
 def mk_thumbnail(filename, theme_name):

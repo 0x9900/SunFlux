@@ -115,7 +115,7 @@ def get_wwv(config):
   return data
 
 
-def graph(data, condition, filename):
+def graph(data, condition, filename, style):
   # pylint: disable=too-many-locals
   values = np.full((len(data), 3), np.nan, dtype=object)
   for i, row in enumerate(data.values()):
@@ -129,7 +129,7 @@ def graph(data, condition, filename):
 
   # I should use mpl.colormaps here
   # colors #6efa7b #a7bb36 #aa7f28 #8c4d30 #582a2d
-  colors = ['#6efa7b'] * data[:, 0].size
+  colors = ['#8EBA42'] * data[:, 0].size
   for pos, val in enumerate(data[:, 2]):
     if 4 <= val < 5:
       colors[pos] = '#a7bb36'
@@ -142,7 +142,7 @@ def graph(data, condition, filename):
 
   today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
   fig = plt.figure(figsize=(12, 5))
-  fig.suptitle('Planetary K-Index', fontsize=14, fontweight='bold')
+  fig.suptitle('Planetary K-Index')
   fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {today}', fontsize=8, style='italic')
   if condition:
     box = {"facecolor": 'white', "alpha": 0.75, "linewidth": 0}
@@ -150,12 +150,11 @@ def graph(data, condition, filename):
              fontweight='bold', color='red', bbox=box)
 
   axgc = plt.gca()
-  axgc.tick_params(labelsize=10)
-  axgc.plot(data[:, 0], data[:, 1], marker='v', linewidth=0, zorder=3, color="navy")
+  axgc.plot(data[:, 0], data[:, 1], marker='v', linewidth=0, zorder=3, color="#988ED5")
   axgc.bar(data[:, 0], data[:, 2], width=0.14, linewidth=0.75, zorder=2, color=colors)
-  axgc.plot(data[:, 0], data[:, 3], marker='^', linewidth=0, zorder=4, color="green")
+  axgc.plot(data[:, 0], data[:, 3], marker='^', linewidth=0, zorder=4, color="#E24A33")
 
-  axgc.axhline(y=4, linewidth=1.5, zorder=1.5, color='red', label='Threshold')
+  axgc.axhline(y=4, linewidth=1.5, zorder=1, color='red', label='Threshold')
 
   loc = mdates.DayLocator(interval=1)
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
@@ -165,11 +164,9 @@ def graph(data, condition, filename):
 
   axgc.set_ylim(0, 9.5)
   axgc.set_ylabel('K-Index')
-  axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
 
-  axgc.legend(['Min', 'Max', 'Storm Threshold'], loc='upper left', fontsize=10,
-              borderaxespad=1)
+  axgc.legend(['Min', 'Max', 'Storm Threshold'], loc='upper left', borderaxespad=1)
   fig.autofmt_xdate(rotation=10, ha="center")
 
   tools.save_plot(plt, filename)
@@ -201,12 +198,13 @@ def main():
     logger.warning('No data collected')
     return os.EX_DATAERR
 
-  for theme_name, set_theme in tools.THEMES.items():
-    set_theme()
-    filename = opts.target.joinpath(f'pkindex-{theme_name}')
-    graph(data, condition, filename)
-    if theme_name == 'light':
-      tools.mk_link(filename, opts.target.joinpath('pkindex'))
+  styles = tools.STYLES
+  for style in styles:
+    with plt.style.context(style.style):
+      filename = opts.target.joinpath(f'pkindex-{style.name}')
+      graph(data, condition, filename, style)
+      if style.name == 'light':
+        tools.mk_link(filename, opts.target.joinpath('pkindex'))
 
 
 if __name__ == "__main__":
