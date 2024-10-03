@@ -8,6 +8,7 @@
 #
 import logging
 import os
+import pathlib
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -69,7 +70,15 @@ class GraphStyle:
   colors: list | None = None
 
   def __post_init__(self):
-    object.__setattr__(self, 'style', f'/var/tmp/{self.style}')
+    style_path = [pathlib.Path(p).absolute() for p in ('.', '/var/tmp')]
+    for path in style_path:
+      stylefile = path.joinpath(self.style)
+      if stylefile.exists():
+        object.__setattr__(self, 'style', str(stylefile))
+        break
+    else:
+      raise SystemExit('Style: {self.style} not found')
+
     if self.cmap in COLOR_MAPS:
       object.__setattr__(self, 'colors', COLOR_MAPS[self.cmap])
     else:

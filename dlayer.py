@@ -129,9 +129,9 @@ class Drap:
       if msg := getattr(self, key):
         fig.text(0.125, 0.12 - (0.03 * nbr), msg, fontsize=8)
 
-  def plot(self, filename):
+  def plot(self, filename, style):
     fig, axgc = plt.subplots(figsize=(10, 5))
-    axgc.set_title('DLayer Absorption', fontsize=16, fontweight='bold')
+    axgc.set_title('DLayer Absorption')
     self.print_info(fig)
     dmap = Basemap(projection='cyl', resolution='c',
                    llcrnrlat=-75, urcrnrlat=89, llcrnrlon=-175, urcrnrlon=175)
@@ -143,22 +143,14 @@ class Drap:
 
     self.draw_colorbar(dmap, self.data.max())
     self.draw_elements(dmap)
-
-    metadata = {
-      'Title': 'D-Layer Absorption',
-      'Description': f'D-Layer Absorption for {self.prod_date.isoformat()}',
-      'Source': 'Data source NOAA',
-    }
-    for ext in tools.EXTENTIONS:
-      fig.savefig(filename.with_suffix(ext), transparent=False, dpi=100, metadata=metadata)
-      logging.info('Dlayer graph "%s%s" saved', filename, ext)
+    tools.save_plot(plt, filename)
 
     plt.close()
 
   @staticmethod
   def draw_colorbar(fig, fmax=None):
     cbar = fig.colorbar(size="3.5%", pad="2%", format=lambda x, _: f"{int(round(x)):d}")
-    cbar.set_label('Affected Frequency (MHz)', weight='bold', size=10)
+    cbar.set_label('Affected Frequency (MHz)')
     cbar.set_ticks(np.linspace(1, MAX_FREQUENCY, 6))
     if fmax:
       cbar.ax.arrow(0.1, fmax, 0.6, 0, width=0.03, head_width=0.6, head_length=0.2, fc='k', ec='k')
@@ -194,9 +186,9 @@ def mk_link(src, dst):
 
 def main():
   config = Config()
-
   cache_path = config.get('dlayer.cache_path', '/tmp')
   cache_time = config.get('dlayer.cache_time', 120)
+  target_dir = config.get('dlayer.target_dir', '/var/www/html/d-rap')
 
   if os.isatty(sys.stdout.fileno()):
     log_file = None
@@ -210,7 +202,7 @@ def main():
   )
 
   parser = argparse.ArgumentParser(description="DLayer absorption graph")
-  parser.add_argument('-t', '--target', type=pathlib.Path, default='/var/tmp/drap',
+  parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
                       help='Image path')
   opts = parser.parse_args()
   drap = Drap(cache_path, cache_time)
@@ -223,14 +215,17 @@ def main():
     logging.error(err)
     raise SystemExit(err)
 
-  for theme_name, set_theme in tools.THEMES.items():
-    set_theme()
-    filename = path.joinpath(f'dlayer-{today.strftime("%Y%m%dT%H%M%S")}-{theme_name}')
-    drap.plot(filename)
-    mk_link(filename, path.joinpath(f'latest-{theme_name}'))
-    if theme_name == 'light':
-      mk_link(filename, path.joinpath(f'dlayer-{today.strftime("%Y%m%dT%H%M%S")}'))
-      mk_link(filename, path.joinpath('latest'))
+  styles = tools.STYLES
+  for style in styles:
+    with plt.style.context(style.style):
+      filename = opts.target.joinpath(f'dlayer-{today.strftime("%Y%m%dT%H%M%S")}-{style.name}')
+      drap.plot(filename, style)
+      tools.mk_link(filename, opts.target.joinpath(f'latest-{style.name}'))
+      if style.name == 'light':
+        tools.mk_link(filename, opts.target.joinpath(f'dlayer-{today.strftime("%Y%m%dT%H%M%S")}'))
+        tools.mk_link(filename, opts.target.joinpath('latest'))
+
+  return os.EX_OK
 
 
 if __name__ == "__main__":
