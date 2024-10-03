@@ -69,6 +69,7 @@ class GraphStyle:
   colors: list | None = None
 
   def __post_init__(self):
+    object.__setattr__(self, 'style', f'/var/tmp/{self.style}')
     if self.cmap in COLOR_MAPS:
       object.__setattr__(self, 'colors', COLOR_MAPS[self.cmap])
     else:
@@ -76,8 +77,8 @@ class GraphStyle:
 
 
 STYLES = [
-  GraphStyle('light', './light.mplstyle', 'light', ['#444444', '#4169e1']),
-  GraphStyle('dark', './dark.mplstyle', 'dark',  ['#81b1d2', '#bc82bd']),
+  GraphStyle('light', 'light.mplstyle', 'light', ['#444444', '#4169e1']),
+  GraphStyle('dark', 'dark.mplstyle', 'dark',  ['#81b1d2', '#bc82bd']),
 ]
 
 

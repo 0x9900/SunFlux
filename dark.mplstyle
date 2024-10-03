@@ -1,0 +1,39 @@
+# Set 1a1a1a background default line colors to e5e5e5.
+
+lines.color: e5e5e5
+patch.edgecolor: e5e5e5
+
+text.color: e5e5e5
+
+font.size: 12.0
+font.family: sans-serif
+font.sans-serif: Helvetica, Helvetica Neue, Arial, DejaVu Sans, Bitstream Vera Sans, sans-serif
+
+axes.facecolor: 151515
+axes.edgecolor: 5a5a5a
+axes.labelcolor: fffff0
+axes.prop_cycle: cycler('color', ['8dd3c7', 'feffb3', 'bfbbd9', 'fa8174', '81b1d2', 'fdb462', 'b3de69', 'bc82bd', 'ccebc4', 'ffed6f'])
+axes.grid: True
+
+xtick.color: fffff0
+ytick.color: fffff0
+xtick.labelsize: 10
+ytick.labelsize: 10
+
+grid.color: black
+grid.linestyle: solid
+
+figure.facecolor: 0c0c0c
+figure.edgecolor: 0a0a0a
+
+legend.frameon: True
+legend.numpoints: 1
+legend.scatterpoints: 1
+legend.fontsize: small
+
+## Boxplots
+boxplot.boxprops.color: e5e5e5
+boxplot.capprops.color: e5e5e5
+boxplot.flierprops.color: e5e5e5
+boxplot.flierprops.markeredgecolor: e5e5e5
+boxplot.whiskerprops.color: e5e5e5
