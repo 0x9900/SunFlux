@@ -26,11 +26,28 @@ import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 from mpl_toolkits.basemap import Basemap
 
+import tools
 from config import Config
 
 DRAP_URL = 'https://services.swpc.noaa.gov/text/drap_global_frequencies.txt'
 MAX_FREQUENCY = 36
-EXTENTIONS = ('.svgz', '.png')
+
+MAP_COLORS = {
+  'light': {
+    'land': 'wheat',
+    'ocean': 'lavender',
+    'coastlines': 'brown',
+    'grid': 'lightgray',
+    'colors': ['lavender', '#2989d8', '#99aaaa', '#ffff00', '#bb0000'],
+  },
+  'dark': {
+    'land': '#000000',
+    'ocean': '#0d1522',
+    'coastlines': '#e0e0e0',
+    'grid': 'lightgray',
+    'colors': ['#0d1117', '#2989d8', '#99aaaa', '#ffff00', '#bb0000'],
+  },
+}
 
 # Silence matplotlib debug messages
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
@@ -123,16 +140,13 @@ class Drap:
 
   def print_info(self, fig):
     fig.text(0.72, .11, f'{self.prod_date.strftime("%a %b %d %Y - %H:%M %Z")}', fontsize=8)
-    fig.text(0.01, 0.02, f'SunFlux (c) {self.prod_date.strftime("%Y")} W6BSD',
-             fontsize=8, style='italic')
     for nbr, key in enumerate(("proton", "xray")):
       if msg := getattr(self, key):
-        fig.text(0.125, 0.12 - (0.03 * nbr), msg, fontsize=8, color='black')
+        fig.text(0.125, 0.12 - (0.03 * nbr), msg, fontsize=8)
 
-  def plot(self, image_path):
-    today = datetime.now(timezone.utc)
-    fig, axgc = plt.subplots(figsize=(10, 5), facecolor='white')
-    axgc.set_title('DLayer Absorption', fontsize=16, fontweight='bold')
+  def plot(self, filename, style):
+    fig, axgc = plt.subplots(figsize=(10, 5))
+    axgc.set_title('DLayer Absorption')
     self.print_info(fig)
     dmap = Basemap(projection='cyl', resolution='c',
                    llcrnrlat=-75, urcrnrlat=89, llcrnrlon=-175, urcrnrlon=175)
@@ -140,35 +154,19 @@ class Drap:
     # Draw the data
     lon, lat = np.meshgrid(self.lon, self.lat)
     clevels = np.arange(self.data.min() + 1, MAX_FREQUENCY + 1)
-    dmap.contourf(lon, lat, self.data, clevels, vmax=MAX_FREQUENCY, cmap=self.mk_colormap())
+    dmap.contourf(lon, lat, self.data, clevels, vmax=MAX_FREQUENCY,
+                  cmap=self.mk_colormap(style))
 
     self.draw_colorbar(dmap, self.data.max())
-    self.draw_elements(dmap)
-
-    path = pathlib.Path(image_path)
-    try:
-      path.mkdir(parents=True, exist_ok=True)
-    except FileExistsError as err:
-      logging.error(err)
-      return None
-
-    filename = path.joinpath(f'dlayer-{today.strftime("%Y%m%dT%H%M%S")}')
-    metadata = {
-      'Title': 'D-Layer Absorption',
-      'Description': f'D-Layer Absorption for {self.prod_date.isoformat()}',
-      'Source': 'Data source NOAA',
-    }
-    for ext in EXTENTIONS:
-      fig.savefig(filename.with_suffix(ext), transparent=False, dpi=100, metadata=metadata)
-      logging.info('Dlayer graph "%s%s" saved', filename, ext)
+    self.draw_elements(dmap, style)
+    tools.save_plot(plt, filename)
 
     plt.close()
-    return filename
 
   @staticmethod
   def draw_colorbar(fig, fmax=None):
     cbar = fig.colorbar(size="3.5%", pad="2%", format=lambda x, _: f"{int(round(x)):d}")
-    cbar.set_label('Affected Frequency (MHz)', weight='bold', size=10)
+    cbar.set_label('Affected Frequency (MHz)')
     cbar.set_ticks(np.linspace(1, MAX_FREQUENCY, 6))
     if fmax:
       cbar.ax.arrow(0.1, fmax, 0.6, 0, width=0.03, head_width=0.6, head_length=0.2, fc='k', ec='k')
@@ -176,15 +174,18 @@ class Drap:
       cbar.ax.annotate('Max', xy=(0, lpos), xytext=(0, lpos), fontsize=8)
 
   @staticmethod
-  def draw_elements(fig):
-    fig.drawparallels([-66.33, -23.5, 0, 23.5, 66.33], linewidth=.5, color='gray', dashes=[2, 2])
-    fig.drawmeridians([-90, 0, 90], linewidth=.5, color='gray', dashes=[2, 2])
-    fig.drawcoastlines(linewidth=.6, color='brown')
-    fig.drawlsmask(land_color='tan', ocean_color='azure', lakes=False)
+  def draw_elements(fig, style):
+    colors = MAP_COLORS[style.name]
+
+    fig.drawparallels([-66.33, -23.5, 0, 23.5, 66.33], linewidth=.5,
+                      color=colors['grid'], dashes=[2, 2])
+    fig.drawmeridians([-90, 0, 90], linewidth=.5, color=colors['grid'], dashes=[2, 2])
+    fig.drawcoastlines(linewidth=.6, color=colors['coastlines'])
+    fig.drawlsmask(land_color=colors['land'], ocean_color=colors['ocean'], lakes=False)
 
   @staticmethod
-  def mk_colormap():
-    colors = ['#f0f0f0', '#2989d8', '#99aaaa', '#ffff00', '#bb0000']
+  def mk_colormap(style):
+    colors = MAP_COLORS[style.name]['colors']
     pos = [0.0, 0.2, 0.4, 0.6, 1.0]
     cmap_name = 'my_cmap'
     n_bins = MAX_FREQUENCY
@@ -192,21 +193,11 @@ class Drap:
     return cmap
 
 
-def mk_latest(image_name):
-  for ext in EXTENTIONS:
-    src_img = image_name.with_suffix(ext)
-    dst_img = image_name.with_name('latest').with_suffix(ext)
-    if dst_img.exists():
-      dst_img.unlink()
-    os.link(src_img, dst_img)
-    logging.info('Lint %s ->  %s', src_img, dst_img)
-
-
 def main():
   config = Config()
-
   cache_path = config.get('dlayer.cache_path', '/tmp')
   cache_time = config.get('dlayer.cache_time', 120)
+  target_dir = config.get('dlayer.target_dir', '/var/www/html/d-rap')
 
   if os.isatty(sys.stdout.fileno()):
     log_file = None
@@ -220,12 +211,30 @@ def main():
   )
 
   parser = argparse.ArgumentParser(description="DLayer absorption graph")
-  parser.add_argument('-t', '--target', default='/var/tmp/drap', help='Image path')
+  parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
+                      help='Image path')
   opts = parser.parse_args()
-
   drap = Drap(cache_path, cache_time)
-  image_name = drap.plot(opts.target)
-  mk_latest(image_name)
+
+  today = datetime.now(timezone.utc)
+  path = opts.target
+  try:
+    path.mkdir(parents=True, exist_ok=True)
+  except FileExistsError as err:
+    logging.error(err)
+    raise SystemExit(err) from None
+
+  styles = tools.STYLES
+  for style in styles:
+    with plt.style.context(style.style):
+      filename = opts.target.joinpath(f'dlayer-{today.strftime("%Y%m%dT%H%M%S")}-{style.name}')
+      drap.plot(filename, style)
+      tools.mk_link(filename, opts.target.joinpath(f'latest-{style.name}'))
+      if style.name == 'light':
+        tools.mk_link(filename, opts.target.joinpath(f'dlayer-{today.strftime("%Y%m%dT%H%M%S")}'))
+        tools.mk_link(filename, opts.target.joinpath('latest'))
+
+  return os.EX_OK
 
 
 if __name__ == "__main__":

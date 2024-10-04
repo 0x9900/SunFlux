@@ -11,28 +11,29 @@ import argparse
 import json
 import logging
 import os
+import pathlib
 import pickle
 import sys
 import time
 import urllib.request
 import warnings
-from datetime import datetime, timezone
+from datetime import datetime
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import ticker
 
+import tools
 from config import Config
 
 warnings.filterwarnings('ignore')
 
 logging.basicConfig(
   format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
+  level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
 )
 logger = logging.getLogger('SolarWind')
-
-plt.style.use(['classic', 'fast'])
 
 NOAA_URL = 'https://services.swpc.noaa.gov/products/solar-wind/plasma-3-day.json'
 
@@ -106,67 +107,68 @@ class SolarWind:
   def is_data(self):
     return bool(self.data.size)
 
-  def graph(self, image_names):
+  def graph(self, filename):
     # pylint: disable=too-many-locals
-    colors = {0: "gray", 1: "orange", 2: "plum"}
+    colors = ["gray", "orange", "plum"]
     labels = {0: r"Density $1/cm^3$", 1: r"Speed $km/S$", 2: r"Temp $^{\circ}K$"}
     limits = {0: [0, 12], 1: [250, 750], 2: [10**3, 10**6]}
     fig, ax = plt.subplots(3, 1, figsize=(12, 5))
-    fig.suptitle('Solar Wind (plasma)', fontsize=14, fontweight='bold')
+    fig.suptitle('Solar Wind (plasma)')
 
     formatter = ticker.ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
     formatter.set_useOffset(False)
-    formatter.set_powerlimits((3, 3))
+    formatter.set_powerlimits((3, 6))
     loc = mdates.HourLocator(interval=6)
 
     for i in range(3):
       data = self.data[0:, i + 1].astype(np.float64)
-      ax[i].plot(self.data[0:, 0], data, color=colors[i], linewidth=.5,
-                 marker='.', markersize=.5)
-      ax[i].grid(color='tab:gray', linestyle='dotted', linewidth=.3)
-      ax[i].set_ylabel(labels[i], fontsize=10)
+      ax[i].plot(self.data[0:, 0], data, color=colors[i], linewidth=.5)
+      ax[i].set_ylabel(labels[i], fontsize=8)
       if i in limits:
         _min, _max = limits[i]
-        ax[i].axhline(_max, linewidth=1, zorder=1, color='lightgray')
+        ax[i].axhline(_max, linewidth=0.5, zorder=5, color='red')
         _max = _max if np.nanmax(data) < _max else np.nanmax(data) * 1.1
         ax[i].set_ylim((_min, _max))
-      ax[i].yaxis.offsetText.set_fontsize(10)
-      if np.nanmean(data) > 10000:
+      if np.nanmean(data) > 10**3:
         ax[i].yaxis.set_major_formatter(formatter)
-      ax[i].tick_params(axis='y', labelsize=8)
-      ax[i].tick_params(axis='x', labelsize=9)
+        offset_text = ax[i].yaxis.get_offset_text()
+        offset_text.set_fontsize(8)
+        offset_text.set_position((-0.04, 0))
+
+      ax[i].tick_params(axis='both', which='major', labelsize=8)
       ax[i].xaxis.set_major_formatter(mdates.DateFormatter('%m/%d %HH'))
       ax[i].xaxis.set_major_locator(loc)
+      if i < 2:
+        ax[i].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
 
-    today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
-    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {today}', fontsize=8, style='italic')
-    for name in image_names:
-      try:
-        fig.savefig(name, transparent=False, dpi=100)
-        logger.info('Save "%s"', name)
-      except ValueError as err:
-        logger.error(err)
+    tools.save_plot(plt, filename)
     plt.close()
 
 
 def main():
-  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config().get('solarwind', {})
-
-  parser = argparse.ArgumentParser()
-  parser.add_argument('names', help='Name of the graph', nargs="*",
-                      default=['/tmp/solarwind.png'])
-  opts = parser.parse_args()
-
   cache_file = config.get('cache_file', '/tmp/solarwind.pkl')
   cache_time = config.get('cache_time', 900)
+  target_dir = config.get('target_dir', '/var/www/html')
+
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
+                      help='Image path')
+  opts = parser.parse_args()
+
   wind = SolarWind(cache_file, cache_time)
   if not wind.is_data():
     logger.error('No data to plot')
     return os.EX_DATAERR
 
-  wind.graph(opts.names)
+  styles = tools.STYLES
+  for style in styles:
+    with plt.style.context(style.style):
+      filename = opts.target.joinpath(f'solarwind-{style.name}')
+      wind.graph(filename)
+      if style.name == 'light':
+        tools.mk_link(filename, opts.target.joinpath('solarwind'))
   return os.EX_OK
 
 

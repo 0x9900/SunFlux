@@ -10,6 +10,7 @@
 import argparse
 import logging
 import os
+import pathlib
 import sqlite3
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
@@ -17,20 +18,25 @@ from itertools import product
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib import cm
+from matplotlib.ticker import FuncFormatter
 
 import adapters
+import tools
 from config import Config
 
 adapters.install_adapters()
-
-plt.style.use(['classic', 'tableau-colorblind10'])
 
 DPI = 100
 NB_DAYS = 15
 
 SQL_REQ = """SELECT STRFTIME("%Y%m%d", DATETIME(time, "unixepoch")) AS tm, mode, COUNT(*) AS cnt
              FROM dxspot WHERE time > {} GROUP BY mode, tm"""
+
+logging.basicConfig(
+  format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%x %X',
+  level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
+)
+logger = logging.getLogger('graphmodes')
 
 
 def read_data(config, days=15):
@@ -60,8 +66,15 @@ def read_data(config, days=15):
   return data
 
 
-def graph(data, imgnames):
-  now = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
+def sizeof_fmt(num, _):
+  for unit in ("", "K", "M"):
+    if abs(num) < 1000.0:
+      return f"{num:.0f}{unit}"
+    num /= 1024.0
+  return f"{num:.1f}"
+
+
+def graph(data, filename):
   xdate = np.array(list(data.keys()))
   modes = sorted({k for d in data.values() for k in d})
   ydata = defaultdict(list)
@@ -72,48 +85,50 @@ def graph(data, imgnames):
       ydata[mode].append(0)
 
   fig, ax1 = plt.subplots(figsize=(12, 5))
-  fig.suptitle('Band Activity / Modes', fontsize=14, fontweight='bold')
-  fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {now}', fontsize=8, style='italic')
-  ax1.set_ylabel('Sports / Day', fontsize=12)
+  fig.suptitle('Band Activity / Modes')
+  ax1.set_ylabel('Sports / Day')
   ax1.margins(x=0.01, y=0.02)
-  colors = cm.Set2(np.linspace(0, 1, len(modes)))  # pylint: disable=no-member
-  colors[0] = (1, .5, 0, 1)
   prev = np.zeros(len(xdate))
-  for idx, mode in enumerate(modes):
+  for mode in modes:
     value = np.array(ydata[mode], dtype=float)
-    ax1.bar(xdate, value, label=mode, bottom=prev, color=colors[idx])
-    prev += 3000
+    ax1.bar(xdate, value, label=mode, bottom=prev, alpha=.8, zorder=10)
     prev += value
 
-  ax1.legend(loc='upper left', fontsize=10)
+  _, ymax = ax1.get_ylim()
+  ax1.set_ylim((0, ymax + ymax*.10))
+  ax1.yaxis.set_major_formatter(FuncFormatter(sizeof_fmt))
+  ax1.legend(loc='upper left')
   fig.autofmt_xdate(rotation=10, ha="center")
-  for graphname in imgnames:
-    plt.savefig(graphname, transparent=False, dpi=DPI)
-    logging.info('Generate graph: %s', graphname)
+  tools.save_plot(plt, filename)
 
 
 def main():
-  logging.basicConfig(
-    format='%(asctime)s %(name)s:%(lineno)d %(levelname)s - %(message)s', datefmt='%x %X',
-    level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
-  )
-  parser = argparse.ArgumentParser()
-  parser.add_argument('-D', '--days', default=NB_DAYS, type=int,
-                      help='Number of days to graph [Default: %(default)s]')
-  parser.add_argument('graph_names', help='Name of the graphs', nargs="*",
-                      default=['/tmp/modes.png'])
-  opts = parser.parse_args()
-
   try:
     _config = Config()
     config = _config['graphmode']
     del _config
   except KeyError as err:
-    logging.error(err)
+    logger.error(err)
     return os.EX_CONFIG
 
+  target_dir = config.get('target_dir', '/var/www/html')
+
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-D', '--days', default=NB_DAYS, type=int,
+                      help='Number of days to graph [Default: %(default)s]')
+  parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
+                      help='Image path')
+  opts = parser.parse_args()
+
   data = read_data(config, opts.days)
-  graph(data, opts.graph_names)
+  styles = tools.STYLES
+  for style in styles:
+    with plt.style.context(style.style):
+      filename = opts.target.joinpath(f'modes-{opts.days}-{style.name}')
+      graph(data, filename)
+      if style.name == 'light' and opts.days == 15:
+        tools.mk_link(filename, opts.target.joinpath('modes'))
+
   return os.EX_OK
 
 

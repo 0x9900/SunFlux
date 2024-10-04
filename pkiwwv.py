@@ -11,6 +11,7 @@ import argparse
 import json
 import logging
 import os
+import pathlib
 import re
 import sqlite3
 import sys
@@ -25,6 +26,7 @@ import numpy as np
 from matplotlib.ticker import MultipleLocator
 
 import adapters
+import tools
 from config import Config
 
 NOAA_URL = "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
@@ -36,10 +38,9 @@ WWV_CONDITIONS = ("SELECT conditions FROM wwv WHERE time > ? "
                   "ORDER BY time DESC LIMIT 1")
 
 
-plt.style.use(['classic', 'fast'])
-
 logging.basicConfig(
   format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
+  level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
 )
 logger = logging.getLogger('pkiwwv')
 
@@ -114,7 +115,7 @@ def get_wwv(config):
   return data
 
 
-def graph(data, condition, filenames):
+def graph(data, condition, filename):
   # pylint: disable=too-many-locals
   values = np.full((len(data), 3), np.nan, dtype=object)
   for i, row in enumerate(data.values()):
@@ -128,7 +129,7 @@ def graph(data, condition, filenames):
 
   # I should use mpl.colormaps here
   # colors #6efa7b #a7bb36 #aa7f28 #8c4d30 #582a2d
-  colors = ['#6efa7b'] * data[:, 0].size
+  colors = ['#8EBA42'] * data[:, 0].size
   for pos, val in enumerate(data[:, 2]):
     if 4 <= val < 5:
       colors[pos] = '#a7bb36'
@@ -139,22 +140,19 @@ def graph(data, condition, filenames):
     elif val >= 8:
       colors[pos] = '#582a2d'
 
-  today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
   fig = plt.figure(figsize=(12, 5))
-  fig.suptitle('Planetary K-Index', fontsize=14, fontweight='bold')
-  fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {today}', fontsize=8, style='italic')
+  fig.suptitle('Planetary K-Index')
   if condition:
     box = {"facecolor": 'white', "alpha": 0.75, "linewidth": 0}
     fig.text(0.136, 0.68, "Forecast: " + condition, fontsize=10, zorder=4,
              fontweight='bold', color='red', bbox=box)
 
   axgc = plt.gca()
-  axgc.tick_params(labelsize=10)
-  axgc.plot(data[:, 0], data[:, 1], marker='v', linewidth=0, zorder=3, color="navy")
+  axgc.plot(data[:, 0], data[:, 1], marker='v', linewidth=0, zorder=3, color="#988ED5")
   axgc.bar(data[:, 0], data[:, 2], width=0.14, linewidth=0.75, zorder=2, color=colors)
-  axgc.plot(data[:, 0], data[:, 3], marker='^', linewidth=0, zorder=4, color="green")
+  axgc.plot(data[:, 0], data[:, 3], marker='^', linewidth=0, zorder=4, color="#E24A33")
 
-  axgc.axhline(y=4, linewidth=1.5, zorder=1.5, color='red', label='Threshold')
+  axgc.axhline(y=4, linewidth=1.5, zorder=1, color='red', label='Threshold')
 
   loc = mdates.DayLocator(interval=1)
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
@@ -164,33 +162,27 @@ def graph(data, condition, filenames):
 
   axgc.set_ylim(0, 9.5)
   axgc.set_ylabel('K-Index')
-  axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
   axgc.margins(.01)
 
-  axgc.legend(['Min', 'Max', 'Storm Threshold'], loc='upper left', fontsize=10,
-              facecolor='linen', borderaxespad=1)
-
+  axgc.legend(['Min', 'Max', 'Storm Threshold'], loc='upper left')
   fig.autofmt_xdate(rotation=10, ha="center")
-  for filename in filenames:
-    try:
-      plt.savefig(filename, transparent=False, dpi=100)
-      logger.info('Graph "%s" saved', filename)
-    except ValueError as err:
-      logger.error(err)
+
+  tools.save_plot(plt, filename)
   plt.close()
 
 
 def main():
   adapters.install_adapters()
-  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config().get('pkiwwv', {})
+  target_dir = config.get('target_dir', '/var/www/html')
 
   parser = argparse.ArgumentParser()
   parser.add_argument('-D', '--days', default=config.get('nb_days', NB_DAYS), type=int,
                       help='Number of days to graph [Default: %(default)s]')
   parser.add_argument('-c', '--cluster', action="store_true", default=False,
                       help='Add data coming from the cluster network [Default: %(default)s]')
-  parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/pkindex.png'])
+  parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
+                      help='Image path')
   opts = parser.parse_args()
 
   config['nb_days'] = opts.days
@@ -199,10 +191,20 @@ def main():
   if opts.cluster:
     data.update(get_wwv(config))
   condition = get_conditions(config)
-  if data:
-    graph(data, condition, opts.names)
-  else:
+
+  if not data:
     logger.warning('No data collected')
+    return os.EX_DATAERR
+
+  styles = tools.STYLES
+  for style in styles:
+    with plt.style.context(style.style):
+      filename = opts.target.joinpath(f'pkindex-{style.name}')
+      graph(data, condition, filename)
+      if style.name == 'light':
+        tools.mk_link(filename, opts.target.joinpath('pkindex'))
+
+  return os.EX_OK
 
 
 if __name__ == "__main__":

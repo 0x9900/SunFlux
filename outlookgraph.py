@@ -10,22 +10,23 @@
 import argparse
 import logging
 import os
+import pathlib
 import sys
 import time
 from collections import namedtuple
-from datetime import datetime, timezone
+from datetime import datetime
 from urllib.request import urlretrieve
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
 
+import tools
 from config import Config
-
-plt.style.use(['classic', 'fast'])
 
 logging.basicConfig(
   format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
+  level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
 )
 logger = logging.getLogger('outloot')
 
@@ -67,14 +68,13 @@ class OutLook:
   def is_data(self):
     return bool(self.data)
 
-  def graph(self, filenames):
+  def graph(self, filename):
     # pylint: disable=too-many-locals
     data = np.array(self.data)
     dates = data[:, 0]
     flux = data[:, 1]
     aindex = data[:, 2]
     kindex = data[:, 3]
-    now = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
 
     fig = plt.figure(figsize=(12, 5))
     ax1 = plt.subplot(222)
@@ -82,7 +82,7 @@ class OutLook:
     ax3 = plt.subplot(212)
 
     fig.tight_layout()
-    fig.suptitle('27 day Solar Predictions', fontsize=14, fontweight='bold')
+    fig.suptitle('27 day Solar Predictions')
 
     # first axis
     self.draw_aindex(ax1, dates, aindex)
@@ -90,9 +90,10 @@ class OutLook:
     self.draw_flux(ax3, dates, flux)
 
     for axe in [ax1, ax2, ax3]:
-      axe.tick_params(axis='both', which='both', labelsize=10, rotation=10)
+      axe.tick_params(axis='both', which='both', labelsize=8, rotation=10)
       axe.xaxis.set_major_formatter(mdates.DateFormatter('%b %d'))
       axe.xaxis.set_minor_locator(mdates.DayLocator())
+      axe.grid(False)
 
     ax3.xaxis.set_major_formatter(mdates.DateFormatter('%a %b %d'))
 
@@ -100,35 +101,20 @@ class OutLook:
       if day.isoweekday() not in (6, 7):
         continue
       for plot in [ax1, ax2, ax3]:
-        plot.axvspan(mdates.date2num(day), mdates.date2num(day) + 1, color="skyblue", alpha=0.3)
-
-    plt.figtext(0.80, 0.03, "Good", size=12,
-                bbox={"boxstyle": "round", "color": "springgreen", "alpha": ALPHA})
-    plt.figtext(0.87, 0.03, " OK ", size=12,
-                bbox={"boxstyle": "round", "color": "orange", "alpha": ALPHA})
-    plt.figtext(0.93, 0.03, "Bad", size=12,
-                bbox={"boxstyle": "round", "color": "tomato", "alpha": ALPHA})
+        plot.axvspan(mdates.date2num(day), mdates.date2num(day) + 1, alpha=0.1)
 
     plt.subplots_adjust(top=0.91, bottom=0.15)
 
-    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {now}', fontsize=8, style='italic')
-    for filename in filenames:
-      try:
-        plt.savefig(filename, transparent=False, dpi=100)
-        logger.info('Graph "%s" saved', filename)
-      except ValueError as err:
-        logger.error(err)
+    tools.save_plot(plt, filename)
     plt.close()
 
   @staticmethod
   def draw_aindex(axe, dates, aindex):
     bars = axe.bar(dates, aindex, color='springgreen', label='AIndex', zorder=2)
     axe.set_ylim([0, aindex.max() * 1.15])
-    axe.legend(loc='upper right', fontsize=10)
-    axe.grid(color="gray", linewidth=.5)
+    axe.legend(loc='upper right')
 
     for hbar in bars:
-      hbar.set_alpha(ALPHA)
       hbar.set_color('springgreen')
       value = hbar.get_height()
       if 5 < value <= 9:
@@ -138,13 +124,11 @@ class OutLook:
 
   @staticmethod
   def draw_kindex(axe, dates, kindex):
-    bars = axe.bar(dates, kindex, color="springgreen", label='Max KP-index', zorder=2)
+    bars = axe.bar(dates, kindex, color="springgreen", label='Max KP-index', zorder=5)
     axe.set_ylim([0, kindex.max() * 1.25])
-    axe.legend(loc='upper right', fontsize=10)
-    axe.grid(color="black", linewidth=.5)
+    axe.legend(loc='upper right')
 
     for hbar in bars:
-      hbar.set_alpha(ALPHA)
       hbar.set_color('springgreen')
       value = hbar.get_height()
       if 3 <= value < 5:
@@ -154,30 +138,35 @@ class OutLook:
 
   @staticmethod
   def draw_flux(axe, dates, flux):
-    axe.plot(dates, flux, "navy", marker='.', linewidth=1.5, label='Flux')
+    axe.plot(dates, flux, marker='.', linewidth=1.5, label='Flux')
     axe.set_ylim([min(flux) / 1.2, max(flux) * 1.05])
-    axe.legend(loc='upper right', fontsize=10)
-    axe.axhspan(90, axe.get_yticks().max(), facecolor='springgreen', alpha=ALPHA / 2, label='Good')
-    axe.axhspan(70, 90, facecolor='orange', alpha=ALPHA / 2, label='Ok')
-    axe.axhspan(40, 70, facecolor='tomato', alpha=ALPHA / 2, label='Bad')
-    axe.grid(color="black", linewidth=.5)
+    axe.legend(loc='upper right')
 
 
 def main():
-  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config().get('outlookgraph', {})
-
-  parser = argparse.ArgumentParser()
-  parser.add_argument('names', help='Name of the graph', nargs="*", default=['/tmp/outlook.png'])
-  opts = parser.parse_args()
-
   cache_file = config.get('outlookgraph.cache_file', '/tmp/outlook.dat')
   cache_time = config.get('outlookgraph.cache_time', 43200)
+  target_dir = config.get('target_dir', '/var/www/html')
+
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
+                      help='Image path')
+  opts = parser.parse_args()
+
   outlook = OutLook(cache_file, cache_time)
   if not outlook.is_data():
     logger.warning('No data to graph')
     return os.EX_DATAERR
-  outlook.graph(opts.names)
+
+  styles = tools.STYLES
+  for style in styles:
+    with plt.style.context(style.style):
+      filename = opts.target.joinpath(f'outlook-{style.name}')
+      outlook.graph(filename)
+      if style.name == 'light':
+        tools.mk_link(filename, opts.target.joinpath('outlook'))
+
   return os.EX_OK
 
 

@@ -11,6 +11,7 @@ import argparse
 import json
 import logging
 import os
+import pathlib
 import pickle
 import sys
 import time
@@ -22,14 +23,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import MultipleLocator
 
+import tools
 from config import Config
 
 NOAA_URL = 'https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json'
 
-plt.style.use(['classic', 'fast'])
-
 logging.basicConfig(
   format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
+  level=logging.getLevelName(os.getenv('LOG_LEVEL', 'INFO'))
 )
 logger = logging.getLogger('pkiforecast')
 
@@ -54,7 +55,7 @@ class PKIForecast:
   def is_data(self):
     return bool(self.data)
 
-  def graph(self, filenames):
+  def graph(self, filename):
     # pylint: disable=too-many-locals,too-many-statements
     start_date = datetime.now(timezone.utc) - timedelta(days=3, hours=4)
     end_date = datetime.now(timezone.utc) + timedelta(days=1, hours=3)
@@ -63,8 +64,8 @@ class PKIForecast:
     observ = [d[2] for d in self.data if start_date < d[0] < end_date]
     labels = [d[3] for d in self.data if start_date < d[0] < end_date]
 
-    # colors #6efa7b #a7bb36 #aa7f28 #8c4d30 #582a2d
-    colors = ['#6efa7b'] * len(observ)
+    # colors #6efa7b #a7bbb36 #aa7f28 #8c4d30 #582a2d
+    colors = ['#8EBA42'] * len(observ)
     for pos, (obs, val) in enumerate(zip(observ, yvalues)):
       if obs == 'observed':
         if 4 <= val < 5:
@@ -78,24 +79,19 @@ class PKIForecast:
       elif obs == "estimated":
         colors[pos] = 'lightgrey'
       elif obs == "predicted":
-        colors[pos] = 'darkgrey'
+        colors[pos] = 'grey'
 
-    date = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
-    plt.rc('xtick', labelsize=10)
-    plt.rc('ytick', labelsize=10)
     fig = plt.figure(figsize=(12, 5))
-    fig.suptitle('Planetary K-Index Predictions', fontsize=14, fontweight='bold')
+    fig.suptitle('Planetary K-Index Predictions')
     axgc = plt.gca()
     bars = axgc.bar(xdates, yvalues, width=.1, linewidth=0.75, zorder=2, color=colors)
-    axgc.axhline(y=4, linewidth=1.5, zorder=1.5, color='red', label='Storm Threshold')
+    axgc.axhline(y=4, linewidth=1.5, zorder=1, color='red', label='Storm Threshold')
 
     for rect, label in ((a, b) for a, b in zip(*(bars, labels)) if labels):
       if not label:
         continue
-      color = 'red' if rect.get_height() > 5 else 'black'
-      fweight = 'bold' if rect.get_height() > 5 else 'normal'
       axgc.text(rect.get_x() + rect.get_width() / 2., .3, label, alpha=1,
-                color=color, fontweight=fweight, fontsize=10, ha='center')
+                color="#0f0f0f", ha='center')
 
     loc = mdates.DayLocator(interval=1)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
@@ -108,20 +104,12 @@ class PKIForecast:
 
     axgc.axhspan(0, 0, facecolor='lightgrey', alpha=1, label='Estimated')
     axgc.axhspan(0, 0, facecolor='darkgrey', alpha=1, label='Predicted')
-    axgc.legend(fontsize=10, loc="best", facecolor="linen", borderaxespad=1)
+    axgc.legend()
 
-    axgc.grid(color="gray", linestyle="dotted", linewidth=.5)
     axgc.margins(x=.01)
-
     fig.autofmt_xdate(rotation=10, ha="center")
 
-    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {date}', fontsize=8, style='italic')
-    for filename in filenames:
-      try:
-        plt.savefig(filename, transparent=False, dpi=100)
-        logger.info('Graph "%s" saved', filename)
-      except ValueError as err:
-        logger.error(err)
+    tools.save_plot(plt, filename)
     plt.close()
 
   def download(self):
@@ -157,21 +145,29 @@ class PKIForecast:
 
 
 def main():
-  logger.setLevel(os.getenv('LOG_LEVEL', 'INFO'))
   config = Config().get('pkiforecast', {})
-
-  parser = argparse.ArgumentParser()
-  parser.add_argument('names', help='Name of the graph', nargs="*",
-                      default=['/tmp/pkiforecast.png'])
-  opts = parser.parse_args()
-
   cache_file = config.get('cache_file', '/tmp/pkiforecast.pkl')
   cache_time = config.get('cache_time', 21600)
+  target_dir = config.get('target_dir', '/var/www/html')
+
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
+                      help='Image path')
+  opts = parser.parse_args()
+
   pki = PKIForecast(cache_file, cache_time)
   if not pki.is_data():
     logger.warning('No data to graph')
     return os.EX_DATAERR
-  pki.graph(opts.names)
+
+  styles = tools.STYLES
+  for style in styles:
+    with plt.style.context(style.style):
+      filename = opts.target.joinpath(f'pki-forecast-{style.name}')
+      pki.graph(filename)
+      if style.name == 'light':
+        tools.mk_link(filename, opts.target.joinpath('pki-forecast'))
+
   return os.EX_OK
 
 

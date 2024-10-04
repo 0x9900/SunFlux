@@ -10,6 +10,7 @@
 import argparse
 import logging
 import os
+import pathlib
 import sqlite3
 import sys
 from collections import deque
@@ -21,6 +22,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from PIL import Image
 
 import adapters
+import tools
 from config import Config
 
 CONTINENTS = ['AF', 'AS', 'EU', 'NA', 'OC', 'SA']
@@ -82,7 +84,7 @@ class ShowDXCC:
   def graph(self, filename):
     dmax = np.max(self.data)
     color_map = ShowDXCC.mk_colormap()  # self.config.get('showdxcc.color_map', 'PRGn')
-    fig, axgc = plt.subplots(figsize=(12, 8), facecolor='white')
+    fig, axgc = plt.subplots(figsize=(12, 8))
 
     # axgc.set_facecolor('#001155')
     # Show all ticks and label them with the respective list entries
@@ -111,10 +113,9 @@ class ShowDXCC:
     #   color = 'white' if self.data[i, j] < threshold else 'black'
     #   axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
 
-    axgc.grid(color="cyan", linestyle="dashed", linewidth=.5, alpha=.75)
+    axgc.grid(linestyle="dashed", linewidth=.5, alpha=.75)
     axgc.set_title(f"HF Propagation from {self.zone_name} = {self.zone}",
                    fontsize=16, fontweight='bold')
-    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {self.today}', fontsize=10, style='italic')
     fig.text(0.72, .95, f'{self.date.strftime("%a %b %d %Y - %H:%M %Z")}', fontsize=14)
     fig.tight_layout()
     logging.info('Save "%s"', filename)
@@ -147,36 +148,54 @@ def type_date(parg):
   return date
 
 
-def create_link(filename):
-  path, fname = os.path.split(filename)
-  fname, ext = os.path.splitext(fname)
-  latest = os.path.join(path, f'latest{ext}')
-  if os.path.exists(latest):
-    os.unlink(latest)
-  os.link(filename, latest)
-  logging.info('Link to "%s" created', latest)
+def create_link(filename, target):
+  if os.path.exists(target):
+    os.unlink(target)
+  os.link(filename, target)
+  logging.info('Link to "%s" created', target)
 
 
-def webp(filename):
-  path, _ = os.path.split(filename)
-  webpfile = os.path.join(path, 'latest.webp')
+def webp(filename, theme_name):
+  webpname = f'latest-{theme_name}'
+  path = filename.parent
+  webpfile = path.joinpath(f'{webpname}.webp')
   image = Image.open(filename)
   image = image.resize((800, 530))
   image.save(webpfile, format='webp')
   logging.info('Image "%s" created', webpfile)
+  if theme_name == 'light':
+    create_link(webpfile, path.joinpath('latest.png'))
 
 
-def mk_thumbnail(filename):
-  path, _ = os.path.split(filename)
+def mk_thumbnail(filename, theme_name):
+  path = filename.parent
   image = Image.open(filename)
   image.thumbnail((600, 400))
   for fmt in ('png', 'webp'):
     try:
-      tn_file = os.path.join(path, f'tn_latest.{fmt}')
+      tn_file = path.joinpath(f'tn_latest-{theme_name}.{fmt}')
       image.save(tn_file, format=fmt, dpi=(100, 100))
       logging.info('Thumbnail "%s" created', tn_file)
     except ValueError as err:
       logging.error(err)
+
+    if theme_name == 'light':
+      create_link(tn_file, path.joinpath(f'tn_latest.{fmt}'))
+
+
+def save_graphs(dxcc, target_dir, zone_name, zone, now):
+  name_tmpl = f'dxcc-{zone_name}{zone}-{now}-{{name}}.png'
+  styles = tools.STYLES
+  for style in styles:
+    with plt.style.context(style.style):
+      filename = target_dir.joinpath(name_tmpl.format(name=style.name))
+      dxcc.graph(filename)
+      webp(filename, style.name)
+      mk_thumbnail(filename, style.name)
+      create_link(filename, target_dir.joinpath(f'latest-{style.name}.png'))
+      if style.name == 'light':
+        create_link(filename, target_dir.joinpath(f'dxcc-{zone_name}{zone}-{now}.png'))
+        create_link(filename, target_dir.joinpath('latest.png'))
 
 
 def main():
@@ -205,29 +224,24 @@ def main():
   parser.add_argument('args', nargs="*")
   opts = parser.parse_args()
 
-  if opts.args:
-    filename = opts.args.pop()
-
   for zone_name in ('continent', 'ituzone', 'cqzone'):
     zone = str(getattr(opts, zone_name) or '')
     if zone:
       break
 
-  now = opts.date.strftime("%Y%m%dT%H%M%S")
-  if not filename:
-    target_root = config.get('showdxcc.target_dir', '/var/tmp/dxcc')
-    target_dir = os.path.join(target_root, zone_name, zone)
-    os.makedirs(target_dir, exist_ok=True)
-    filename = os.path.join(target_dir, f'dxcc-{zone_name}{zone}-{now}.png')
-
   showdxcc = ShowDXCC(config, zone_name, zone, opts.date)
   showdxcc.get_dxcc(opts.delta)
-  showdxcc.graph(filename)
-  if opts.no_link is False:
-    webp(filename)
-    create_link(filename)
-  if opts.thumbnail:
-    mk_thumbnail(filename)
+
+  if opts.args:
+    filename = pathlib.Path(opts.args.pop())
+    showdxcc.graph(filename)
+    return os.EX_OK
+
+  now = opts.date.strftime("%Y%m%dT%H%M%S")
+  target_root = pathlib.Path(config.get('showdxcc.target_dir', '/var/tmp/dxcc'))
+  target_dir = target_root.joinpath(zone_name, zone)
+  target_dir.mkdir(parents=True, exist_ok=True)
+  save_graphs(showdxcc, target_dir, zone_name, zone, now)
 
   return os.EX_OK
 
