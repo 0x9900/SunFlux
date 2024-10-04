@@ -32,6 +32,23 @@ from config import Config
 DRAP_URL = 'https://services.swpc.noaa.gov/text/drap_global_frequencies.txt'
 MAX_FREQUENCY = 36
 
+MAP_COLORS = {
+  'light': {
+    'land': 'wheat',
+    'ocean': 'lavender',
+    'coastlines': 'brown',
+    'grid': 'lightgray',
+    'colors': ['lavender', '#2989d8', '#99aaaa', '#ffff00', '#bb0000'],
+  },
+  'dark': {
+    'land': '#000000',
+    'ocean': '#0d1522',
+    'coastlines': '#e0e0e0',
+    'grid': 'lightgray',
+    'colors': ['#0d1117', '#2989d8', '#99aaaa', '#ffff00', '#bb0000'],
+  },
+}
+
 # Silence matplotlib debug messages
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
@@ -122,9 +139,9 @@ class Drap:
       pickle.dump(dlayer, fd_cache)
 
   def print_info(self, fig):
+    date = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
     fig.text(0.72, .11, f'{self.prod_date.strftime("%a %b %d %Y - %H:%M %Z")}', fontsize=8)
-    fig.text(0.01, 0.02, f'SunFlux (c) {self.prod_date.strftime("%Y")} W6BSD',
-             fontsize=8, style='italic')
+    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {date}', fontsize=8, style='italic')
     for nbr, key in enumerate(("proton", "xray")):
       if msg := getattr(self, key):
         fig.text(0.125, 0.12 - (0.03 * nbr), msg, fontsize=8)
@@ -139,10 +156,11 @@ class Drap:
     # Draw the data
     lon, lat = np.meshgrid(self.lon, self.lat)
     clevels = np.arange(self.data.min() + 1, MAX_FREQUENCY + 1)
-    dmap.contourf(lon, lat, self.data, clevels, vmax=MAX_FREQUENCY, cmap=self.mk_colormap())
+    dmap.contourf(lon, lat, self.data, clevels, vmax=MAX_FREQUENCY,
+                  cmap=self.mk_colormap(style))
 
     self.draw_colorbar(dmap, self.data.max())
-    self.draw_elements(dmap)
+    self.draw_elements(dmap, style)
     tools.save_plot(plt, filename)
 
     plt.close()
@@ -158,30 +176,23 @@ class Drap:
       cbar.ax.annotate('Max', xy=(0, lpos), xytext=(0, lpos), fontsize=8)
 
   @staticmethod
-  def draw_elements(fig):
-    fig.drawparallels([-66.33, -23.5, 0, 23.5, 66.33], linewidth=.5, color='gray', dashes=[2, 2])
-    fig.drawmeridians([-90, 0, 90], linewidth=.5, color='gray', dashes=[2, 2])
-    fig.drawcoastlines(linewidth=.6, color='brown')
-    fig.drawlsmask(land_color='tan', ocean_color='azure', lakes=False)
+  def draw_elements(fig, style):
+    colors = MAP_COLORS[style.name]
+
+    fig.drawparallels([-66.33, -23.5, 0, 23.5, 66.33], linewidth=.5,
+                      color=colors['grid'], dashes=[2, 2])
+    fig.drawmeridians([-90, 0, 90], linewidth=.5, color=colors['grid'], dashes=[2, 2])
+    fig.drawcoastlines(linewidth=.6, color=colors['coastlines'])
+    fig.drawlsmask(land_color=colors['land'], ocean_color=colors['ocean'], lakes=False)
 
   @staticmethod
-  def mk_colormap():
-    colors = ['#f0f0f0', '#2989d8', '#99aaaa', '#ffff00', '#bb0000']
+  def mk_colormap(style):
+    colors = MAP_COLORS[style.name]['colors']
     pos = [0.0, 0.2, 0.4, 0.6, 1.0]
     cmap_name = 'my_cmap'
     n_bins = MAX_FREQUENCY
     cmap = LinearSegmentedColormap.from_list(cmap_name, list(zip(pos, colors)), N=n_bins)
     return cmap
-
-
-def mk_link(src, dst):
-  for ext in tools.EXTENTIONS:
-    src_img = src.with_suffix(ext)
-    dst_img = dst.with_suffix(ext)
-    if dst_img.exists():
-      dst_img.unlink()
-    os.link(src_img, dst_img)
-    logging.info('Lint %s ->  %s', src_img, dst_img)
 
 
 def main():
