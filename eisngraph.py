@@ -123,8 +123,7 @@ class EISN:
     axgc.fill_between(x, y - error, y + error, facecolor=style.colors[2], alpha=1.0,
                       linewidth=.75, edgecolor='gray')
 
-    axgc.legend(['EISN', 'Average', 'Valid Data', 'Entries'], loc='best',
-                borderaxespad=1, ncol=2)
+    axgc.legend(['EISN', 'Average', 'Valid Data', 'Entries'], ncol=2)
 
     loc = mdates.DayLocator(interval=int(1 + len(x) / 11))
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))

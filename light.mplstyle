@@ -1,47 +1,45 @@
 # from https://everyhue.me/posts/sane-color-scheme-for-matplotlib/
 
-patch.linewidth: 0.5
-patch.facecolor: 348ABD  # blue
-patch.edgecolor: EEEEEE
 patch.antialiased: True
+patch.edgecolor: eeeeee
+patch.facecolor: 348abd  # blue
+patch.linewidth: 0.5
 
 font.size: 12.0
 font.family: sans-serif
 font.sans-serif: Helvetica, Helvetica Neue, Arial, DejaVu Sans, Bitstream Vera Sans, sans-serif
 
-axes.facecolor: E5E5E5
-axes.edgecolor: white
-axes.linewidth: 1
-axes.grid: True
-axes.titlesize: x-large
-axes.labelsize: large
-axes.labelcolor: 555555
 axes.axisbelow: True       # grid/ticks are below elements (e.g., lines, text)
+axes.edgecolor: white
+axes.facecolor: e5e5e5
+axes.grid: True
+axes.labelcolor: 555555
+axes.labelsize: large
+axes.linewidth: 1
+axes.titlesize: x-large
 
 axes.prop_cycle: cycler('color', ['E24A33', '348ABD', '988ED5', '777777', 'FBC15E', '8EBA42', 'FFB5B8'])
-                   # E24A33 : red
-                   # 348ABD : blue
-                   # 988ED5 : purple
-                   # 777777 : gray
-                   # FBC15E : yellow
-                   # 8EBA42 : green
-                   # FFB5B8 : pink
+       # E24A33 : red # 348ABD : blue # 988ED5 : purple # 777777 : gray # FBC15E : yellow # 8EBA42 : green # FFB5B8 : pink
 
 xtick.color: 555555
 xtick.direction: out
 xtick.labelsize: 10
-
 ytick.color: 555555
 ytick.direction: out
 ytick.labelsize: 10
 
-grid.color: white
-grid.linestyle: -    # solid line
+grid.color: f5f5f5
+grid.linestyle: solid
 
 figure.facecolor: white
-figure.edgecolor: 0.50
+figure.edgecolor: white
 
 legend.frameon: True
 legend.numpoints: 1
 legend.scatterpoints: 1
+legend.borderaxespad: 1
 legend.fontsize: small
+legend.loc: best
+legend.facecolor: inherit
+legend.edgecolor: 0.4
+legend.borderpad: 0.5

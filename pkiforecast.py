@@ -90,10 +90,8 @@ class PKIForecast:
     for rect, label in ((a, b) for a, b in zip(*(bars, labels)) if labels):
       if not label:
         continue
-      color = 'red' if rect.get_height() > 5 else 'black'
-      fweight = 'bold' if rect.get_height() > 5 else 'normal'
       axgc.text(rect.get_x() + rect.get_width() / 2., .3, label, alpha=1,
-                color=color, fontweight=fweight, ha='center')
+                color="#0f0f0f", ha='center')
 
     loc = mdates.DayLocator(interval=1)
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
@@ -106,7 +104,7 @@ class PKIForecast:
 
     axgc.axhspan(0, 0, facecolor='lightgrey', alpha=1, label='Estimated')
     axgc.axhspan(0, 0, facecolor='darkgrey', alpha=1, label='Predicted')
-    axgc.legend(loc="best", borderaxespad=1)
+    axgc.legend()
 
     axgc.margins(x=.01)
     fig.autofmt_xdate(rotation=10, ha="center")

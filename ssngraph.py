@@ -140,7 +140,7 @@ class SSN:
                    ha='center', fontsize=8, color=style.arrows[0],
                    arrowprops={"arrowstyle": "->", "color": style.arrows[0]})
 
-    axgc.legend(['Sun spot', '5day average', '10.7cm Flux'], loc='best')
+    axgc.legend(['Sun spot', '5day average', '10.7cm Flux'])
     axgc.margins(.01)
     fig.autofmt_xdate(rotation=10, ha="center")
 

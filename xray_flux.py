@@ -150,7 +150,7 @@ class XRayFlux:
     handles, labels = ax.get_legend_handles_labels()
 
     unique = OrderedDict(sorted(zip(labels, handles), key=lambda x: x[0]))
-    ax.legend(unique.values(), unique.keys(), loc='upper left', borderpad=1, borderaxespad=1)
+    ax.legend(unique.values(), unique.keys(), loc='upper left')
 
     tools.save_plot(plt, filename)
     plt.close()

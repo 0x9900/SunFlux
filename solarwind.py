@@ -139,6 +139,8 @@ class SolarWind:
       ax[i].tick_params(axis='both', which='major', labelsize=8)
       ax[i].xaxis.set_major_formatter(mdates.DateFormatter('%m/%d %HH'))
       ax[i].xaxis.set_major_locator(loc)
+      if i < 2:
+        ax[i].tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
 
     tools.save_plot(plt, filename)
     plt.close()
