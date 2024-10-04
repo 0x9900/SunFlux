@@ -124,8 +124,8 @@ def mk_link(src, dst):
     logger.info('Link %s ->  %s', src_img, dst_img)
 
 
-def save_plot(plt, filename):
-  fig = plt.gcf()
+def save_plot(plot, filename):
+  fig = plot.gcf()
   today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
   fig.text(0.01, 0.02, f'SunFlux (c) W6BSD {today}', fontsize=8, style='italic')
   if not filename.parent.exists():
@@ -134,7 +134,7 @@ def save_plot(plt, filename):
   for ext in EXTENTIONS:
     fname = filename.with_suffix(ext)
     try:
-      plt.savefig(fname, transparent=False, dpi=100)
+      plot.savefig(fname, transparent=False, dpi=100)
       logger.info('Graph "%s" saved', fname)
     except (FileNotFoundError, ValueError) as err:
       logger.error(err)

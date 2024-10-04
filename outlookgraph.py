@@ -68,7 +68,7 @@ class OutLook:
   def is_data(self):
     return bool(self.data)
 
-  def graph(self, filename, style):
+  def graph(self, filename):
     # pylint: disable=too-many-locals
     data = np.array(self.data)
     dates = data[:, 0]
@@ -163,7 +163,7 @@ def main():
   for style in styles:
     with plt.style.context(style.style):
       filename = opts.target.joinpath(f'outlook-{style.name}')
-      outlook.graph(filename, style)
+      outlook.graph(filename)
       if style.name == 'light':
         tools.mk_link(filename, opts.target.joinpath('outlook'))
 

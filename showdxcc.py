@@ -185,16 +185,17 @@ def mk_thumbnail(filename, theme_name):
 
 def save_graphs(dxcc, target_dir, zone_name, zone, now):
   name_tmpl = f'dxcc-{zone_name}{zone}-{now}-{{name}}.png'
-  for set_theme in (tools.set_light_theme, tools.set_dark_theme):
-    theme_name = set_theme()
-    filename = target_dir.joinpath(name_tmpl.format(name=theme_name))
-    dxcc.graph(filename)
-    webp(filename, theme_name)
-    mk_thumbnail(filename, theme_name)
-    create_link(filename, target_dir.joinpath(f'latest-{theme_name}.png'))
-    if theme_name == 'light':
-      create_link(filename, target_dir.joinpath(f'dxcc-{zone_name}{zone}-{now}.png'))
-      create_link(filename, target_dir.joinpath('latest.png'))
+  styles = tools.STYLES
+  for style in styles:
+    with plt.style.context(style.style):
+      filename = target_dir.joinpath(name_tmpl.format(name=style.name))
+      dxcc.graph(filename)
+      webp(filename, style.name)
+      mk_thumbnail(filename, style.name)
+      create_link(filename, target_dir.joinpath(f'latest-{style.name}.png'))
+      if style.name == 'light':
+        create_link(filename, target_dir.joinpath(f'dxcc-{zone_name}{zone}-{now}.png'))
+        create_link(filename, target_dir.joinpath('latest.png'))
 
 
 def main():

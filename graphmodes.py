@@ -74,7 +74,7 @@ def sizeof_fmt(num, _):
   return f"{num:.1f}"
 
 
-def graph(data, filename, style):
+def graph(data, filename):
   xdate = np.array(list(data.keys()))
   modes = sorted({k for d in data.values() for k in d})
   ydata = defaultdict(list)
@@ -89,7 +89,7 @@ def graph(data, filename, style):
   ax1.set_ylabel('Sports / Day')
   ax1.margins(x=0.01, y=0.02)
   prev = np.zeros(len(xdate))
-  for idx, mode in enumerate(modes):
+  for mode in modes:
     value = np.array(ydata[mode], dtype=float)
     ax1.bar(xdate, value, label=mode, bottom=prev, alpha=.8, zorder=10)
     prev += value
@@ -125,7 +125,7 @@ def main():
   for style in styles:
     with plt.style.context(style.style):
       filename = opts.target.joinpath(f'modes-{opts.days}-{style.name}')
-      graph(data, filename, style)
+      graph(data, filename)
       if style.name == 'light' and opts.days == 15:
         tools.mk_link(filename, opts.target.joinpath('modes'))
 

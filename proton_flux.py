@@ -103,7 +103,7 @@ class ProtonFlux:
   def is_data(self):
     return bool(self.data)
 
-  def graph(self, filename, style):
+  def graph(self, filename):
     # pylint: disable=too-many-locals
     energy = (10, 30, 50, 100)  # Graphs to plot
     colors = {10: "tab:orange", 30: "tab:olive", 50: "tab:blue", 100: "tab:cyan"}
@@ -170,7 +170,7 @@ def main():
   for style in styles:
     with plt.style.context(style.style):
       filename = opts.target.joinpath(f'proton_flux-{style.name}')
-      p_f.graph(filename, style)
+      p_f.graph(filename)
       if style.name == 'light':
         tools.mk_link(filename, opts.target.joinpath('proton_flux'))
   return os.EX_OK

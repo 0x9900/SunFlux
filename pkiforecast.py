@@ -55,7 +55,7 @@ class PKIForecast:
   def is_data(self):
     return bool(self.data)
 
-  def graph(self, filename, style):
+  def graph(self, filename):
     # pylint: disable=too-many-locals,too-many-statements
     start_date = datetime.now(timezone.utc) - timedelta(days=3, hours=4)
     end_date = datetime.now(timezone.utc) + timedelta(days=1, hours=3)
@@ -166,7 +166,7 @@ def main():
   for style in styles:
     with plt.style.context(style.style):
       filename = opts.target.joinpath(f'pki-forecast-{style.name}')
-      pki.graph(filename, style)
+      pki.graph(filename)
       if style.name == 'light':
         tools.mk_link(filename, opts.target.joinpath('pki-forecast'))
 

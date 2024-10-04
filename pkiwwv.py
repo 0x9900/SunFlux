@@ -115,7 +115,7 @@ def get_wwv(config):
   return data
 
 
-def graph(data, condition, filename, style):
+def graph(data, condition, filename):
   # pylint: disable=too-many-locals
   values = np.full((len(data), 3), np.nan, dtype=object)
   for i, row in enumerate(data.values()):
@@ -200,9 +200,11 @@ def main():
   for style in styles:
     with plt.style.context(style.style):
       filename = opts.target.joinpath(f'pkindex-{style.name}')
-      graph(data, condition, filename, style)
+      graph(data, condition, filename)
       if style.name == 'light':
         tools.mk_link(filename, opts.target.joinpath('pkindex'))
+
+  return os.EX_OK
 
 
 if __name__ == "__main__":

@@ -222,7 +222,7 @@ def main():
     path.mkdir(parents=True, exist_ok=True)
   except FileExistsError as err:
     logging.error(err)
-    raise SystemExit(err)
+    raise SystemExit(err) from None
 
   styles = tools.STYLES
   for style in styles:
