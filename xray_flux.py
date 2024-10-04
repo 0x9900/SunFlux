@@ -181,7 +181,9 @@ def main():
     with plt.style.context(style.style):
       filename = opts.target.joinpath(f'xray_flux{opts.days}-{style.name}')
       xray.graph(filename, style)
-      if style.name == 'light' and opts.days == '3':
+      if opts.days == '3':
+        tools.mk_link(filename, opts.target.joinpath(f'xray_flux-{style.name}'))
+      if style.name == 'light':
         tools.mk_link(filename, opts.target.joinpath('xray_flux'))
 
   return os.EX_OK
