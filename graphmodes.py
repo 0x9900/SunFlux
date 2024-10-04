@@ -75,7 +75,6 @@ def sizeof_fmt(num, _):
 
 
 def graph(data, filename, style):
-  now = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
   xdate = np.array(list(data.keys()))
   modes = sorted({k for d in data.values() for k in d})
   ydata = defaultdict(list)
@@ -87,7 +86,6 @@ def graph(data, filename, style):
 
   fig, ax1 = plt.subplots(figsize=(12, 5))
   fig.suptitle('Band Activity / Modes')
-  fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {now}', fontsize=8, style='italic')
   ax1.set_ylabel('Sports / Day')
   ax1.margins(x=0.01, y=0.02)
   prev = np.zeros(len(xdate))

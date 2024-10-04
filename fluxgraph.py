@@ -121,7 +121,6 @@ def graph(data, filename, style, trend_week=3):
   poly = np.poly1d(np.polyfit(x[idx], y[idx], 1))
   avg = moving_average(arr[:, 1], 7)
 
-  date = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('Daily 10cm Flux Index')
   axgc = plt.gca()
@@ -161,7 +160,6 @@ def graph(data, filename, style, trend_week=3):
   axgc.margins(x=.015)
 
   fig.autofmt_xdate(rotation=10, ha="center")
-  fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {date}', fontsize=8, style='italic')
 
   tools.save_plot(plt, filename)
   plt.close()

@@ -15,7 +15,7 @@ import pathlib
 import pickle
 import sys
 import time
-from datetime import date, datetime, timezone
+from datetime import date
 from urllib.request import urlopen
 
 import matplotlib.dates as mdates
@@ -109,10 +109,8 @@ class EISN:
     vdata = data[:, 4].astype(np.float64)
     cdata = data[:, 5].astype(np.float64)
 
-    today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
     fig = plt.figure(figsize=(12, 5))
     fig.suptitle('Estimated International Sunspot Number (EISN)')
-    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {today}', fontsize=8, style='italic')
     axgc = plt.gca()
     axgc.tick_params(labelsize=10)
     axgc.plot(x, y, color=style.colors[0])

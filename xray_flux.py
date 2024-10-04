@@ -19,7 +19,6 @@ import time
 import urllib.request
 import warnings
 from collections import OrderedDict
-from datetime import datetime, timezone
 from urllib.parse import urlparse
 
 import matplotlib.dates as mdates
@@ -153,8 +152,6 @@ class XRayFlux:
     unique = OrderedDict(sorted(zip(labels, handles), key=lambda x: x[0]))
     ax.legend(unique.values(), unique.keys(), loc='upper left', borderpad=1, borderaxespad=1)
 
-    today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
-    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {today}', fontsize=8, style='italic')
     tools.save_plot(plt, filename)
     plt.close()
 

@@ -81,7 +81,6 @@ class PKIForecast:
       elif obs == "predicted":
         colors[pos] = 'grey'
 
-    date = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
     fig = plt.figure(figsize=(12, 5))
     fig.suptitle('Planetary K-Index Predictions')
     axgc = plt.gca()
@@ -111,7 +110,6 @@ class PKIForecast:
 
     axgc.margins(x=.01)
     fig.autofmt_xdate(rotation=10, ha="center")
-    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {date}', fontsize=8, style='italic')
 
     tools.save_plot(plt, filename)
     plt.close()

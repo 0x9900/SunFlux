@@ -104,10 +104,8 @@ def graph(histo, predic, filename, style, year=1961):
   hvals = np.array([d['smoothed_ssn_max'] for d in predic if d['time-tag'] < end_date])
   pavg = np.array([d['ssn'] for d in predic if d['time-tag'] < end_date])
 
-  today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle(f'SunSpot Numbers from {year} to {last_date}')
-  fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {today}', fontsize=8, style='italic')
 
   axis = plt.gca()
   axis.plot(xdates, yvals, label='Sun Spots', zorder=4, color=style.colors[0], linewidth=0.75)

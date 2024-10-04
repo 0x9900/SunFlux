@@ -140,10 +140,8 @@ def graph(data, condition, filename, style):
     elif val >= 8:
       colors[pos] = '#582a2d'
 
-  today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('Planetary K-Index')
-  fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {today}', fontsize=8, style='italic')
   if condition:
     box = {"facecolor": 'white', "alpha": 0.75, "linewidth": 0}
     fig.text(0.136, 0.68, "Forecast: " + condition, fontsize=10, zorder=4,

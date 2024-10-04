@@ -139,9 +139,7 @@ class Drap:
       pickle.dump(dlayer, fd_cache)
 
   def print_info(self, fig):
-    date = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
     fig.text(0.72, .11, f'{self.prod_date.strftime("%a %b %d %Y - %H:%M %Z")}', fontsize=8)
-    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {date}', fontsize=8, style='italic')
     for nbr, key in enumerate(("proton", "xray")):
       if msg := getattr(self, key):
         fig.text(0.125, 0.12 - (0.03 * nbr), msg, fontsize=8)

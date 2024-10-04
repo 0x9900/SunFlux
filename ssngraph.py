@@ -14,7 +14,7 @@ import pathlib
 import pickle
 import sys
 import time
-from datetime import date, datetime, timezone
+from datetime import date
 from itertools import cycle
 from urllib.request import urlopen
 
@@ -117,10 +117,8 @@ class SSN:
     flux = data[:, 1]
     avg = moving_average(ssn)
 
-    today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
     fig = plt.figure(figsize=(12, 5))
     fig.suptitle('Sunspot Number (SSN)')
-    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {today}', fontsize=8, style='italic')
     axgc = plt.gca()
     axgc.plot(xtime, ssn, marker='o', markersize=7, linewidth=1)
     axgc.plot(xtime, flux, linestyle='-.', linewidth=1)

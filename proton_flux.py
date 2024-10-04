@@ -19,7 +19,6 @@ import sys
 import time
 import urllib.request
 import warnings
-from datetime import datetime, timezone
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
@@ -147,8 +146,6 @@ class ProtonFlux:
       else:
         line.set_linewidth(2)
 
-    today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
-    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {today}', fontsize=8, style='italic')
     tools.save_plot(plt, filename)
     plt.close()
 

@@ -163,13 +163,17 @@ def graph(data, condition, filename, style):
     elif val >= 100:
       colors[pos] = style.colors[7]
 
-  today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('A-Index')
-  fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {today}', fontsize=8, style='italic')
   if condition:
-    fig.text(0.22, 0.82, "Forecast: " + condition, fontsize=10,
-             color='red', fontweight='bold', zorder=4)
+    if style.name == 'light':
+      tbox = fig.text(0.22, 0.82, "Forecast: " + condition, fontsize=10,
+                      color='crimson', fontweight='bold', zorder=4)
+      tbox.set_bbox({'facecolor': 'ivory', 'edgecolor': 'none'})
+    else:
+      tbox = fig.text(0.22, 0.82, "Forecast: " + condition, fontsize=10,
+                      color='ivory', fontweight='bold', zorder=4)
+      tbox.set_bbox({'facecolor': 'crimson', 'edgecolor': 'none'})
 
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)

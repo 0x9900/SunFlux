@@ -30,10 +30,3 @@ legend.frameon: True
 legend.numpoints: 1
 legend.scatterpoints: 1
 legend.fontsize: small
-
-## Boxplots
-boxplot.boxprops.color: e5e5e5
-boxplot.capprops.color: e5e5e5
-boxplot.flierprops.color: e5e5e5
-boxplot.flierprops.markeredgecolor: e5e5e5
-boxplot.whiskerprops.color: e5e5e5

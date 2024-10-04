@@ -14,7 +14,7 @@ import pathlib
 import sys
 import time
 from collections import namedtuple
-from datetime import datetime, timezone
+from datetime import datetime
 from urllib.request import urlretrieve
 
 import matplotlib.dates as mdates
@@ -75,7 +75,6 @@ class OutLook:
     flux = data[:, 1]
     aindex = data[:, 2]
     kindex = data[:, 3]
-    now = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
 
     fig = plt.figure(figsize=(12, 5))
     ax1 = plt.subplot(222)
@@ -105,7 +104,6 @@ class OutLook:
         plot.axvspan(mdates.date2num(day), mdates.date2num(day) + 1, alpha=0.1)
 
     plt.subplots_adjust(top=0.91, bottom=0.15)
-    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {now}', fontsize=8, style='italic')
 
     tools.save_plot(plt, filename)
     plt.close()

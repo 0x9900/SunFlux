@@ -125,6 +125,9 @@ def mk_link(src, dst):
 
 
 def save_plot(plt, filename):
+  fig = plt.gcf()
+  today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
+  fig.text(0.01, 0.02, f'SunFlux (c) W6BSD {today}', fontsize=8, style='italic')
   if not filename.parent.exists():
     logger.error('[Errno 2] No such file or directory: %s', filename.parent)
     return
@@ -135,3 +138,5 @@ def save_plot(plt, filename):
       logger.info('Graph "%s" saved', fname)
     except (FileNotFoundError, ValueError) as err:
       logger.error(err)
+
+#

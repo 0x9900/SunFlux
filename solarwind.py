@@ -17,7 +17,7 @@ import sys
 import time
 import urllib.request
 import warnings
-from datetime import datetime, timezone
+from datetime import datetime
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
@@ -140,8 +140,6 @@ class SolarWind:
       ax[i].xaxis.set_major_formatter(mdates.DateFormatter('%m/%d %HH'))
       ax[i].xaxis.set_major_locator(loc)
 
-    today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M %Z')
-    fig.text(0.01, 0.02, f'SunFlux (c)W6BSD {today}', fontsize=8, style='italic')
     tools.save_plot(plt, filename)
     plt.close()
 
