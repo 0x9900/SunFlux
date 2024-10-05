@@ -144,11 +144,11 @@ def graph(data, condition, filename, style):
   fig.suptitle('Planetary K-Index')
   if condition:
     if style.name == 'light':
-      tbox = fig.text(0.29, 0.81, "Forecast: " + condition, fontsize=10,
+      tbox = fig.text(0.30, 0.81, "Forecast: " + condition, fontsize=10,
                       color='crimson', fontweight='bold', zorder=4)
       tbox.set_bbox({'facecolor': 'ivory', 'edgecolor': 'none'})
     else:
-      tbox = fig.text(0.29, 0.81, "Forecast: " + condition, fontsize=10,
+      tbox = fig.text(0.30, 0.81, "Forecast: " + condition, fontsize=10,
                       color='ivory', fontweight='bold', zorder=4)
       tbox.set_bbox({'facecolor': 'crimson', 'edgecolor': 'none'})
 
