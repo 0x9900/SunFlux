@@ -106,7 +106,6 @@ class PKIForecast:
     axgc.axhspan(0, 0, facecolor='darkgrey', alpha=1, label='Predicted')
     axgc.legend()
 
-    axgc.margins(x=.01)
     fig.autofmt_xdate(rotation=10, ha="center")
 
     tools.save_plot(plt, filename)

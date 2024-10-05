@@ -194,7 +194,6 @@ def graph(data, condition, filename, style):
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
   axgc.set_ylim(0, data[:, MAX].max() * 1.1)
   axgc.set_ylabel('A-Index')
-  axgc.margins(.01)
 
   axgc.legend(['Max', 'Min'], loc='upper left')
 

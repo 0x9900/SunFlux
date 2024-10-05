@@ -120,15 +120,14 @@ class SSN:
     fig = plt.figure(figsize=(12, 5))
     fig.suptitle('Sunspot Number (SSN)')
     axgc = plt.gca()
-    axgc.plot(xtime, ssn, marker='o', markersize=7, linewidth=1)
-    axgc.plot(xtime, flux, linestyle='-.', linewidth=1)
-    axgc.plot(xtime, avg, linewidth=2, zorder=5)
+    axgc.plot(xtime, ssn, label="Sun spot", marker='o', markersize=7, linewidth=1)
+    axgc.plot(xtime, avg, label="5day average", linewidth=2, zorder=5)
+    axgc.plot(xtime, flux, label="10.7cm Flux", linestyle='-.', linewidth=1)
     loc = mdates.DayLocator(interval=int(1 + len(xtime) / 11))
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.DayLocator())
-    axgc.yaxis.set_major_locator(MultipleLocator(25))
-    axgc.yaxis.set_minor_locator(MultipleLocator(5))
+    axgc.yaxis.set_major_locator(MultipleLocator(50))
     axgc.set_ylabel('Sun Sport Number')
 
     axgc.set_ylim(np.min([ssn, flux]) * 0.2, np.max([ssn, flux]) * 1.15)
@@ -140,8 +139,7 @@ class SSN:
                    ha='center', fontsize=8, color=style.arrows[0],
                    arrowprops={"arrowstyle": "->", "color": style.arrows[0]})
 
-    axgc.legend(['Sun spot', '5day average', '10.7cm Flux'])
-    axgc.margins(.01)
+    axgc.legend()
     fig.autofmt_xdate(rotation=10, ha="center")
 
     tools.save_plot(plt, filename)

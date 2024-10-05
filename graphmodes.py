@@ -87,7 +87,6 @@ def graph(data, filename):
   fig, ax1 = plt.subplots(figsize=(12, 5))
   fig.suptitle('Band Activity / Modes')
   ax1.set_ylabel('Sports / Day')
-  ax1.margins(x=0.01, y=0.02)
   prev = np.zeros(len(xdate))
   for mode in modes:
     value = np.array(ydata[mode], dtype=float)

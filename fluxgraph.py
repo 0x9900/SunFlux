@@ -157,7 +157,6 @@ def graph(data, filename, style, trend_week=3):
   trend_legend = axgc.legend(handles=[trend, mave], loc='lower left')
   axgc.add_artist(trend_legend)
   axgc.legend(handles=[zone1, zone2, zone3], loc="upper left")
-  axgc.margins(x=.015)
 
   fig.autofmt_xdate(rotation=10, ha="center")
 

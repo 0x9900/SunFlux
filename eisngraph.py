@@ -130,7 +130,6 @@ class EISN:
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.DayLocator())
     axgc.set_ylim(0, y.max() * 1.2)
-    axgc.margins(.01)
     fig.autofmt_xdate(rotation=10, ha="center")
 
     tools.save_plot(plt, filename)

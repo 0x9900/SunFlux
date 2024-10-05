@@ -19,6 +19,8 @@ axes.labelcolor: e0ffe0
 axes.labelsize: large
 axes.linewidth: 1
 axes.titlesize: x-large
+axes.xmargin: .02
+axes.ymargin: .02
 
 xtick.major.size:  6               # major tick width in points
 ytick.major.size:  6               # major tick width in points

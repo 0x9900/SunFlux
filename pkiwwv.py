@@ -162,7 +162,6 @@ def graph(data, condition, filename):
 
   axgc.set_ylim(0, 9.5)
   axgc.set_ylabel('K-Index')
-  axgc.margins(.01)
 
   axgc.legend(['Min', 'Max', 'Storm Threshold'], loc='upper left')
   fig.autofmt_xdate(rotation=10, ha="center")

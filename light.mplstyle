@@ -17,6 +17,11 @@ axes.labelcolor: 555555
 axes.labelsize: large
 axes.linewidth: 1
 axes.titlesize: x-large
+axes.xmargin: .02
+axes.ymargin: .02
+
+xtick.major.size:  6               # major tick width in points
+ytick.major.size:  6               # major tick width in points
 
 axes.prop_cycle: cycler('color', ['E24A33', '348ABD', '988ED5', '777777', 'FBC15E', '8EBA42', 'FFB5B8'])
        # E24A33 : red # 348ABD : blue # 988ED5 : purple # 777777 : gray # FBC15E : yellow # 8EBA42 : green # FFB5B8 : pink
