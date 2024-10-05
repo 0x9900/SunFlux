@@ -115,7 +115,7 @@ def get_wwv(config):
   return data
 
 
-def graph(data, condition, filename):
+def graph(data, condition, filename, style):
   # pylint: disable=too-many-locals
   values = np.full((len(data), 3), np.nan, dtype=object)
   for i, row in enumerate(data.values()):
@@ -143,16 +143,23 @@ def graph(data, condition, filename):
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('Planetary K-Index')
   if condition:
-    box = {"facecolor": 'white', "alpha": 0.75, "linewidth": 0}
-    fig.text(0.136, 0.68, "Forecast: " + condition, fontsize=10, zorder=4,
-             fontweight='bold', color='red', bbox=box)
+    if style.name == 'light':
+      tbox = fig.text(0.28, 0.81, "Forecast: " + condition, fontsize=10,
+                      color='crimson', fontweight='bold', zorder=4)
+      tbox.set_bbox({'facecolor': 'ivory', 'edgecolor': 'none'})
+    else:
+      tbox = fig.text(0.28, 0.81, "Forecast: " + condition, fontsize=10,
+                      color='ivory', fontweight='bold', zorder=4)
+      tbox.set_bbox({'facecolor': 'crimson', 'edgecolor': 'none'})
 
   axgc = plt.gca()
-  axgc.plot(data[:, 0], data[:, 1], marker='v', linewidth=0, zorder=3, color="#988ED5")
+  axgc.plot(data[:, 0], data[:, 1], label="Min", marker='^', linewidth=0,
+            zorder=3, color="#988ED5")
+  axgc.plot(data[:, 0], data[:, 3], label="Max",  marker='v', linewidth=0,
+            zorder=4, color="#E24A33")
   axgc.bar(data[:, 0], data[:, 2], width=0.14, linewidth=0.75, zorder=2, color=colors)
-  axgc.plot(data[:, 0], data[:, 3], marker='^', linewidth=0, zorder=4, color="#E24A33")
 
-  axgc.axhline(y=4, linewidth=1.5, zorder=1, color='red', label='Threshold')
+  axgc.axhline(y=4, linewidth=1.5, zorder=1, color='mediumvioletred', label='Storm Threshold')
 
   loc = mdates.DayLocator(interval=1)
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
@@ -163,7 +170,8 @@ def graph(data, condition, filename):
   axgc.set_ylim(0, 9.5)
   axgc.set_ylabel('K-Index')
 
-  axgc.legend(['Min', 'Max', 'Storm Threshold'], loc='upper left')
+  axgc.legend(loc='upper left')
+  # axgc.legend(['Min', 'Max', 'Storm Threshold'], loc='upper left')
   fig.autofmt_xdate(rotation=10, ha="center")
 
   tools.save_plot(plt, filename)
@@ -199,7 +207,7 @@ def main():
   for style in styles:
     with plt.style.context(style.style):
       filename = opts.target.joinpath(f'pkindex-{style.name}')
-      graph(data, condition, filename)
+      graph(data, condition, filename, style)
       if style.name == 'light':
         tools.mk_link(filename, opts.target.joinpath('pkindex'))
 
