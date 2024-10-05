@@ -33,7 +33,7 @@ ytick.color: 555555
 ytick.direction: out
 ytick.labelsize: 10
 
-grid.color: f5f5f5
+grid.color: f0f0f0
 grid.linestyle: solid
 
 figure.facecolor: white
