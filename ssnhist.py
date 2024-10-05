@@ -122,8 +122,8 @@ def graph(histo, predic, filename, style, year=1961):
   axis.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
   axis.xaxis.set_major_locator(mdates.YearLocator(5, month=1, day=1))
   axis.xaxis.set_minor_locator(mdates.YearLocator())
-  axis.yaxis.set_major_locator(MultipleLocator(25))
-  axis.yaxis.set_minor_locator(MultipleLocator(5))
+  axis.yaxis.set_major_locator(MultipleLocator(50))
+  axis.yaxis.set_minor_locator(MultipleLocator(10))
 
   legend = axis.legend(loc='upper left')
   for line in legend.get_lines():
