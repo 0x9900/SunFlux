@@ -124,14 +124,14 @@ def mk_link(src, dst):
     logger.info('Link %s ->  %s', src_img, dst_img)
 
 
-def save_plot(plot, filename):
+def save_plot(plot, filename, extentions=EXTENTIONS):
   fig = plot.gcf()
-  today = datetime.now(timezone.utc).strftime('%Y/%m/%d %H:%M UTC')
-  fig.text(0.01, 0.02, f'SunFlux (c) W6BSD {today}', fontsize=8, style='italic')
+  today = datetime.now(timezone.utc).strftime('%Y')
+  fig.text(0.01, 0.02, f'\xa9 W6BSD {today} https://bsdworld.org/', fontsize=8, style='italic')
   if not filename.parent.exists():
     logger.error('[Errno 2] No such file or directory: %s', filename.parent)
     return
-  for ext in EXTENTIONS:
+  for ext in extentions:
     fname = filename.with_suffix(ext)
     try:
       plot.savefig(fname, transparent=False, dpi=100)

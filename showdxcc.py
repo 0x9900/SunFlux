@@ -88,10 +88,10 @@ class ShowDXCC:
 
     # axgc.set_facecolor('#001155')
     # Show all ticks and label them with the respective list entries
-    plt.xticks(np.arange(len(BANDS)), labels=BANDS, fontsize=14)
-    plt.xlabel("Bands", fontsize=14)
-    plt.yticks(np.arange(len(CONTINENTS)), labels=CONTINENTS, fontsize=14)
-    plt.ylabel("Destination", fontsize=14)
+    plt.xticks(np.arange(len(BANDS)), labels=BANDS)
+    plt.xlabel("Bands")
+    plt.yticks(np.arange(len(CONTINENTS)), labels=CONTINENTS)
+    plt.ylabel("Destination")
 
     timage = axgc.imshow(self.data, cmap=color_map)
     axgc.imshow(self.data, cmap=color_map,
@@ -102,8 +102,7 @@ class ShowDXCC:
 
     cbar = axgc.figure.colorbar(timage, ax=axgc, shrink=0.69, aspect=15, fraction=0.09,
                                 pad=0.02, ticks=[0, dmax / 2, dmax])
-    cbar.ax.set_yticklabels(['low', 'med', 'high'], fontsize=12)
-    cbar.ax.tick_params(labelsize=10)
+    cbar.ax.set_yticklabels(['low', 'med', 'high'])
 
     # Loop over data dimensions and create text annotations.
     # threshold = np.percentile(self.data, 70)
@@ -113,13 +112,11 @@ class ShowDXCC:
     #   color = 'white' if self.data[i, j] < threshold else 'black'
     #   axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
 
-    axgc.grid(linestyle="dashed", linewidth=.5, alpha=.75)
-    axgc.set_title(f"HF Propagation from {self.zone_name} = {self.zone}",
-                   fontsize=16, fontweight='bold')
-    fig.text(0.72, .95, f'{self.date.strftime("%a %b %d %Y - %H:%M %Z")}', fontsize=14)
+    axgc.grid(None)
+    axgc.set_title(f"HF Propagation from {self.zone_name} = {self.zone.strip('\"')}", y=1.1)
+    fig.text(0.72, .92, f'{self.date.strftime("%a %b %d %Y - %H:%M %Z")}')
     fig.tight_layout()
-    logging.info('Save "%s"', filename)
-    fig.savefig(filename, transparent=False, dpi=100)
+    tools.save_plot(plt, filename, ('.png',))
 
   @staticmethod
   def mk_colormap():
@@ -198,6 +195,14 @@ def save_graphs(dxcc, target_dir, zone_name, zone, now):
         create_link(filename, target_dir.joinpath('latest.png'))
 
 
+def find_zone(opts, *zone_names):
+  for zone_name in zone_names:
+    zone = str(getattr(opts, zone_name) or '')
+    if zone:
+      return zone_name, zone
+  raise ValueError(f'Zone "{zone}" not found')
+
+
 def main():
   adapters.install_adapters()
   config = Config()
@@ -224,11 +229,7 @@ def main():
   parser.add_argument('args', nargs="*")
   opts = parser.parse_args()
 
-  for zone_name in ('continent', 'ituzone', 'cqzone'):
-    zone = str(getattr(opts, zone_name) or '')
-    if zone:
-      break
-
+  zone_name, zone = find_zone(opts, 'continent', 'ituzone', 'cqzone')
   showdxcc = ShowDXCC(config, zone_name, zone, opts.date)
   showdxcc.get_dxcc(opts.delta)
 
