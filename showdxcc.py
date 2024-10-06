@@ -113,7 +113,7 @@ class ShowDXCC:
     #   axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
 
     axgc.grid(None)
-    zone = self.zone.strip('"')
+    zone = str(self.zone) if isinstance(self.zone, int) else self.zone.strip('"')
     axgc.set_title(f"HF Propagation from {self.zone_name} = {zone}", y=1.1)
     fig.text(0.72, .92, f'{self.date.strftime("%a %b %d %Y - %H:%M %Z")}')
     fig.tight_layout()
