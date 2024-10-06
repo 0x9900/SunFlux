@@ -113,7 +113,8 @@ class ShowDXCC:
     #   axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
 
     axgc.grid(None)
-    axgc.set_title(fr"HF Propagation from {self.zone_name} = {self.zone.strip('\"')}", y=1.1)
+    zone = self.zone.strip('"')
+    axgc.set_title(f"HF Propagation from {self.zone_name} = {zone}", y=1.1)
     fig.text(0.72, .92, f'{self.date.strftime("%a %b %d %Y - %H:%M %Z")}')
     fig.tight_layout()
     tools.save_plot(plt, filename, ('.png',))
