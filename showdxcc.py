@@ -112,7 +112,7 @@ class ShowDXCC:
     #   color = 'white' if self.data[i, j] < threshold else 'black'
     #   axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
 
-    axgc.grid(None)
+    axgc.grid(which='major', linestyle='-', color='darkgray', alpha=.5, linewidth=.5)
     zone = str(self.zone) if isinstance(self.zone, int) else self.zone.strip('"')
     axgc.set_title(f"HF Propagation from {self.zone_name} = {zone}", y=1.1)
     fig.text(0.72, .92, f'{self.date.strftime("%a %b %d %Y - %H:%M %Z")}')
