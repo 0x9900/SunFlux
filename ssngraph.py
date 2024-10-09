@@ -120,7 +120,7 @@ class SSN:
     fig = plt.figure(figsize=(12, 5))
     fig.suptitle('Sunspot Number (SSN)')
     axgc = plt.gca()
-    axgc.plot(xtime, ssn, label="Sun spot", marker='o', markersize=7, linewidth=1)
+    axgc.plot(xtime, ssn, label="Sun spot", marker='o', markersize=4, linewidth=1)
     axgc.plot(xtime, avg, label="5day average", linewidth=2, zorder=5)
     axgc.plot(xtime, flux, label="10.7cm Flux", linestyle='-.', linewidth=1)
     loc = mdates.DayLocator(interval=int(1 + len(xtime) / 11))
@@ -136,8 +136,8 @@ class SSN:
     sign = cycle([-1, 1])
     for _x, _y, _s in zip(xtime, ssn, sign):
       plt.annotate(f"{_y:d}", (_x, _y), textcoords="offset points", xytext=(0, 20 * _s),
-                   ha='center', fontsize=8, color=style.arrows[0],
-                   arrowprops={"arrowstyle": "->", "color": style.arrows[0]})
+                   ha='center', fontsize=8, color=style.top,
+                   arrowprops={"arrowstyle": "->", "color": style.top})
 
     axgc.legend()
     fig.autofmt_xdate(rotation=10, ha="center")

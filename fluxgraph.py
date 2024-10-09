@@ -124,9 +124,9 @@ def graph(data, filename, style, trend_week=3):
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('Daily 10cm Flux Index')
   axgc = plt.gca()
-  axgc.plot(x, y, linewidth=1, label='Flux', color=style.colors[4])
-  mave, = axgc.plot(x, avg, linewidth=1.5, linestyle=":", label='Daily Average',
-                    color=style.colors[5])
+  axgc.plot(x, y, linewidth=1, label='Flux', color=style.colors[3])
+  mave, = axgc.plot(x, avg, linewidth=2, linestyle=":", label='Daily Average',
+                    color=style.colors[8])
   trend, = axgc.plot(x[idx], poly(x[idx]), label=f'Trend ({trend_week} weeks)', linestyle='--',
                      color=style.colors[6], linewidth=1)
   axgc.tick_params(labelsize=10)
@@ -134,9 +134,9 @@ def graph(data, filename, style, trend_week=3):
   for pos in set([y.argmax(), y.argmin(), x.size - 1]):
     xytext = (20, 20) if pos == x.size - 1 else (20, -20)
     plt.annotate(f"{int(y[pos]):d}", (x[pos], y[pos]), textcoords="offset points", xytext=xytext,
-                 ha='center', fontsize=10, color=style.colors[6],
-                 arrowprops={'arrowstyle': 'wedge', 'color': style.colors[4]},
-                 bbox={'boxstyle': 'square,pad=0.2', 'fc': 'white'})
+                 ha='center', fontsize=10, color=style.colors[8],
+                 arrowprops={'arrowstyle': 'wedge', 'color': style.top},
+                 bbox={'boxstyle': 'square,pad=0.2', 'fc': style.top})
 
   loc = mdates.DayLocator(interval=10)
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
@@ -155,8 +155,10 @@ def graph(data, filename, style, trend_week=3):
   zone3 = axgc.axhspan(MIN_TICKS, 70, facecolor=style.colors[2], alpha=0.3, label='Bad')
 
   trend_legend = axgc.legend(handles=[trend, mave], loc='lower left')
+  trend_legend.get_frame().set_alpha(None)
+
   axgc.add_artist(trend_legend)
-  axgc.legend(handles=[zone1, zone2, zone3], loc="upper left")
+  axgc.legend(handles=[zone1, zone2, zone3], loc="upper left").get_frame().set_alpha(None)
 
   fig.autofmt_xdate(rotation=10, ha="center")
 

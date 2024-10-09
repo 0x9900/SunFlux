@@ -68,7 +68,8 @@ class GraphStyle:
   name: str
   style: str
   cmap: str | None
-  arrows: list
+  top: str
+  bottom: str
   colors: list | None = None
 
   def __post_init__(self):
@@ -92,8 +93,8 @@ class GraphStyle:
 
 
 STYLES = [
-  GraphStyle('light', 'light.mplstyle', 'light', ['#444444', '#4169e1']),
-  GraphStyle('dark', 'dark.mplstyle', 'dark',  ['#81b1d2', '#bc82bd']),
+  GraphStyle('light', 'light.mplstyle', 'light', '#D2B48C', '#5F9EA0'),
+  GraphStyle('dark', 'dark.mplstyle', 'dark',  '#778899', '#2F4F4F'),
 ]
 
 

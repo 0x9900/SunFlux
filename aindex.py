@@ -178,8 +178,10 @@ def graph(data, condition, filename, style):
   axgc = plt.gca()
   axgc.tick_params(labelsize=10)
   bars = axgc.bar(data[:, 0], data[:, AVG], linewidth=0.75, zorder=2, color=colors)
-  axgc.plot(data[:, 0], data[:, MAX], marker='v', linewidth=0, color=style.arrows[0])
-  axgc.plot(data[:, 0], data[:, MIN], marker='^', linewidth=0, color=style.arrows[1])
+  axgc.plot(data[:, 0], data[:, MAX], marker='v', linewidth=0,
+            markeredgecolor='black', markeredgewidth=.25, color=style.top)
+  axgc.plot(data[:, 0], data[:, MIN], marker='^', linewidth=0,
+            markeredgecolor='black', markeredgewidth=.25, color=style.bottom)
   autolabel(axgc, bars)
 
   axgc.axhline(y=20, linewidth=1.5, zorder=1, color=style.colors[1])

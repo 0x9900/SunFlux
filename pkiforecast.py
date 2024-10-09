@@ -55,7 +55,7 @@ class PKIForecast:
   def is_data(self):
     return bool(self.data)
 
-  def graph(self, filename):
+  def graph(self, filename, style):
     # pylint: disable=too-many-locals,too-many-statements
     start_date = datetime.now(timezone.utc) - timedelta(days=3, hours=4)
     end_date = datetime.now(timezone.utc) + timedelta(days=1, hours=3)
@@ -65,21 +65,21 @@ class PKIForecast:
     labels = [d[3] for d in self.data if start_date < d[0] < end_date]
 
     # colors #6efa7b #a7bbb36 #aa7f28 #8c4d30 #582a2d
-    colors = ['#8EBA42'] * len(observ)
+    colors = [style.colors[1]] * len(observ)
     for pos, (obs, val) in enumerate(zip(observ, yvalues)):
       if obs == 'observed':
-        if 4 <= val < 5:
-          colors[pos] = '#a7bb36'
-        elif 5 <= val < 6:
-          colors[pos] = '#aa7f28'
-        elif 6 <= val < 8:
-          colors[pos] = '#8c4d30'
-        elif val >= 8:
-          colors[pos] = '#582a2d'
+        if 4 < val <= 5:
+          colors[pos] = style.colors[3]
+        elif 5 < val <= 6:
+          colors[pos] = style.colors[5]
+        elif 6 < val <= 8:
+          colors[pos] = style.colors[6]
+        elif val > 8:
+          colors[pos] = style.colors[8]
       elif obs == "estimated":
-        colors[pos] = 'lightgrey'
+        colors[pos] = style.top
       elif obs == "predicted":
-        colors[pos] = 'grey'
+        colors[pos] = style.bottom
 
     fig = plt.figure(figsize=(12, 5))
     fig.suptitle('Planetary K-Index Predictions')
@@ -90,7 +90,7 @@ class PKIForecast:
     for rect, label in ((a, b) for a, b in zip(*(bars, labels)) if labels):
       if not label:
         continue
-      axgc.text(rect.get_x() + rect.get_width() / 2., .3, label, alpha=1,
+      axgc.text(rect.get_x() + rect.get_width() / 2., .3, label, alpha=1, fontsize=10,
                 color="#0f0f0f", ha='center')
 
     loc = mdates.DayLocator(interval=1)
@@ -102,8 +102,8 @@ class PKIForecast:
     axgc.set_ylim(0, 9.5)
     axgc.set_ylabel('K-Index')
 
-    axgc.axhspan(0, 0, facecolor='lightgrey', alpha=1, label='Estimated')
-    axgc.axhspan(0, 0, facecolor='darkgrey', alpha=1, label='Predicted')
+    axgc.axhspan(0, 0, facecolor=style.top, alpha=1, label='Estimated')
+    axgc.axhspan(0, 0, facecolor=style.bottom, alpha=1, label='Predicted')
     axgc.legend()
 
     fig.autofmt_xdate(rotation=10, ha="center")
@@ -163,7 +163,7 @@ def main():
   for style in styles:
     with plt.style.context(style.style):
       filename = opts.target.joinpath(f'pki-forecast-{style.name}')
-      pki.graph(filename)
+      pki.graph(filename, style)
       if style.name == 'light':
         tools.mk_link(filename, opts.target.joinpath('pki-forecast'))
 

@@ -115,8 +115,8 @@ class EISN:
     axgc.tick_params(labelsize=10)
     axgc.plot(x, y, color=style.colors[0])
     axgc.axhline(y.mean(), color=style.colors[3], linestyle='--', linewidth=2)
-    axgc.plot(x, vdata, marker='*', linewidth=0, color=style.arrows[0])
-    axgc.plot(x, cdata, marker='.', linewidth=0, color=style.arrows[1])
+    axgc.plot(x, vdata, marker='*', linewidth=0, color=style.top)
+    axgc.plot(x, cdata, marker='.', linewidth=0, color=style.bottom)
     axgc.errorbar(x, y, yerr=error, fmt='.', color=style.colors[6],
                   ecolor='gray', elinewidth=.8, capsize=5,
                   capthick=.8)
