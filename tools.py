@@ -88,7 +88,7 @@ class GraphStyle:
         object.__setattr__(self, 'colors', mk_colormap(self.cmap))
       except ValueError:
         logger.error('"%s" is not a valid colormap.', self.cmap)
-        raise SystemExit
+        raise SystemExit from None
 
 
 STYLES = [
