@@ -23,24 +23,26 @@ logger = logging.getLogger('tools')
 
 COLOR_MAPS = {
   'dark': [
-    '#76c7c0',  # (Soft Teal)
-    '#ffcc66',  # (Warm Amber)
-    '#99cc99',  # (Muted Green)
-    '#ff6666',  # (Soft Red)
-    '#6699cc',  # (Soft Blue)
-    '#c594c5',  # (Muted Purple)
-    '#e6b3b3',  # (Dusty Rose)
-    '#999999',  # (Muted Gray)
+    '#008585',
+    '#74a892',
+    '#fbf2c4',
+    '#e5c185',
+    '#e0a278',
+    '#db836b',
+    '#c7522a',
+    '#642915',
+    '#32150b',
   ],
   'light': [
-    '#1f77b4',
-    '#ff7f0e',
-    '#2ca02c',
-    '#d62728',
-    '#9467bd',
-    '#8c564b',
-    '#e377c2',
-    '#7f7f7f',
+    '#ffd380',
+    '#ffa600',
+    '#ff8531',
+    '#ff6361',
+    '#bc5090',
+    '#8a508f',
+    '#2c4875',
+    '#003f5c',
+    '#00202e',
   ],
 }
 
@@ -82,7 +84,11 @@ class GraphStyle:
     if self.cmap in COLOR_MAPS:
       object.__setattr__(self, 'colors', COLOR_MAPS[self.cmap])
     else:
-      object.__setattr__(self, 'colors', mk_colormap(self.cmap))
+      try:
+        object.__setattr__(self, 'colors', mk_colormap(self.cmap))
+      except ValueError:
+        logger.error('"%s" is not a valid colormap.', self.cmap)
+        raise SystemExit
 
 
 STYLES = [
