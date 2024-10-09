@@ -52,7 +52,7 @@ class SSN:
       self.data = SSN.read_url(NOAA_URL, self.data)
       SSN.write_cache(cache_file, self.data)
 
-    self.data = self.data[-90:]
+    self.data = self.data[-62:]
 
   @staticmethod
   def read_url(url, current_data):
