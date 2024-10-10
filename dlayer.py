@@ -53,6 +53,14 @@ MAP_COLORS = {
 logging.getLogger('matplotlib').setLevel(logging.WARNING)
 
 
+def float64_or_nan(value):
+  try:
+    val = np.float64(value)
+    return val if not np.isnan(val) else np.nan
+  except (ValueError, TypeError):
+    return np.nan
+
+
 class Drap:
   def __init__(self, cache_path, cache_time):
     self.data = np.array([])
@@ -121,19 +129,19 @@ class Drap:
 
     dlayer = self.read_header(content)
     for line in content:
-      lon = [float(d) for d in line.split()]
+      lon = [float64_or_nan(d) for d in line.split()]
       break
     for line in content:
       if line.startswith('-' * 10):
         break
     for line in content:
       _lat, flux = line.split('|')
-      lat.append(float(_lat))
-      data.append([float(f) for f in flux.split()])
+      lat.append(float64_or_nan(_lat))
+      data.append([float64_or_nan(f) for f in flux.split()])
 
-    dlayer['lon'] = np.array(lon, dtype=np.float16)
-    dlayer['lat'] = np.array(lat, dtype=np.float16)
-    dlayer['data'] = np.array(data, dtype=np.float16)
+    dlayer['lon'] = np.array(lon, dtype=np.float64)
+    dlayer['lat'] = np.array(lat, dtype=np.float64)
+    dlayer['data'] = np.array(data, dtype=np.float64)
 
     with open(self.cache_file, 'wb') as fd_cache:
       pickle.dump(dlayer, fd_cache)
@@ -153,7 +161,7 @@ class Drap:
 
     # Draw the data
     lon, lat = np.meshgrid(self.lon, self.lat)
-    clevels = np.arange(self.data.min() + 1, MAX_FREQUENCY + 1)
+    clevels = np.arange(np.nanmin(self.data) + 1, MAX_FREQUENCY + 1)
     dmap.contourf(lon, lat, self.data, clevels, vmax=MAX_FREQUENCY,
                   cmap=self.mk_colormap(style))
 
