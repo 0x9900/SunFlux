@@ -14,7 +14,7 @@ import os
 import pathlib
 import sys
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from urllib import request
 
 import matplotlib.dates as mdates
@@ -31,6 +31,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger('ssnhist')
 
+TREND_YEARS = 16
 URL_HISTORY = 'https://services.swpc.noaa.gov/json/solar-cycle/sunspots.json'
 URL_PREDICTIONS = 'https://services.swpc.noaa.gov/products/solar-cycle-25-ssn-predicted-range.json'
 
@@ -45,21 +46,25 @@ def moving_average(data, window=7):
 def _history_cache(cache_file):
   with open(cache_file, 'r', encoding='ASCII') as cfd:
     data = json.load(cfd)
-  for item in data:
-    date = datetime.strptime(item['time-tag'], '%Y-%m')
-    item['time-tag'] = date.replace(tzinfo=timezone.utc)
+  data = [tuple(v.values()) for v in data]
+  dtype = [('time_tag', 'datetime64[D]'), ('ssn', 'float64')]
+  data = np.array(data, dtype=dtype)
+
   return data
 
 
 def _predictions_cache(cache_file):
   with open(cache_file, 'r', encoding='ASCII') as cfd:
     data = json.load(cfd)
-  for item in data:
-    date = datetime.strptime(item['time-tag'], '%Y-%m')
-    item['time-tag'] = date.replace(tzinfo=timezone.utc)
-    if item['smoothed_ssn_min'] < 0.0:
-      item['smoothed_ssn_min'] = 0.0
-    item['ssn'] = np.average([item['smoothed_ssn_min'], item['smoothed_ssn_max']])
+
+  data = [tuple(d.values()) for d in data]
+  dtype = [
+    ('time_tag', 'datetime64[M]'),
+    ('smoothed_ssn_min', 'float64'),
+    ('smoothed_ssn_max', 'float64')
+  ]
+  data = np.array(data, dtype=dtype)
+  data['smoothed_ssn_min'][data['smoothed_ssn_min'] < 0.0] = 0.0
   return data
 
 
@@ -91,31 +96,35 @@ def download_predictions(cache_file, cache_time=86400):
 
 def graph(histo, predic, filename, style, year=1961):
   # pylint: disable=too-many-locals
-  start_date = datetime(year, 1, 1, tzinfo=timezone.utc)
-  end_date = datetime.now(timezone.utc) + timedelta(days=365 * 12)
-  last_date = histo[-1]['time-tag'].strftime("%m-%Y")
+  start_date = np.datetime64(f'{year}', 'D')
+  end_date = np.datetime64(datetime.now() + timedelta(days=365 * 12), 'D')
+  last_date = histo['time_tag'][-1].astype(object).year
+  histo = histo[histo['time_tag'] > start_date]
+  mavg = moving_average(histo['ssn'], 7)
 
-  xdates = np.array([d['time-tag'] for d in histo if d['time-tag'] > start_date])
-  yvals = np.array([d['ssn'] for d in histo if d['time-tag'] > start_date])
-  mavg = moving_average(yvals)
-
-  pdates = np.array([d['time-tag'] for d in predic if d['time-tag'] < end_date])
-  lvals = np.array([d['smoothed_ssn_min'] for d in predic if d['time-tag'] < end_date])
-  hvals = np.array([d['smoothed_ssn_max'] for d in predic if d['time-tag'] < end_date])
-  pavg = np.array([d['ssn'] for d in predic if d['time-tag'] < end_date])
+  predic = predic[predic['time_tag'] < end_date]
+  pavg = np.mean([predic['smoothed_ssn_min'], predic['smoothed_ssn_max']], axis=0)
 
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle(f'SunSpot Numbers from {year} to {last_date}')
 
   axis = plt.gca()
-  axis.plot(xdates, yvals, label='Sun Spots', zorder=4, color=style.colors[0], linewidth=0.75)
-  axis.plot(xdates, mavg, label='Average', zorder=5, color=style.colors[1], linewidth=1.5)
-  axis.fill_between(pdates, lvals, hvals, label='Predicted', zorder=0, alpha=0.3, linewidth=1,
-                    facecolor=style.colors[2])
-  axis.plot(pdates, pavg, zorder=4, color=style.colors[1], linewidth=1.5)
+  xdates = histo['time_tag']
+  axis.plot(xdates, histo['ssn'], label='Sun Spots', zorder=4, linewidth=0.75)
+  axis.plot(xdates, mavg, label='Average', zorder=5, linewidth=1.5)
+  axis.axhline(y=histo['ssn'].mean(), label='All time mean', zorder=1, linewidth=.25,
+               linestyle='dashed')
 
-  axis.axhline(y=yvals.mean(), label='All time mean', zorder=1, color=style.colors[7],
-               linewidth=1, linestyle='dashed')
+  # Calculate the trend for the last {TREND_YEARS}
+  idx = histo['time_tag'] > np.datetime64(f'{last_date - TREND_YEARS}', 'D')
+  trend_dates = histo['time_tag'][idx].astype('float64')
+  poly = np.poly1d(np.polyfit(trend_dates, histo['ssn'][idx], 1))
+  axis.plot(trend_dates, poly(trend_dates), label=f'Trend ({TREND_YEARS} years)', linestyle='--',
+            color=style.colors[6], linewidth=1)
+
+  axis.plot(predic['time_tag'], pavg, zorder=1, linewidth=1)
+  axis.fill_between(predic['time_tag'], predic['smoothed_ssn_min'], predic['smoothed_ssn_max'],
+                    label='Predicted', zorder=0, alpha=0.3, linewidth=1)
 
   axis.set_xlabel('Years')
   axis.set_ylabel('Sun Spot Number')
