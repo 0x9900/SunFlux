@@ -88,9 +88,9 @@ class ShowDXCC:
 
     # axgc.set_facecolor('#001155')
     # Show all ticks and label them with the respective list entries
-    plt.xticks(np.arange(len(BANDS)), labels=BANDS)
+    plt.xticks(np.arange(len(BANDS)), labels=BANDS, fontsize=12)
     plt.xlabel("Bands")
-    plt.yticks(np.arange(len(CONTINENTS)), labels=CONTINENTS)
+    plt.yticks(np.arange(len(CONTINENTS)), labels=CONTINENTS, fontsize=12)
     plt.ylabel("Destination")
 
     timage = axgc.imshow(self.data, cmap=color_map)
