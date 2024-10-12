@@ -122,7 +122,7 @@ class EISN:
     axgc.legend(ncol=2)
 
     loc = mdates.DayLocator(interval=int(1 + len(x) / 11))
-    axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
+    axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
     axgc.xaxis.set_major_locator(loc)
     axgc.xaxis.set_minor_locator(mdates.DayLocator())
     axgc.set_ylim(0, y.max() * 1.2)
