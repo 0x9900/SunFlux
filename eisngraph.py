@@ -113,17 +113,13 @@ class EISN:
     fig.suptitle('Estimated International Sunspot Number (EISN)')
     axgc = plt.gca()
     axgc.tick_params(labelsize=10)
-    axgc.plot(x, y, color=style.colors[0])
-    axgc.axhline(y.mean(), color=style.colors[3], linestyle='--', linewidth=2)
-    axgc.plot(x, vdata, marker='*', linewidth=0, color=style.top)
-    axgc.plot(x, cdata, marker='.', linewidth=0, color=style.bottom)
-    axgc.errorbar(x, y, yerr=error, fmt='.', color=style.colors[6],
-                  ecolor='gray', elinewidth=.8, capsize=5,
-                  capthick=.8)
-    axgc.fill_between(x, y - error, y + error, facecolor=style.colors[2], alpha=1.0,
-                      linewidth=.75, edgecolor='gray')
+    axgc.plot(x, y, label='Sun Spot', linewidth=1.5)
+    axgc.fill_between(x, y - error, y + error, alpha=.2, linewidth=.75, edgecolor='g',
+                      label="Estimated")
+    axgc.plot(x, cdata, marker='2', linewidth=0, color=style.bottom, label='Nb. entries')
+    axgc.plot(x, vdata, marker='1', linewidth=0, color=style.top, label='Valid entries')
 
-    axgc.legend(['EISN', 'Average', 'Valid Data', 'Entries'], ncol=2)
+    axgc.legend(ncol=2)
 
     loc = mdates.DayLocator(interval=int(1 + len(x) / 11))
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
