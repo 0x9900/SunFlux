@@ -129,16 +129,16 @@ def graph(data, condition, filename, style):
 
   # I should use mpl.colormaps here
   # colors #6efa7b #a7bb36 #aa7f28 #8c4d30 #582a2d
-  colors = ['#8EBA42'] * data[:, 0].size
+  colors = ['#AEDA62'] * data[:, 0].size
   for pos, val in enumerate(data[:, 2]):
     if 4 <= val < 5:
-      colors[pos] = '#a7bb36'
+      colors[pos] = '#A7BB36'
     elif 5 <= val < 6:
-      colors[pos] = '#aa7f28'
+      colors[pos] = '#AA7F28'
     elif 6 <= val < 8:
-      colors[pos] = '#8c4d30'
+      colors[pos] = '#8C4D30'
     elif val >= 8:
-      colors[pos] = '#582a2d'
+      colors[pos] = '#582A2D'
 
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('Planetary K-Index')
