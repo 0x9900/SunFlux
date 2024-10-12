@@ -30,6 +30,13 @@ from config import Config
 NB_DAYS = 92
 TREND_WK = 3
 MIN_TICKS = 55
+COLORS = (
+  '#538fff',
+  '#fca207',
+  '#f6ccf9',
+  '#268189',
+  '#2d1a77',
+)
 
 WWV_REQUEST = "SELECT wwv.time, wwv.SFI FROM wwv WHERE wwv.time > ?"
 
@@ -124,35 +131,34 @@ def graph(data, filename, style, trend_week=3):
   fig = plt.figure(figsize=(12, 5))
   fig.suptitle('Daily 10cm Flux Index')
   axgc = plt.gca()
-  axgc.plot(x, y, linewidth=1, label='Flux', color=style.colors[3])
-  mave, = axgc.plot(x, avg, linewidth=2, linestyle=":", label='Daily Average',
-                    color=style.colors[8])
-  trend, = axgc.plot(x[idx], poly(x[idx]), label=f'Trend ({trend_week} weeks)', linestyle='--',
-                     color=style.colors[6], linewidth=1)
+  trend, = axgc.plot(x[idx], poly(x[idx]), label=f'Trend ({trend_week} weeks)',
+                     linestyle='--', color=COLORS[3])
+  axgc.plot(x, y, color=COLORS[0], alpha=.7, label='Flux')
+  mave, = axgc.plot(x, avg, color=COLORS[1], label='Daily Average')
   axgc.tick_params(labelsize=10)
 
   for pos in set([y.argmax(), y.argmin(), x.size - 1]):
     xytext = (20, 20) if pos == x.size - 1 else (20, -20)
     plt.annotate(f"{int(y[pos]):d}", (x[pos], y[pos]), textcoords="offset points", xytext=xytext,
-                 ha='center', fontsize=10, color=style.colors[8],
+                 ha='center', fontsize=10,
                  arrowprops={'arrowstyle': 'wedge', 'color': style.top},
                  bbox={'boxstyle': 'square,pad=0.2', 'fc': style.top})
 
   loc = mdates.DayLocator(interval=10)
-  axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d UTC'))
+  axgc.xaxis.set_major_formatter(mdates.DateFormatter('%b-%d'))
   axgc.xaxis.set_major_locator(loc)
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
   axgc.set_ylabel('SFU at 2800 MHz')
   # axgc.set_ylim([MIN_TICKS, y.max() * 1.15])
 
   ticks = np.array([MIN_TICKS, 70])
-  ticks = np.append(ticks, np.arange(90, int(y.max() * 1.15), 20))
+  ticks = np.append(ticks, np.arange(90, int(y.max() * 1.1), 20))
   axgc.set_yticks(ticks)
 
   zone1 = axgc.axhspan(90, round(axgc.axis()[-1]), facecolor=style.colors[0],
-                       alpha=0.3, label='Good')
-  zone2 = axgc.axhspan(70, 90, facecolor=style.colors[1], alpha=0.3, label='Ok')
-  zone3 = axgc.axhspan(MIN_TICKS, 70, facecolor=style.colors[2], alpha=0.3, label='Bad')
+                       alpha=0.2, label='Good')
+  zone2 = axgc.axhspan(70, 90, facecolor=style.colors[1], alpha=0.2, label='Ok')
+  zone3 = axgc.axhspan(MIN_TICKS, 70, facecolor=style.colors[2], alpha=0.2, label='Bad')
 
   trend_legend = axgc.legend(handles=[trend, mave], loc='lower left')
   trend_legend.get_frame().set_alpha(None)
