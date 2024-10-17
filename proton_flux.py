@@ -76,7 +76,7 @@ class ProtonFlux:
 
     data = {}
     for elem in _data:
-      data[elem['time_tag']] = {k: 0.0 for k in (1, 10, 100, 30, 5, 50, 500, 60)}
+      data[elem['time_tag']] = {k: 0.0 for k in (1, 5, 10, 30, 50, 60, 100, 500)}
 
     for elem in _data:
       date = elem['time_tag']
@@ -105,7 +105,6 @@ class ProtonFlux:
 
   def graph(self, filename):
     # pylint: disable=too-many-locals
-    energy = (10, 30, 50, 100)  # Graphs to plot
     colors = {10: "tab:orange", 30: "tab:olive", 50: "tab:blue", 100: "tab:cyan"}
     fig = plt.figure(figsize=(12, 5))
     fig.subplots_adjust(bottom=0.15)
@@ -125,10 +124,12 @@ class ProtonFlux:
     dates = np.array(list(self.data.keys()))
 
     _max = 0
-    for _energy in energy:
-      data = np.array([flux[_energy] for flux in self.data.values()])
+    label_tmpl = r'$\geq${}MeV'.format
+    for energy, color in colors.items():
+      data = np.array([flux[energy] for flux in self.data.values()])
       data = remove_outliers(data)
-      ax.plot(dates, data, color=colors[_energy], zorder=2, label=r'$\geq${}MeV'.format(_energy))
+      ax.plot(dates, data, color=color, zorder=2, linewidth=.66,
+              label=label_tmpl(energy))
       _max = max(data.max(), _max)
 
     magnitude = 2 + int(math.log(_max, 10))
