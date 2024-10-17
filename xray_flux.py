@@ -124,7 +124,7 @@ class XRayFlux:
     ax.set_ylim((10**min_mag, 10**max_mag))
 
     data[data == 0.0] = np.nan
-    ax.plot(dates, data, linewidth=1.5, zorder=2, label='X-Ray Flux')
+    ax.plot(dates, data, linewidth=1, zorder=2, label='X-Ray Flux')
 
     class_colors = {
       'X': style.colors[3],

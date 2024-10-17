@@ -128,8 +128,7 @@ class ProtonFlux:
     for energy, color in colors.items():
       data = np.array([flux[energy] for flux in self.data.values()])
       data = remove_outliers(data)
-      ax.plot(dates, data, color=color, zorder=2, linewidth=.66,
-              label=label_tmpl(energy))
+      ax.plot(dates, data, color=color, zorder=2, label=label_tmpl(energy))
       _max = max(data.max(), _max)
 
     magnitude = 2 + int(math.log(_max, 10))

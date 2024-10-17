@@ -48,3 +48,5 @@ legend.loc: best
 legend.facecolor: inherit
 legend.edgecolor: 0.4
 legend.borderpad: 0.5
+
+lines.linewidth: .66
