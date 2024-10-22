@@ -144,7 +144,7 @@ def graph(data, filename, style, trend_week=3):
                  arrowprops={'arrowstyle': 'wedge', 'color': style.top},
                  bbox={'boxstyle': 'square,pad=0.2', 'fc': style.top})
 
-  loc = mdates.DayLocator(interval=10)
+  loc = mdates.WeekdayLocator(byweekday=mdates.MO, interval=1)
   axgc.xaxis.set_major_formatter(mdates.DateFormatter('%b-%d'))
   axgc.xaxis.set_major_locator(loc)
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
