@@ -9,14 +9,18 @@
 import logging
 import os
 import pathlib
+import re
+import sqlite3
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
 
 EXTENTIONS = ('.svgz', '.png')
+
+WWV_CONDITIONS = ("SELECT conditions FROM wwv WHERE time > ? ORDER BY time DESC LIMIT 1")
 
 logger = logging.getLogger('tools')
 
@@ -45,6 +49,23 @@ COLOR_MAPS = {
     '#00202e',
   ],
 }
+
+
+def get_conditions(config):
+  db_name = config['db_name']
+  start_time = datetime.now(timezone.utc) - timedelta(days=1)
+  conn = sqlite3.connect(db_name, timeout=5, detect_types=sqlite3.PARSE_DECLTYPES)
+  with conn:
+    curs = conn.cursor()
+    result = curs.execute(WWV_CONDITIONS, (start_time,)).fetchone()
+    try:
+      conditions = result[0]
+    except TypeError:
+      return None
+  if re.match(r'(No Storm.*){2}', conditions):
+    return None
+  # cleanup the string and return
+  return re.sub(r'[^\x20-\x7E]', '', conditions).strip()
 
 
 def mk_colormap(map_name, nb_colors=8):

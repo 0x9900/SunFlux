@@ -12,7 +12,6 @@ import json
 import logging
 import os
 import pathlib
-import re
 import sqlite3
 import sys
 import time
@@ -34,9 +33,6 @@ NOAA_URL = "https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json"
 NB_DAYS = 5
 
 WWV_REQUEST = "SELECT wwv.time, wwv.k FROM wwv WHERE wwv.time > ?"
-WWV_CONDITIONS = ("SELECT conditions FROM wwv WHERE time > ? "
-                  "ORDER BY time DESC LIMIT 1")
-
 
 logging.basicConfig(
   format='%(asctime)s %(levelname)s - %(name)s:%(lineno)3d - %(message)s', datefmt='%x %X',
@@ -47,22 +43,6 @@ logger = logging.getLogger('pkiwwv')
 
 def bucket(dtm, size=4):
   return int(size * int(dtm.hour / size))
-
-
-def get_conditions(config):
-  db_name = config['db_name']
-  start_time = datetime.now(timezone.utc) - timedelta(hours=12)
-  conn = sqlite3.connect(db_name, timeout=5, detect_types=sqlite3.PARSE_DECLTYPES)
-  with conn:
-    curs = conn.cursor()
-    result = curs.execute(WWV_CONDITIONS, (start_time,)).fetchone()
-    try:
-      conditions = result[0]
-    except TypeError:
-      return None
-  if re.match(r'(No Storm.*){2}', conditions):
-    return None
-  return conditions
 
 
 def get_pkindex(config):
@@ -197,7 +177,7 @@ def main():
   data = get_pkindex(config)
   if opts.cluster:
     data.update(get_wwv(config))
-  condition = get_conditions(config)
+  condition = tools.get_conditions(config)
 
   if not data:
     logger.warning('No data collected')

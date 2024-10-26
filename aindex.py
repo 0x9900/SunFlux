@@ -13,7 +13,6 @@ import logging
 import os
 import pathlib
 import pickle
-import re
 import sqlite3
 import sys
 import time
@@ -56,23 +55,6 @@ def color_complement(hue, saturation, value, alpha):
   c_rgb = [1.0 - c for c in rgb]
   c_hsv = colorsys.rgb_to_hsv(*c_rgb)
   return c_hsv + (alpha, )
-
-
-def get_conditions(config):
-  db_name = config['db_name']
-  start_time = datetime.now(timezone.utc) - timedelta(days=1)
-  conn = sqlite3.connect(db_name, timeout=5,
-                         detect_types=sqlite3.PARSE_DECLTYPES)
-  with conn:
-    curs = conn.cursor()
-    result = curs.execute(WWV_CONDITIONS, (start_time,)).fetchone()
-    try:
-      conditions = result[0]
-    except TypeError:
-      return None
-  if re.match(r'(No Storm.*){2}', conditions):
-    return None
-  return conditions
 
 
 def download_aindex(cache_file):
@@ -221,7 +203,7 @@ def main():
   data = get_noaa(config)
   data.update(get_wwv(config))
   data = sorted(list(data.items()))
-  condition = get_conditions(config)
+  condition = tools.get_conditions(config)
 
   if not data:
     logger.warning('No data collected')
