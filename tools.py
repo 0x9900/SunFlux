@@ -160,10 +160,15 @@ def save_plot(plot, filename, extentions=EXTENTIONS):
   if not filename.parent.exists():
     logger.error('[Errno 2] No such file or directory: %s', filename.parent)
     return
+
+  metadata = {'Description': f"{filename.stem} - Solar activity https://bsdworld.org/"}
   for ext in extentions:
     fname = filename.with_suffix(ext)
     try:
-      plot.savefig(fname, transparent=False, dpi=100)
+      if ext in ['.svg', '.svgz', '.png']:
+        plot.savefig(fname, transparent=False, dpi=100, metadata=metadata)
+      else:
+        plot.savefig(fname, transparent=False, dpi=100)
       logger.info('Graph "%s" saved', fname)
     except (FileNotFoundError, ValueError) as err:
       logger.error(err)
