@@ -183,8 +183,8 @@ def main():
       xray.graph(filename, style)
       if opts.days == '3':
         tools.mk_link(filename, opts.target.joinpath(f'xray_flux-{style.name}'))
-      if style.name == 'light':
-        tools.mk_link(filename, opts.target.joinpath('xray_flux'))
+        if style.name == 'light':
+          tools.mk_link(filename, opts.target.joinpath('xray_flux'))
 
   return os.EX_OK
 
