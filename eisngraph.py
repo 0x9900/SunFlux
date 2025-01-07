@@ -16,6 +16,7 @@ import pickle
 import sys
 import time
 from datetime import date
+from itertools import cycle
 from urllib.request import urlopen
 
 import matplotlib.dates as mdates
@@ -101,6 +102,16 @@ class EISN:
   def is_data(self):
     return bool(self.data)
 
+  @staticmethod
+  def anotate(xtime, ssn, style):
+    sign = cycle([-1, 1])
+    for _x, _y, _s in zip(xtime, ssn, sign):
+      if _s == 0:
+        continue
+      plt.annotate(f"{int(_y):d}", (_x, _y), textcoords="offset points", xytext=(0, 20 * _s),
+                   ha='center', fontsize=8, color=style.top,
+                   arrowprops={"arrowstyle": "->", "color": style.top})
+
   def graph(self, filename, style):
     data = np.array(self.data)
     x = data[:, 0]
@@ -127,6 +138,7 @@ class EISN:
     axgc.xaxis.set_minor_locator(mdates.DayLocator())
     axgc.set_ylim(0, y.max() * 1.2)
     fig.autofmt_xdate(rotation=10, ha="center")
+    self.anotate(x, y, style)
 
     tools.save_plot(plt, filename)
     plt.close()
