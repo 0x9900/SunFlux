@@ -115,7 +115,7 @@ class GraphStyle:
 
 
 STYLES = [
-  GraphStyle('light', 'light.mplstyle', 'light', '#D2B48C', '#5F9EA0'),
+  GraphStyle('light', 'light.mplstyle', 'light', '#82746C', '#5F9EA0'),
   GraphStyle('dark', 'dark.mplstyle', 'dark',  '#778899', '#2F4F4F'),
 ]
 
