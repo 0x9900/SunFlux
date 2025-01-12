@@ -41,9 +41,9 @@ MAP_COLORS = {
     'colors': ['lavender', '#2989d8', '#99aaaa', '#ffff00', '#bb0000'],
   },
   'dark': {
-    'land': '#000000',
+    'land': '#332200',
     'ocean': '#0d1522',
-    'coastlines': '#e0e0e0',
+    'coastlines': '#808080',
     'grid': 'lightgray',
     'colors': ['#0d1117', '#2989d8', '#99aaaa', '#ffff00', '#bb0000'],
   },
@@ -174,12 +174,13 @@ class Drap:
   @staticmethod
   def draw_colorbar(fig, fmax=None):
     cbar = fig.colorbar(size="3.5%", pad="2%", format=lambda x, _: f"{int(round(x)):d}")
-    cbar.set_label('Affected Frequency (MHz)')
+    cbar.set_label('Affected Frequency (MHz)', fontsize=12)
     cbar.set_ticks(np.linspace(1, MAX_FREQUENCY, 6))
+    cbar.ax.tick_params(labelsize=8)
     if fmax:
       cbar.ax.arrow(0.1, fmax, 0.6, 0, width=0.03, head_width=0.6, head_length=0.2, fc='k', ec='k')
       lpos = fmax - 1 if fmax > 22 else fmax + .5
-      cbar.ax.annotate('Max', xy=(0, lpos), xytext=(0, lpos), fontsize=8)
+      cbar.ax.annotate('Max', xy=(0.1, lpos), xytext=(0.1, lpos), fontsize=6)
 
   @staticmethod
   def draw_elements(fig, style):
