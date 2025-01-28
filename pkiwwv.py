@@ -147,7 +147,7 @@ def graph(data, condition, filename, style):
   axgc.xaxis.set_minor_locator(mdates.DayLocator())
   axgc.yaxis.set_major_locator(MultipleLocator(1))
 
-  axgc.set_ylim(0, 9.5 if data[:, 3].max() > 5 else data[:, 3].max() * 1.8)
+  axgc.set_ylim(0, 9.5 if data[:, 3].max() > 6 else data[:, 3].max() * 1.6)
   axgc.set_ylabel('K-Index')
 
   axgc.legend(loc='upper left')
