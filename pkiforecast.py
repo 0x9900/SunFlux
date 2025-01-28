@@ -99,7 +99,7 @@ class PKIForecast:
     axgc.xaxis.set_minor_locator(mdates.HourLocator(interval=6))
     axgc.yaxis.set_major_locator(MultipleLocator(1))
 
-    axgc.set_ylim(0, 9.5)
+    axgc.set_ylim(0, 9.5 if yvalues.max() > 5 else yvalues.max() * 1.8)
     axgc.set_ylabel('K-Index')
 
     axgc.axhspan(0, 0, facecolor=style.top, alpha=1, label='Estimated')
