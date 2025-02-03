@@ -131,7 +131,7 @@ class ProtonFlux:
       ax.plot(dates, data, color=color, zorder=2, label=label_tmpl(energy))
       _max = max(data.max(), _max)
 
-    magnitude = 2 + int(math.log(_max, 10))
+    magnitude = 1 + int(math.log(_max, 10))
     ax.set_ylim((0.1, 10**magnitude))
 
     if magnitude > WARNING_THRESHOLD:
