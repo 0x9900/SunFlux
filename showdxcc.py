@@ -63,7 +63,8 @@ class ShowDXCC:
   def get_dxcc(self, delta=1):
     start_date = self.date - timedelta(hours=delta, minutes=0)
     end_date = self.date
-    request = (f"SELECT band, de_cont, to_cont, COUNT(*) FROM dxspot WHERE band >= 6 "
+    request = (f"SELECT band, de_cont, to_cont, COUNT(*) FROM dxspot "
+               "WHERE band >= 6 and band <= 160 "
                f"AND ({self.zone_label[0]} = {self.zone} OR {self.zone_label[1]} = {self.zone}) "
                f"AND time > {start_date.timestamp()} "
                f"AND time <= {end_date.timestamp()} "
