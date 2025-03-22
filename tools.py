@@ -11,12 +11,16 @@ import os
 import pathlib
 import re
 import sqlite3
+import warnings
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
+
+warnings.filterwarnings("ignore", category=UserWarning)
+
 
 EXTENTIONS = ('.svgz', '.png')
 
