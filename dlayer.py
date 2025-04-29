@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # vim:fenc=utf-8
 #
 # Copyright © 2024 fred <github-fred@hidzz.com>

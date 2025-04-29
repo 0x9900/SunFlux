@@ -130,7 +130,7 @@ class EISN:
     axgc.plot(x, cdata, marker='2', linewidth=0, color=style.bottom, label='Nb. entries')
     axgc.plot(x, vdata, marker='1', linewidth=0, color=style.top, label='Valid entries')
 
-    axgc.legend(ncol=2)
+    axgc.legend(ncol=2, loc='upper left')
 
     loc = mdates.DayLocator(interval=int(1 + len(x) / 11))
     axgc.xaxis.set_major_formatter(mdates.DateFormatter('%a, %b %d'))
