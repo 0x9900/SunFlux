@@ -8,6 +8,7 @@
 #
 
 import argparse
+import hashlib
 import json
 import logging
 import math
@@ -46,6 +47,42 @@ NOAA_XRAY7 = 'https://services.swpc.noaa.gov/json/goes/primary/xrays-7-day.json'
 NOAA_FLARE = 'https://services.swpc.noaa.gov/json/goes/primary/xray-flares-7-day.json'
 
 
+def make_etag_filename(url: str):
+  filename = hashlib.sha1(url.encode()).hexdigest()
+  return pathlib.Path(f'/tmp/xrays-{filename}.etag')
+
+
+def download_with_etag(url: str) -> str:
+  etag_file = make_etag_filename(url)
+  etag = etag_file.read_text(encoding="utf-8").strip() if etag_file.exists() else None
+
+  request = urllib.request.Request(url)
+  if etag:
+    request.add_header("If-None-Match", etag)
+
+  try:
+    with urllib.request.urlopen(request) as response:
+      if response.status == 304:
+        return ""
+
+      encoding = response.info().get_content_charset('utf-8')
+      data = response.read().decode(encoding)
+
+      # Update ETag file
+      new_etag = response.headers.get("ETag")
+      if new_etag:
+        etag_file.write_text(new_etag, encoding="utf-8")
+      elif etag_file.exists():
+        etag_file.unlink()
+
+      return data  # File was updated
+
+  except urllib.error.HTTPError as e:
+    if e.code == 304:
+      return ""
+    raise
+
+
 class XRayFlux:
   def __init__(self, source, cache_path, cache_time=900):
     self.source = source
@@ -61,25 +98,19 @@ class XRayFlux:
         raise FileNotFoundError
     except FileNotFoundError:
       self.download()
-    self.readcache()
+    else:
+      self.readcache()
 
   def download(self):
     logger.info('Downloading XRayFlux data from NOAA into %s', self.cachefile)
-    try:
-      with urllib.request.urlopen(self.source) as res:
-        webdata = res.read()
-        encoding = res.info().get_content_charset('utf-8')
-        _data = json.loads(webdata.decode(encoding), object_hook=noaa_date_hook)
-      self.xray_data = {e['time_tag']: e for e in _data}
+    json_data = download_with_etag(self.source)
+    xray_data = json.loads(json_data, object_hook=noaa_date_hook)
+    self.xray_data = {e['time_tag']: e for e in xray_data}
 
-      with urllib.request.urlopen(NOAA_FLARE) as res:
-        webdata = res.read()
-        encoding = res.info().get_content_charset('utf-8')
-        self.flare_data = json.loads(webdata.decode(encoding))
-    except urllib.error.HTTPError as err:
-      logger.warning('No data found: %s', err)
-    else:
-      self.writecache()
+    flare_data = download_with_etag(NOAA_FLARE)
+    self.flare_data = json.loads(flare_data)
+
+    self.writecache()
 
   def readcache(self):
     """Read data from the cache"""
