@@ -61,23 +61,25 @@ class XRayFlux:
         raise FileNotFoundError
     except FileNotFoundError:
       self.download()
-      self.writecache()
-    else:
-      self.readcache()
+    self.readcache()
 
   def download(self):
     logger.info('Downloading XRayFlux data from NOAA into %s', self.cachefile)
+    try:
+      with urllib.request.urlopen(self.source) as res:
+        webdata = res.read()
+        encoding = res.info().get_content_charset('utf-8')
+        _data = json.loads(webdata.decode(encoding), object_hook=noaa_date_hook)
+      self.xray_data = {e['time_tag']: e for e in _data}
 
-    with urllib.request.urlopen(self.source) as res:
-      webdata = res.read()
-      encoding = res.info().get_content_charset('utf-8')
-      _data = json.loads(webdata.decode(encoding), object_hook=noaa_date_hook)
-    self.xray_data = {e['time_tag']: e for e in _data}
-
-    with urllib.request.urlopen(NOAA_FLARE) as res:
-      webdata = res.read()
-      encoding = res.info().get_content_charset('utf-8')
-      self.flare_data = json.loads(webdata.decode(encoding))
+      with urllib.request.urlopen(NOAA_FLARE) as res:
+        webdata = res.read()
+        encoding = res.info().get_content_charset('utf-8')
+        self.flare_data = json.loads(webdata.decode(encoding))
+    except urllib.error.HTTPError as err:
+      logger.warning('No data found: %s', err)
+    else:
+      self.writecache()
 
   def readcache(self):
     """Read data from the cache"""
@@ -86,7 +88,8 @@ class XRayFlux:
       with open(self.cachefile, 'rb') as fd_cache:
         self.xray_data = pickle.load(fd_cache)
         self.flare_data = pickle.load(fd_cache)
-    except (FileNotFoundError, EOFError):
+    except (FileNotFoundError, EOFError) as err:
+      logging.warning("No XRay data: %s", err)
       self.xray_data = None
       self.flare_data = None
 
@@ -176,6 +179,10 @@ def main():
   opts = parser.parse_args()
 
   xray = XRayFlux(days[opts.days], cache_path, cache_time)
+
+  if not xray.xray_data:
+    logger.error('No XRay data available')
+    return os.EX_DATAERR
 
   for style in tools.STYLES:
     with plt.style.context(style.style):
