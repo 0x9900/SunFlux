@@ -108,7 +108,12 @@ class XRayFlux:
     self.xray_data = {e['time_tag']: e for e in xray_data}
 
     flare_data = download_with_etag(NOAA_FLARE)
-    self.flare_data = json.loads(flare_data)
+    try:
+      if flare_data:
+        self.flare_data = json.loads(flare_data)
+    except json.decoder.JSONDecodeError as err:
+      logging.warning(err)
+      self.flare_data = []
 
     self.writecache()
 
