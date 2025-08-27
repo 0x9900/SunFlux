@@ -109,11 +109,11 @@ class XRayFlux:
 
     flare_data = download_with_etag(NOAA_FLARE)
     try:
+      self.flare_data = []
       if flare_data:
         self.flare_data = json.loads(flare_data)
     except json.decoder.JSONDecodeError as err:
       logging.warning(err)
-      self.flare_data = []
 
     self.writecache()
 
@@ -126,8 +126,8 @@ class XRayFlux:
         self.flare_data = pickle.load(fd_cache)
     except (FileNotFoundError, EOFError) as err:
       logging.warning("No XRay data: %s", err)
-      self.xray_data = None
-      self.flare_data = None
+      self.xray_data = {}
+      self.flare_data = []
 
   def writecache(self):
     """Write data into the cachefile"""
