@@ -104,8 +104,12 @@ class XRayFlux:
   def download(self):
     logger.info('Downloading XRayFlux data from NOAA into %s', self.cachefile)
     json_data = download_with_etag(self.source)
-    xray_data = json.loads(json_data, object_hook=noaa_date_hook)
-    self.xray_data = {e['time_tag']: e for e in xray_data}
+    try:
+      xray_data = json.loads(json_data, object_hook=noaa_date_hook)
+      self.xray_data = {e['time_tag']: e for e in xray_data}
+    except json.decoder.JSONDecodeError as err:
+      self.xray_data = {}
+      logging.warning(err)
 
     flare_data = download_with_etag(NOAA_FLARE)
     try:
