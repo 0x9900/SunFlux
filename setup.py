@@ -2,7 +2,7 @@
 #
 # BSD 3-Clause License
 #
-# Copyright (c)2022-2023 Fred W6BSD
+# Copyright (c)2022-2025 Fred W6BSD
 # All rights reserved.
 #
 #
@@ -12,7 +12,7 @@ import sys
 from setuptools import find_namespace_packages, setup
 
 __author__ = "Fred C. (W6BSD)"
-__version__ = '0.1.5'
+__version__ = '0.1.6'
 __license__ = 'BSD'
 
 py_version = sys.version_info[:2]

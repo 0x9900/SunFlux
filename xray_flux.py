@@ -2,7 +2,7 @@
 #
 # BSD 3-Clause License
 #
-# Copyright (c)2023 Fred W6BSD
+# Copyright (c)2023-2025 Fred W6BSD
 # All rights reserved.
 #
 #
@@ -109,7 +109,7 @@ class XRayFlux:
       self.xray_data = {e['time_tag']: e for e in xray_data}
     except json.decoder.JSONDecodeError as err:
       self.xray_data = {}
-      logging.warning(err)
+      logger.warning(err)
 
     flare_data = download_with_etag(NOAA_FLARE)
     try:
@@ -117,7 +117,7 @@ class XRayFlux:
       if flare_data:
         self.flare_data = json.loads(flare_data)
     except json.decoder.JSONDecodeError as err:
-      logging.warning(err)
+      logger.warning(err)
 
     self.writecache()
 
@@ -129,7 +129,7 @@ class XRayFlux:
         self.xray_data = pickle.load(fd_cache)
         self.flare_data = pickle.load(fd_cache)
     except (FileNotFoundError, EOFError) as err:
-      logging.warning("No XRay data: %s", err)
+      logger.warning("No XRay data: %s", err)
       self.xray_data = {}
       self.flare_data = []
 

@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # vim:fenc=utf-8
 #
-# Copyright © 2024 fred <github-fred@hidzz.com>
+# Copyright (c)2024-2025 Fred W6BSD
 #
 # Distributed under terms of the BSD 3-Clause license.
 

@@ -2,7 +2,7 @@
 #
 # BSD 3-Clause License
 #
-# Copyright (c)2023 Fred W6BSD
+# Copyright (c)2023-2025 Fred W6BSD
 # All rights reserved.
 #
 #
@@ -71,7 +71,7 @@ class SolarWind:
         encoding = res.info().get_content_charset('utf-8')
         _data = json.loads(webdata.decode(encoding))
     except (urllib.request.URLError, urllib.request.HTTPError) as err:
-      logging.warning(err)
+      logger.warning(err)
       return False
 
     data = []
