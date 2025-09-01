@@ -69,10 +69,14 @@ class ProtonFlux:
         return match.group(1)
       return None
 
-    with urllib.request.urlopen(NOAA_URL) as res:
-      webdata = res.read()
-      encoding = res.info().get_content_charset('utf-8')
-      _data = json.loads(webdata.decode(encoding), object_hook=noaa_date_hook)
+    try:
+      with urllib.request.urlopen(NOAA_URL) as res:
+        webdata = res.read()
+        encoding = res.info().get_content_charset('utf-8')
+        _data = json.loads(webdata.decode(encoding), object_hook=noaa_date_hook)
+    except json.decoder.JSONDecodeError as err:
+      logger.warning('JSon decode error: %s', err)
+      return {}
 
     data = {}
     for elem in _data:
