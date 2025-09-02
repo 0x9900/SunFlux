@@ -73,6 +73,9 @@ class SolarWind:
     except (urllib.request.URLError, urllib.request.HTTPError) as err:
       logger.warning(err)
       return False
+    except json.decoder.JSONDecodeError as err:
+      logger.warning('JSon Decode Error: %s', err)
+      return False
 
     data = []
     for elem in _data[1:]:
