@@ -172,10 +172,10 @@ def main():
   styles = tools.STYLES
   for style in styles:
     with plt.style.context(style.style):
-      filename = opts.target.joinpath(f'proton_flux-{style.name}')
+      filename = opts.target / f'proton_flux-{style.name}'
       p_f.graph(filename)
       if style.name == 'light':
-        tools.mk_link(filename, opts.target.joinpath('proton_flux'))
+        tools.mk_link(filename, opts.target / 'proton_flux')
   return os.EX_OK
 
 

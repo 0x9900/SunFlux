@@ -162,10 +162,10 @@ def main():
   styles = tools.STYLES
   for style in styles:
     with plt.style.context(style.style):
-      filename = opts.target.joinpath(f'pki-forecast-{style.name}')
+      filename = opts.target / f'pki-forecast-{style.name}'
       pki.graph(filename, style)
       if style.name == 'light':
-        tools.mk_link(filename, opts.target.joinpath('pki-forecast'))
+        tools.mk_link(filename, opts.target / 'pki-forecast')
 
   return os.EX_OK
 

@@ -123,10 +123,10 @@ def main():
   styles = tools.STYLES
   for style in styles:
     with plt.style.context(style.style):
-      filename = opts.target.joinpath(f'modes-{opts.days}-{style.name}')
+      filename = opts.target / f'modes-{opts.days}-{style.name}'
       graph(data, filename)
       if style.name == 'light' and opts.days == 15:
-        tools.mk_link(filename, opts.target.joinpath('modes'))
+        tools.mk_link(filename, opts.target / 'modes')
 
   return os.EX_OK
 

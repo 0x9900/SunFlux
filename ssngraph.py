@@ -164,10 +164,10 @@ def main():
 
   for style in tools.STYLES:
     with plt.style.context(style.style):
-      filename = opts.target.joinpath(f'ssn-{style.name}')
+      filename = opts.target / f'ssn-{style.name}'
       ssn.graph(filename, style)
       if style.name == 'light':
-        tools.mk_link(filename, opts.target.joinpath('ssn'))
+        tools.mk_link(filename, opts.target / 'ssn')
 
   return os.EX_OK
 

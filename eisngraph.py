@@ -165,10 +165,10 @@ def main():
   styles = tools.STYLES
   for style in styles:
     with plt.style.context(style.style):
-      filename = opts.target.joinpath(f'eisn-{style.name}')
+      filename = opts.target / f'eisn-{style.name}'
       eisn.graph(filename, style)
       if style.name == 'light':
-        tools.mk_link(filename, opts.target.joinpath('eisn'))
+        tools.mk_link(filename, opts.target / 'eisn')
   return os.EX_OK
 
 

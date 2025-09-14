@@ -162,10 +162,10 @@ def main():
   styles = tools.STYLES
   for style in styles:
     with plt.style.context(style.style):
-      filename = opts.target.joinpath(f'outlook-{style.name}')
+      filename = opts.target / f'outlook-{style.name}'
       outlook.graph(filename)
       if style.name == 'light':
-        tools.mk_link(filename, opts.target.joinpath('outlook'))
+        tools.mk_link(filename, opts.target / 'outlook')
 
   return os.EX_OK
 

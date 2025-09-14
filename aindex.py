@@ -107,8 +107,13 @@ def get_wwv(config):
   start_date = datetime.now(timezone.utc) - timedelta(days=days)
   data = {}
 
-  conn = sqlite3.connect(db_name, timeout=5,
-                         detect_types=sqlite3.PARSE_DECLTYPES)
+  try:
+    conn = sqlite3.connect(db_name, timeout=5,
+                           detect_types=sqlite3.PARSE_DECLTYPES)
+  except sqlite3.Error as err:
+    error = f'Database: {db_name} - {err}'
+    raise IOError(error) from None
+
   with conn:
     curs = conn.cursor()
     results = curs.execute(WWV_REQUEST, (start_date.timestamp(),))
@@ -200,11 +205,15 @@ def main():
 
   config['nb_days'] = opts.days
 
-  data = get_noaa(config)
-  data.update(get_wwv(config))
+  try:
+    data = get_noaa(config)
+    data.update(get_wwv(config))
+  except IOError as err:
+    logger.error(err)
+    return
+
   data = sorted(list(data.items()))
   condition = tools.get_conditions(config)
-
   if not data:
     logger.warning('No data collected')
     return
@@ -212,10 +221,10 @@ def main():
   styles = tools.STYLES
   for style in styles:
     with plt.style.context(style.style):
-      filename = opts.target.joinpath(f'aindex-{style.name}')
+      filename = opts.target / f'aindex-{style.name}'
       graph(data, condition, filename, style)
       if style.name == 'light':
-        tools.mk_link(filename, opts.target.joinpath('aindex'))
+        tools.mk_link(filename, opts.target / 'aindex')
 
 
 if __name__ == "__main__":

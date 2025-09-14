@@ -98,10 +98,10 @@ class GraphStyle:
   colors: list | None = None
 
   def __post_init__(self):
-    home = pathlib.Path.home().joinpath('.local')
+    home = pathlib.Path.home() / '.local'
     style_path = [pathlib.Path(p).absolute() for p in ('.', home, '/var/tmp')]
     for path in style_path:
-      stylefile = path.joinpath(self.style)
+      stylefile = path / self.style
       if stylefile.exists():
         object.__setattr__(self, 'style', str(stylefile))
         break

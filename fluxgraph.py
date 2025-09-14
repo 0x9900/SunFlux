@@ -200,10 +200,10 @@ def main():
   styles = tools.STYLES
   for style in styles:
     with plt.style.context(style.style):
-      filename = opts.target.joinpath(f'flux-{style.name}')
+      filename = opts.target / f'flux-{style.name}'
       graph(data, filename, style, opts.trend)
       if style.name == 'light':
-        tools.mk_link(filename, opts.target.joinpath('flux'))
+        tools.mk_link(filename, opts.target / 'flux')
 
   return os.EX_OK
 

@@ -157,13 +157,13 @@ def create_link(filename, target):
 def webp(filename, theme_name):
   webpname = f'latest-{theme_name}'
   path = filename.parent
-  webpfile = path.joinpath(f'{webpname}.webp')
+  webpfile = path / f'{webpname}.webp'
   image = Image.open(filename)
   image = image.resize((800, 530))
   image.save(webpfile, format='webp')
   logging.info('Image "%s" created', webpfile)
   if theme_name == 'light':
-    create_link(webpfile, path.joinpath('latest.png'))
+    create_link(webpfile, path / 'latest.png')
 
 
 def mk_thumbnail(filename, theme_name):
@@ -172,14 +172,14 @@ def mk_thumbnail(filename, theme_name):
   image.thumbnail((600, 400))
   for fmt in ('png', 'webp'):
     try:
-      tn_file = path.joinpath(f'tn_latest-{theme_name}.{fmt}')
+      tn_file = path / f'tn_latest-{theme_name}.{fmt}'
       image.save(tn_file, format=fmt, dpi=(100, 100))
       logging.info('Thumbnail "%s" created', tn_file)
     except ValueError as err:
       logging.error(err)
 
     if theme_name == 'light':
-      create_link(tn_file, path.joinpath(f'tn_latest.{fmt}'))
+      create_link(tn_file, path / f'tn_latest.{fmt}')
 
 
 def save_graphs(dxcc, target_dir, zone_name, zone, now):
@@ -187,14 +187,14 @@ def save_graphs(dxcc, target_dir, zone_name, zone, now):
   styles = tools.STYLES
   for style in styles:
     with plt.style.context(style.style):
-      filename = target_dir.joinpath(name_tmpl.format(name=style.name))
+      filename = target_dir / name_tmpl.format(name=style.name)
       dxcc.graph(filename)
       webp(filename, style.name)
       mk_thumbnail(filename, style.name)
-      create_link(filename, target_dir.joinpath(f'latest-{style.name}.png'))
+      create_link(filename, target_dir / f'latest-{style.name}.png')
       if style.name == 'light':
-        create_link(filename, target_dir.joinpath(f'dxcc-{zone_name}{zone}-{now}.png'))
-        create_link(filename, target_dir.joinpath('latest.png'))
+        create_link(filename, target_dir / f'dxcc-{zone_name}{zone}-{now}.png')
+        create_link(filename, target_dir / 'latest.png')
 
 
 def find_zone(opts, *zone_names):
@@ -242,7 +242,7 @@ def main():
 
   now = opts.date.strftime("%Y%m%dT%H%M%S")
   target_root = pathlib.Path(config.get('showdxcc.target_dir', '/var/tmp/dxcc'))
-  target_dir = target_root.joinpath(zone_name, zone)
+  target_dir = target_root / zone_name / zone
   target_dir.mkdir(parents=True, exist_ok=True)
   save_graphs(showdxcc, target_dir, zone_name, zone, now)
 

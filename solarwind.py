@@ -168,10 +168,10 @@ def main():
   styles = tools.STYLES
   for style in styles:
     with plt.style.context(style.style):
-      filename = opts.target.joinpath(f'solarwind-{style.name}')
+      filename = opts.target / f'solarwind-{style.name}'
       wind.graph(filename)
       if style.name == 'light':
-        tools.mk_link(filename, opts.target.joinpath('solarwind'))
+        tools.mk_link(filename, opts.target / 'solarwind')
   return os.EX_OK
 
 

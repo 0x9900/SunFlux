@@ -186,10 +186,10 @@ def main():
   styles = tools.STYLES
   for style in styles:
     with plt.style.context(style.style):
-      filename = opts.target.joinpath(f'pkindex-{style.name}')
+      filename = opts.target / f'pkindex-{style.name}'
       graph(data, condition, filename, style)
       if style.name == 'light':
-        tools.mk_link(filename, opts.target.joinpath('pkindex'))
+        tools.mk_link(filename, opts.target / 'pkindex')
 
   return os.EX_OK
 

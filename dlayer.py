@@ -70,7 +70,7 @@ class Drap:
     self.xray = None
 
     cache_name = pathlib.Path(__file__).with_suffix('.pkl').name
-    self.cache_file = pathlib.Path(cache_path).joinpath(cache_name)
+    self.cache_file = pathlib.Path(cache_path) / cache_name
     self.cache_time = cache_time
     logging.debug('Cache: %s', self.cache_file)
 
@@ -236,12 +236,12 @@ def main():
   styles = tools.STYLES
   for style in styles:
     with plt.style.context(style.style):
-      filename = opts.target.joinpath(f'dlayer-{today.strftime("%Y%m%dT%H%M%S")}-{style.name}')
+      filename = opts.target / f'dlayer-{today.strftime("%Y%m%dT%H%M%S")}-{style.name}'
       drap.plot(filename, style)
-      tools.mk_link(filename, opts.target.joinpath(f'latest-{style.name}'))
+      tools.mk_link(filename, opts.target / f'latest-{style.name}')
       if style.name == 'light':
-        tools.mk_link(filename, opts.target.joinpath(f'dlayer-{today.strftime("%Y%m%dT%H%M%S")}'))
-        tools.mk_link(filename, opts.target.joinpath('latest'))
+        tools.mk_link(filename, opts.target / f'dlayer-{today.strftime("%Y%m%dT%H%M%S")}')
+        tools.mk_link(filename, opts.target / 'latest')
 
   return os.EX_OK
 

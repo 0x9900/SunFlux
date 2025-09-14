@@ -160,10 +160,10 @@ def main():
 
   for style in tools.STYLES:
     with plt.style.context(style.style):
-      filename = opts.target.joinpath(f'ssnhist-{style.name}')
+      filename = opts.target / f'ssnhist-{style.name}'
       graph(histo, predic, filename, style, 1961)
       if style.name == 'light':
-        tools.mk_link(filename, opts.target.joinpath('ssnhist'))
+        tools.mk_link(filename, opts.target / 'ssnhist')
 
   return os.EX_OK
 

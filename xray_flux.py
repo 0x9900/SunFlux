@@ -13,13 +13,13 @@ import json
 import logging
 import math
 import os
-import pathlib
 import pickle
 import sys
 import time
 import urllib.request
 import warnings
 from collections import OrderedDict
+from pathlib import Path
 from urllib.parse import urlparse
 
 import matplotlib.dates as mdates
@@ -49,7 +49,7 @@ NOAA_FLARE = 'https://services.swpc.noaa.gov/json/goes/primary/xray-flares-7-day
 
 def make_etag_filename(url: str):
   filename = hashlib.sha1(url.encode()).hexdigest()
-  return pathlib.Path(f'/tmp/xrays-{filename}.etag')
+  return Path(f'/tmp/xrays-{filename}.etag')
 
 
 def download_with_etag(url: str) -> str:
@@ -86,9 +86,14 @@ def download_with_etag(url: str) -> str:
 class XRayFlux:
   def __init__(self, source, cache_path, cache_time=900):
     self.source = source
+    self.cache_time = cache_time
+
     parsed_url = urlparse(source)
-    cache_file = pathlib.Path(parsed_url.path).stem
-    self.cachefile = pathlib.Path(cache_path).joinpath(cache_file + '.pkl')
+    url_path = Path(parsed_url.path)
+
+    cache_file = url_path.name or "default_cache"
+    cache_file = Path(cache_file).with_suffix('.pkl')
+    self.cachefile = Path(cache_path) / cache_file
 
     logger.debug('Import XRay Flux')
     now = time.time()
@@ -214,7 +219,7 @@ def main():
   parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
   parser.add_argument('-d', '--days', choices=days.keys(), default='3',
                       help="Number of days to graph (default: %(default)s)")
-  parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
+  parser.add_argument('-t', '--target', type=Path, default=target_dir,
                       help='Image path')
   opts = parser.parse_args()
 
@@ -226,12 +231,12 @@ def main():
 
   for style in tools.STYLES:
     with plt.style.context(style.style):
-      filename = opts.target.joinpath(f'xray_flux{opts.days}-{style.name}')
+      filename = opts.target / f'xray_flux{opts.days}-{style.name}'
       xray.graph(filename, style)
       if opts.days == '3':
-        tools.mk_link(filename, opts.target.joinpath(f'xray_flux-{style.name}'))
+        tools.mk_link(filename, opts.target / f'xray_flux-{style.name}')
         if style.name == 'light':
-          tools.mk_link(filename, opts.target.joinpath('xray_flux'))
+          tools.mk_link(filename, opts.target / 'xray_flux')
 
   return os.EX_OK
 
