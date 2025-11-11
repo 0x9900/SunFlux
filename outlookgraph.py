@@ -36,10 +36,12 @@ ALPHA = 1
 
 
 class Record(namedtuple("OLRecord", ["Date", "Flux", "AIndex", "KpIndex"])):
+  __slots__ = ()  # reduces memory usage
+
   def __new__(cls, items):
-    _items = [datetime.strptime(' '.join(items[:3]), "%Y %b %d")]
-    _items.extend([int(x.strip()) for x in items[3:]])
-    return tuple.__new__(cls, _items)
+    date = datetime.strptime(' '.join(items[:3]), "%Y %b %d")
+    flux, aindex, kpindex = (int(x.strip()) for x in items[3:])
+    return super().__new__(cls, date, flux, aindex, kpindex)
 
 
 class OutLook:
