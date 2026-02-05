@@ -12,7 +12,7 @@ import sys
 from setuptools import find_namespace_packages, setup
 
 __author__ = "Fred C. (W6BSD)"
-__version__ = '0.1.6'
+__version__ = '0.1.7'
 __license__ = 'BSD'
 
 py_version = sys.version_info[:2]
@@ -74,7 +74,6 @@ setup(
   classifiers=[
     'Development Status :: 3 - Alpha',
     'Intended Audience :: Developers',
-    'License :: OSI Approved :: BSD License',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
