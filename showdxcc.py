@@ -77,10 +77,10 @@ class ShowDXCC:
       results = curs.execute(request).fetchall()
 
     self.data = np.zeros((len(CONTINENTS), len(BANDS)), dtype=int)
-    for band, _, to_continent, count in results:
+    for band, de_continent, to_continent, count in results:
       _x = CONTINENTS.index(to_continent)
       _y = BANDS.index(band)
-      self.data[_x, _y] = count
+      self.data[_x, _y] = count if de_continent == to_continent else count * 1.5
 
   def graph(self, filename):
     dmax = np.max(self.data)
