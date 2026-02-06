@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "SunFluxBot"
+version = "0.1.7"
+description = "SunFluxBot"
+readme = {content-type = "text/markdown", text = "Bot to access Sun activity information"}
+requires-python = ">=3.10"
+license = {text = "BSD"}
+authors = [
+    {name = "Fred C. (W6BSD)", email = "w6bsd@bsdworld.org"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Communications :: Ham Radio",
+]
+dependencies = [
+    "numpy",
+    "matplotlib"
+]
+
+[project.urls]
+Homepage = "https://github.com/0x9900/SunFlux"
+
+[project.scripts]
+aindex = "aindex:main"
+dlayer = "dlayer:main"
+eisngraph = "eisngraph:main"
+fluxgraph = "fluxgraph:main"
+graphmodes = "graphmodes:main"
+outlookgraph = "outlookgraph:main"
+pkiforecast = "pkiforecast:main"
+pkiwwv = "pkiwwv:main"
+proton_flux = "proton_flux:main"
+showdxcc = "showdxcc:main"
+solarwind = "solarwind:main"
+ssngraph = "ssngraph:main"
+ssnhist = "ssnhist:main"
+xray_flux = "xray_flux:main"
+
+[tool.setuptools]
+py-modules = [
+    "adapters",
+    "aindex",
+    "config",
+    "dlayer",
+    "eisngraph",
+    "fluxgraph",
+    "graphmodes",
+    "outlookgraph",
+    "pkiforecast",
+    "pkiwwv",
+    "proton_flux",
+    "showdxcc",
+    "solarwind",
+    "ssngraph",
+    "ssnhist",
+    "tools",
+    "xray_flux",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["build*", "misc*", "dist*"]
