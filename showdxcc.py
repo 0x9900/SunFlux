@@ -106,12 +106,14 @@ class ShowDXCC:
     cbar.ax.set_yticklabels(['low', 'med', 'high'])
 
     # Loop over data dimensions and create text annotations.
-    # threshold = np.percentile(self.data, 70)
+    # from itertools import product
+    # normalized_data = (self.data - self.data.min()) / (self.data.max() - self.data.min())
+    # threshold = np.percentile(normalized_data, 75)
     # for i, j in product(range(len(CONTINENTS)), range(len(BANDS))):
     #   if self.data[i, j] < 1:
     #     continue
-    #   color = 'white' if self.data[i, j] < threshold else 'black'
-    #   axgc.text(j, i, self.data[i, j], ha="center", va="center", color=color)
+    #   color = 'white' if normalized_data[i, j] < threshold else 'black'
+    #   axgc.text(j, i, np.ceil(normalized_data[i, j] * 100), ha="center", va="center", color=color)
 
     axgc.grid(which='major', linestyle='-', color='darkgray', alpha=.5, linewidth=.5)
     zone = str(self.zone) if isinstance(self.zone, int) else self.zone.strip('"')
