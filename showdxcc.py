@@ -80,7 +80,7 @@ class ShowDXCC:
     for band, de_continent, to_continent, count in results:
       _x = CONTINENTS.index(to_continent)
       _y = BANDS.index(band)
-      self.data[_x, _y] = count if de_continent == to_continent else count * 1.5
+      self.data[_x, _y] = count if de_continent == to_continent else count * 1.25
 
   def graph(self, filename):
     dmax = np.max(self.data)
