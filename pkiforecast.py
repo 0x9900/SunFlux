@@ -85,7 +85,9 @@ class PKIForecast:
     fig.suptitle('Planetary K-Index Predictions')
     axgc = plt.gca()
     bars = axgc.bar(xdates, yvalues, width=.1, linewidth=0.75, zorder=2, color=colors)
-    axgc.axhline(y=4, linewidth=1.5, zorder=1, color='red', label='Storm Threshold')
+    axgc.axhline(y=4, linewidth=1.5, zorder=3, color='red', label='Storm Threshold')
+    current_time = xdates[observ.index('estimated') - 1]
+    axgc.axvline(current_time, linewidth=1.5, zorder=3, color='red', linestyle=":")
 
     for rect, label in ((a, b) for a, b in zip(*(bars, labels)) if labels):
       if not label:
