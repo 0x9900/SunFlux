@@ -28,7 +28,7 @@ import tools
 from config import Config
 
 NB_DAYS = 92
-TREND_WK = 3
+TREND_WK = 12
 MIN_TICKS = 55
 COLORS = (
   '#538fff',
@@ -117,7 +117,7 @@ def get_flux(config):
   return data
 
 
-def graph(data, filename, style, trend_week=3):
+def graph(data, filename, style, trend_week=TREND_WK):
   # pylint: disable=invalid-name, too-many-locals
   trend_days = trend_week * 7
   arr = np.array(data)
