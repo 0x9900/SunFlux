@@ -121,10 +121,11 @@ class PKIForecast:
       webdata = res.read()
       encoding = res.info().get_content_charset('utf-8')
       _data = json.loads(webdata.decode(encoding))
-      for elem in _data[1:]:
-        date = datetime.strptime(elem[0], '%Y-%m-%d %H:%M:%S')
+
+      for elem in _data:
+        date = datetime.strptime(elem['time_tag'], '%Y-%m-%dT%H:%M:%S')
         date = date.replace(tzinfo=timezone.utc)
-        data.append((date, float(elem[1]), *elem[2:]))
+        data.append((date, float(elem['kp']), elem['observed'], elem['noaa_scale']))
 
     self.data = sorted(data)
 

@@ -65,11 +65,11 @@ def get_pkindex(config):
 
   for rec in _data:
     try:
-      date = datetime.strptime(rec[0], '%Y-%m-%d %H:%M:%S.%f')
+      date = datetime.strptime(rec['time_tag'], '%Y-%m-%dT%H:%M:%S')
       date = date.replace(hour=bucket(date), minute=0, second=0, microsecond=0,
                           tzinfo=timezone.utc)
       if date >= start_date:
-        data[date].append(float(rec[1]))
+        data[date].append(float(rec['Kp']))
     except ValueError:
       pass
 
