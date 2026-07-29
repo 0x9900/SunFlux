@@ -35,7 +35,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger('SolarWind')
 
-NOAA_URL = 'https://services.swpc.noaa.gov/products/solar-wind/plasma-3-day.json'
+NOAA_URL = 'https://services.swpc.noaa.gov/json/rtsw/rtsw_wind_1m.json'
 
 
 def remove_outlier(points, low=25, high=95):
@@ -76,11 +76,13 @@ class SolarWind:
     except json.decoder.JSONDecodeError as err:
       logger.warning('JSon Decode Error: %s', err)
       return False
-
+    fields = ['proton_density', 'proton_speed', 'proton_temperature']
     data = []
-    for elem in _data[1:]:
-      date = datetime.strptime(elem[0], '%Y-%m-%d %H:%M:%S.%f')
-      data.append([date, *[self.float(e) for e in elem[1:]]])
+    for elem in _data:
+      if not elem['active']:
+        continue
+      date = tools.noaa_date_notz(elem['time_tag'])
+      data.append([date, *[self.float(elem[f]) for f in fields]])
     self.data = np.array(sorted(data))
     self.data[:, 1] = remove_outlier(self.data[:, 1])
     return True

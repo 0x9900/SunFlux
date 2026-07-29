@@ -22,8 +22,10 @@ classifiers = [
     "Topic :: Communications :: Ham Radio",
 ]
 dependencies = [
+    "PyYAML",
+    "matplotlib",
+    "Basemap",
     "numpy",
-    "matplotlib"
 ]
 
 [project.urls]

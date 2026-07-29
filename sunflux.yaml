@@ -37,3 +37,9 @@ aindex:
 
 graphmode:
   db_name: /tmp/cluster/dxcluster.db
+
+proton_flux:
+  target_dir: /tmp
+
+dlayer:
+  target_dir: /tmp

@@ -125,13 +125,20 @@ STYLES = [
 
 
 def remove_outliers(points, low=25, high=95):
-  percent_lo = np.percentile(points, low, interpolation='midpoint')
-  percent_hi = np.percentile(points, high, interpolation='midpoint')
+  percent_lo = np.percentile(points, low, method='midpoint')
+  percent_hi = np.percentile(points, high, method='midpoint')
   iqr = percent_hi - percent_lo
   lower_bound = points <= (percent_lo - 5 * iqr)
   upper_bound = points >= (percent_hi + 5 * iqr)
   points[lower_bound | upper_bound] = np.nan
   return points
+
+
+def noaa_date_notz(field):
+  """Convert the noaa date into a datetime object and make sure the timezone is utc"""
+  _date = datetime.strptime(field, '%Y-%m-%dT%H:%M:%S')
+  _date = _date.replace(tzinfo=timezone.utc)
+  return _date
 
 
 def noaa_date(field):
