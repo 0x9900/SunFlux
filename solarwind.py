@@ -17,7 +17,6 @@ import sys
 import time
 import urllib.request
 import warnings
-from datetime import datetime
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
