@@ -21,10 +21,11 @@ import time
 from datetime import datetime, timezone
 from urllib.request import urlopen
 
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
-from mpl_toolkits.basemap import Basemap
 
 import tools
 from config import Config
@@ -147,29 +148,33 @@ class Drap:
       pickle.dump(dlayer, fd_cache)
 
   def print_info(self, fig):
-    fig.text(0.72, .11, f'{self.prod_date.strftime("%a %b %d %Y - %H:%M %Z")}', fontsize=8)
+    fig.text(0.62, .11, f'{self.prod_date.strftime("%a %b %d %Y - %H:%M %Z")}', fontsize=8)
     for nbr, key in enumerate(("proton", "xray")):
       if msg := getattr(self, key):
         fig.text(0.125, 0.12 - (0.03 * nbr), msg, fontsize=8)
 
   def plot(self, filename, style):
-    fig, axgc = plt.subplots(figsize=(10, 5))
+    fig, axgc = plt.subplots(figsize=(10, 5), subplot_kw={"projection": ccrs.PlateCarree()})
+
     axgc.set_title('DLayer Absorption')
     self.print_info(fig)
-    dmap = Basemap(projection='cyl', resolution='c',
-                   llcrnrlat=-75, urcrnrlat=89, llcrnrlon=-175, urcrnrlon=175)
+
+    axgc.set_extent([-175, 175, -75, 89], crs=ccrs.PlateCarree())
 
     # Draw the data
     lon, lat = np.meshgrid(self.lon, self.lat)
     clevels = np.arange(np.nanmin(self.data) + 1, MAX_FREQUENCY + 1)
-    dmap.contourf(lon, lat, self.data, clevels, vmax=MAX_FREQUENCY,
-                  cmap=self.mk_colormap(style))
 
-    self.draw_colorbar(dmap, self.data.max())
-    self.draw_elements(dmap, style)
+    self.draw_elements(axgc, style)
+
+    contour = axgc.contourf(lon, lat, self.data, levels=clevels, vmax=MAX_FREQUENCY,
+                            cmap=self.mk_colormap(style), transform=ccrs.PlateCarree())
+
+    fig.colorbar(contour, ax=axgc)
+
     tools.save_plot(plt, filename)
 
-    plt.close()
+    plt.close(fig)
 
   @staticmethod
   def draw_colorbar(fig, fmax=None):
@@ -183,14 +188,21 @@ class Drap:
       cbar.ax.annotate('Max', xy=(0.1, lpos), xytext=(0.1, lpos), fontsize=6)
 
   @staticmethod
-  def draw_elements(fig, style):
+  def draw_elements(ax, style):
     colors = MAP_COLORS[style.name]
 
-    fig.drawparallels([-66.33, -23.5, 0, 23.5, 66.33], linewidth=.5,
-                      color=colors['grid'], dashes=[2, 2])
-    fig.drawmeridians([-90, 0, 90], linewidth=.5, color=colors['grid'], dashes=[2, 2])
-    fig.drawcoastlines(linewidth=.6, color=colors['coastlines'])
-    fig.drawlsmask(land_color=colors['land'], ocean_color=colors['ocean'], lakes=False)
+    # Land and ocean
+    ax.add_feature(cfeature.OCEAN, facecolor=colors['ocean'], zorder=0)
+    ax.add_feature(cfeature.LAND, facecolor=colors['land'], zorder=0)
+
+    # Gridlines
+    gl = ax.gridlines(crs=ccrs.PlateCarree(), linewidth=0.5, color=colors['grid'],
+                      linestyle=(0, (2, 2)), draw_labels=False)
+    gl.ylocs = [-66.33, -23.5, 0, 23.5, 66.33]
+    gl.xlocs = [-90, 0, 90]
+
+    # Coastlines
+    ax.coastlines(resolution='110m', linewidth=0.6, color=colors['coastlines'])
 
   @staticmethod
   def mk_colormap(style):

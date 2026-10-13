@@ -25,7 +25,6 @@ dependencies = [
     "PyYAML",
     "cartopy",
     "matplotlib",
-    "matplotlib",
     "numpy",
     "pyyaml",
 ]
