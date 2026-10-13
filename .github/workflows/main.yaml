@@ -39,4 +39,4 @@ jobs:
 
       - name: Analyze code with Pylint
         run: |
-          git ls-files -z -- '*.py' | xargs -0 -r pylint -j 2
+          git ls-files -z -- '*.py' | xargs -0 -r -n 1 pylint
