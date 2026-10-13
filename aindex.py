@@ -136,7 +136,7 @@ def autolabel(ax, rects):
 
 
 def graph(data, condition, filename, style):
-  values = np.row_stack([d[1] for d in data])
+  values = np.vstack([d[1] for d in data])
   keys_column = np.array([d[0] for d in data]).reshape((-1, 1))
   data = np.hstack((keys_column, values))
   colors = [style.colors[1]] * data[:, 0].size

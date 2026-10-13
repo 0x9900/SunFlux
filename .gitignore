@@ -2,6 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.whl
+
 
 # C extensions
 *.so
@@ -27,6 +29,7 @@ lib64/
 parts/
 sdist/
 var/
+data/
 wheels/
 pip-wheel-metadata/
 share/python-wheels/

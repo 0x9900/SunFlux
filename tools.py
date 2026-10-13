@@ -98,8 +98,13 @@ class GraphStyle:
   colors: list | None = None
 
   def __post_init__(self):
-    home = pathlib.Path.home() / '.local'
-    style_path = [pathlib.Path(p).absolute() for p in ('.', home, '/var/tmp')]
+    cwd = pathlib.Path().cwd()
+    style_path = [
+      cwd,
+      cwd / 'data',
+      pathlib.Path.home() / '.local'
+    ]
+
     for path in style_path:
       stylefile = path / self.style
       if stylefile.exists():

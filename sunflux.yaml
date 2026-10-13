@@ -1,45 +1,79 @@
 ---
 fluxgraph:
-  cache_file: /tmp/cluster/flux.pkl
+  target_dir: /var/www/html/sun
+  cache_file: /opt/sunflux/data/flux.pkl
+  db_name: /opt/dxcluster/data/dxcluster.db
   cache_time: 43200
 
 outlookgraph:
-  cache_file: /tmp/cluster/outlook.dat
+  target_dir: /var/www/html/sun
+  cache_file: /opt/sunflux/data/outlook.dat
   cache_time: 43200
 
 kpiwwv:
-  cache_file: /tmp/cluster/kpiwwv-noaa.json
+  target_dir: /var/www/html/sun
+  cache_file: /opt/sunflux/data/kpiwwv-noaa.json
   cache_time: 10800
 
 kpiforecast:
-  cache_file: /tmp/cluster/kpiforecast.pkl
+  target_dir: /var/www/html/sun
+  cache_file: /opt/sunflux/data/kpiforecast.pkl
   cache_time: 900
 
 showdxcc:
-  db_name: /tmp/cluster/dxcluster.db
-  target_dir: /var/www/html/DXCC
+  target_dir: /var/www/html/sun/DXCC
+  db_name: /opt/dxcluster/data/dxcluster.db
 
 ssngraph:
-  cache_file: /tmp/cluster/ssn.pkl
+  target_dir: /var/www/html/sun
+  cache_file: /opt/sunflux/data/ssn.pkl
   cache_time: 43200
 
 ssnhist:
-  cache_history: /var/tmp/cluster/ssnhist.json
-  cache_precictions: /var/tmp/cluster/ssnpredict.json
+  target_dir: /var/www/html/sun
+  cache_history: /opt/sunflux/data/ssnhist.json
+  cache_precictions: /opt/sunflux/data/ssnpredict.json
   cache_time: 864000
 
-eisngraph:
-  cache_file: /tmp/cluster/eisn.pkl
+eisn:
+  target_dir: /var/www/html/sun
+  cache_file: /opt/sunflux/data/eisn.pkl
 
 aindex:
-  db_name: /tmp/cluster/dxcluster.db
+  target_dir: /var/www/html/sun
+  cache_file: /opt/sunflux/data/aindex-noaa.plk
+  db_name: /opt/dxcluster/data/dxcluster.db
   nb_days: 17
 
 graphmode:
-  db_name: /tmp/cluster/dxcluster.db
+  target_dir: /var/www/html/sun
+  db_name: /opt/dxcluster/data/dxcluster.db
 
 proton_flux:
-  target_dir: /tmp
+  cache_file: /opt/sunflux/data/proton_flux.plk
+  target_dir: /var/www/html/sun
 
 dlayer:
-  target_dir: /tmp
+  target_dir: /var/www/html/sun
+
+pkiwwv:
+  target_dir: /var/www/html/sun
+  db_name: /opt/dxcluster/data/dxcluster.db
+  cache_file: /opt/sunflux/data/pkiwwv-noaa.json
+  cache_time: 10800
+
+pkiforecast:
+  target_dir: /var/www/html/sun
+  cache_file: /opt/sunflux/data/pkiforecast.pkl
+  cache_time: 21600
+  target_dir: /var/www/html/sun
+
+xray_flux:
+  target_dir: /var/www/html/sun
+  cache_path: /opt/sunflux/data
+  cache_time: 900
+
+solarwind:
+  target_dir: /var/www/html/sun
+  cache_file: /opt/sunflux/data/solarwind.pkl
+  cache_time: 900

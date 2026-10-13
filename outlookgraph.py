@@ -147,8 +147,8 @@ class OutLook:
 
 def main():
   config = Config().get('outlookgraph', {})
-  cache_file = config.get('outlookgraph.cache_file', '/tmp/outlook.dat')
-  cache_time = config.get('outlookgraph.cache_time', 43200)
+  cache_file = config.get('cache_file', '/tmp/outlook.dat')
+  cache_time = config.get('cache_time', 43200)
   target_dir = config.get('target_dir', '/var/www/html')
 
   parser = argparse.ArgumentParser()
