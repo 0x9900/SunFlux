@@ -7,7 +7,7 @@ name = "SunFlux"
 version = "0.1.20"
 description = "SunFlux"
 readme = {content-type = "text/markdown", text = "Bot to access Sun activity information"}
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 license = {text = "BSD"}
 authors = [
     {name = "Fred C. (W6BSD)", email = "w6bsd@bsdworld.org"}
@@ -18,7 +18,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Communications :: Ham Radio",
 ]
 dependencies = [
