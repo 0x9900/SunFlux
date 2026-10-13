@@ -106,7 +106,7 @@ class GraphStyle:
         object.__setattr__(self, 'style', str(stylefile))
         break
     else:
-      raise SystemExit('Style: {self.style} not found')
+      raise SystemExit(f'Style: {self.style} not found')
 
     if self.cmap in COLOR_MAPS:
       object.__setattr__(self, 'colors', COLOR_MAPS[self.cmap])
