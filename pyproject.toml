@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "SunFlux"
-version = "0.1.8"
+version = "0.1.20"
 description = "SunFlux"
 readme = {content-type = "text/markdown", text = "Bot to access Sun activity information"}
 requires-python = ">=3.10"
@@ -23,10 +23,10 @@ classifiers = [
 ]
 dependencies = [
     "PyYAML",
+    "cartopy",
     "matplotlib",
-    "Basemap",
+    "matplotlib",
     "numpy",
-    "matplotlib",
     "pyyaml",
 ]
 

@@ -38,8 +38,8 @@ NOAA_URL = 'https://services.swpc.noaa.gov/json/rtsw/rtsw_wind_1m.json'
 
 
 def remove_outlier(points, low=25, high=95):
-  percent_lo = np.percentile(points, low, interpolation='midpoint')
-  percent_hi = np.percentile(points, high, interpolation='midpoint')
+  percent_lo = np.percentile(points, low, method='midpoint')
+  percent_hi = np.percentile(points, high, method='midpoint')
   iqr = percent_hi - percent_lo
   lower_bound = points <= (percent_lo - 5 * iqr)
   upper_bound = points >= (percent_hi + 5 * iqr)
@@ -154,7 +154,7 @@ def main():
   config = Config().get('solarwind', {})
   cache_file = config.get('cache_file', '/tmp/solarwind.pkl')
   cache_time = config.get('cache_time', 900)
-  target_dir = config.get('target_dir', '/var/www/html')
+  target_dir = config.get('target_dir', '/tmp')
 
   parser = argparse.ArgumentParser()
   parser.add_argument('-t', '--target', type=pathlib.Path, default=target_dir,
