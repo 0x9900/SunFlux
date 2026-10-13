@@ -1,0 +1,7 @@
+pylint
+flake8
+isort
+numpy
+matplotlib
+cartopy
+PyYAML
