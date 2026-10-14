@@ -9,11 +9,12 @@
 import logging
 import os
 import sys
+from pathlib import Path
 
 import yaml
 
 CONFIG_FILENAME = "sunflux.yaml"
-CONFIG_LOCATIONS = ['/etc', '~/.local', '.']
+CONFIG_LOCATIONS = [Path(__file__).parent, '/etc', '~/.local']
 
 
 class Config:

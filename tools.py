@@ -98,10 +98,9 @@ class GraphStyle:
   colors: list | None = None
 
   def __post_init__(self):
-    cwd = pathlib.Path().cwd()
     style_path = [
-      cwd,
-      cwd / 'data',
+      pathlib.Path(__file__).parent / 'data',
+      pathlib.Path.cwd() / 'data',
       pathlib.Path.home() / '.local'
     ]
 
